@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import Home from './pages/Home.jsx'
-import SubmitBook from './pages/SubmitBook.jsx'
-import SubmitArticle from './pages/SubmitArticle.jsx'
+// import Home from './pages/Home.jsx'
+// import SubmitBook from './pages/SubmitBook.jsx'
+// import SubmitArticle from './pages/SubmitArticle.jsx'
 import AdminPage from './pages/Admin.jsx'
 
 export default function App() {
@@ -11,8 +11,8 @@ export default function App() {
     window.addEventListener('popstate', handler)
     return () => window.removeEventListener('popstate', handler)
   }, [])
-  if (path === '/submit-book' || path === '/submit-book.html' || path === '/submit-book.php') return <SubmitBook />
-  if (path === '/submit-article' || path === '/submit-article.html' || path === '/submit-article.php') return <SubmitArticle />
-  if (path.startsWith('/admin')) return <AdminPage />
-  return <Home />
+  // if (path === '/submit-book' || path === '/submit-book.html' || path === '/submit-book.php') return <SubmitBook />
+  // if (path === '/submit-article' || path === '/submit-article.html' || path === '/submit-article.php') return <SubmitArticle />
+  // Any other URL, including the root URL (/), will strictly load the Admin Portal
+  return <AdminPage />
 }
