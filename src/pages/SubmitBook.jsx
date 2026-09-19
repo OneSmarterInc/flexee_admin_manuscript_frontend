@@ -76,12 +76,12 @@ export default function SubmitBook() {
           </select>
         </div>
         {sim === '__other' && <div className="row"><label htmlFor="sim_other">Which simulation? <span className="req">*</span></label><input id="sim_other" name="sim_other" type="text" required /></div>}
-        <div className="row"><label htmlFor="manuscript">Manuscript file <span className="req">*</span></label><div className="hint">Word (.docx), PDF (.pdf), or Markdown (.md). Use clear chapter headings and caption figures as “Figure 1”, “Figure 2”, and so on so the structural check can read them.</div><input id="manuscript" name="manuscript" type="file" accept=".docx,.pdf,.md" required /></div>
+        <div className="row"><label htmlFor="manuscript">Manuscript file <span className="req">*</span></label><div className="hint">Word (.docx), PDF (.pdf), Markdown (.md), or a ZIP archive (.zip) containing your manuscript. Use clear chapter headings and caption figures as "Figure 1", "Figure 2", and so on so the structural check can read them.</div><input id="manuscript" name="manuscript" type="file" accept=".docx,.pdf,.md,.zip" required /></div>
         <div className="row"><label htmlFor="disclosure">How did you use AI in writing this book? <span className="req">*</span></label><div className="hint">Be specific — drafting, figure generation, editing, research, and so on.</div><textarea id="disclosure" name="disclosure" required /></div>
         <div className="row"><label htmlFor="notes">Notes to the editor</label><textarea id="notes" name="notes" className="short-textarea" /></div>
         <div className="row check"><input id="attest-ui" type="checkbox" required /><label htmlFor="attest-ui">This manuscript is human-authored with AI assistance. It is not AI-authored. <span className="req">*</span></label></div>
         <button className="copper-button" type="submit" disabled={busy}>{busy ? 'Reviewing manuscript…' : 'Submit manuscript'}</button>
-        {success && <p className="submit-status" style={{color: 'green'}}>book has been uploded successfully</p>}
+        {success && <p className="submit-status" style={{color: 'green'}}>Book has been uploaded successfully</p>}
         {busy && <p className="submit-status">Keep this page open while the first-gate review runs.</p>}
         {error && <p className="form-error">{error}</p>}
         <ReviewResult data={result} />
