@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App.jsx'
 import './styles.css'
 import './zip-summary-format.css'
+import './admin-action-modal-polish.css'
 import './admin-summary-page.js'
 
 createRoot(document.getElementById('root')).render(
