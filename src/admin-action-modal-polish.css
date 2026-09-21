@@ -1,0 +1,107 @@
+/* Professional action modal polish for Accept, Reject, and Custom Email flows. */
+.admin-drawer-backdrop:has(.admin-modal-card) {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  background: rgba(28, 26, 23, 0.32) !important;
+  backdrop-filter: blur(3px) saturate(115%) !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-card {
+  width: min(560px, calc(100vw - 48px)) !important;
+  max-height: calc(100vh - 64px) !important;
+  overflow: hidden auto !important;
+  background: linear-gradient(180deg, #fffdf9 0%, #fbf7f1 100%) !important;
+  border: 1px solid rgba(168, 92, 50, 0.14) !important;
+  border-radius: 24px !important;
+  box-shadow: 0 34px 90px rgba(28, 26, 23, 0.22), 0 10px 28px rgba(28, 26, 23, 0.10) !important;
+  transform: translateZ(0);
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-header {
+  padding: 30px 32px 20px !important;
+  background: linear-gradient(135deg, rgba(168, 92, 50, 0.09), rgba(255, 255, 255, 0.72)) !important;
+  border-bottom: 1px solid rgba(168, 92, 50, 0.12) !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-header h3 {
+  font-size: 32px !important;
+  line-height: 1.05 !important;
+  margin: 0 !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-header p {
+  margin-top: 8px !important;
+  max-width: 46ch;
+  line-height: 1.55 !important;
+  color: var(--muted) !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-body {
+  padding: 26px 32px !important;
+  background: #fffdf9 !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-body .admin-field {
+  margin: 0 0 20px !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-body .admin-field:last-child {
+  margin-bottom: 0 !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-field textarea,
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-field input {
+  background: #ffffff !important;
+  border: 1px solid rgba(28, 26, 23, 0.12) !important;
+  border-radius: 14px !important;
+  padding: 13px 15px !important;
+  box-shadow: inset 0 1px 2px rgba(28, 26, 23, 0.03) !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-field textarea {
+  min-height: 150px !important;
+  resize: vertical;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-footer {
+  display: flex !important;
+  justify-content: flex-end !important;
+  gap: 12px !important;
+  padding: 20px 32px 26px !important;
+  background: #fbf7f1 !important;
+  border-top: 1px solid rgba(168, 92, 50, 0.10) !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-footer .admin-btn {
+  min-width: 132px;
+  justify-content: center;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-footer .admin-btn.secondary {
+  background: #fff !important;
+  border: 1px solid rgba(28, 26, 23, 0.12) !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-footer .admin-btn.danger {
+  background: #b42318 !important;
+  color: #fff !important;
+  border-color: #b42318 !important;
+}
+
+.admin-drawer-backdrop:has(.admin-modal-card) .admin-error {
+  margin-top: 4px !important;
+}
+
+@media (max-width: 640px) {
+  .admin-drawer-backdrop:has(.admin-modal-card) {
+    padding: 16px !important;
+  }
+
+  .admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-header,
+  .admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-body,
+  .admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-footer {
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+  }
+}
