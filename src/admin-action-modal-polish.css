@@ -1,15 +1,37 @@
 /* Professional action modal polish for Accept, Reject, and Custom Email flows. */
+
+/* The admin shell has a transform animation, which makes fixed children behave
+   like they are fixed to the scrolled shell instead of the viewport. Disable it
+   so action modals always open in the visible screen area. */
+.admin-page .admin-shell {
+  transform: none !important;
+  animation: none !important;
+}
+
+body:has(.admin-drawer-backdrop .admin-modal-card) {
+  overflow: hidden !important;
+}
+
+.admin-page:has(.admin-drawer-backdrop .admin-modal-card) main {
+  overflow: hidden !important;
+}
+
 .admin-drawer-backdrop:has(.admin-modal-card) {
-  align-items: center !important;
+  position: fixed !important;
+  inset: 0 !important;
+  width: 100vw !important;
+  height: 100dvh !important;
+  align-items: flex-start !important;
   justify-content: center !important;
-  padding: 24px !important;
+  padding: clamp(24px, 6vh, 56px) 24px 24px !important;
+  overflow: hidden !important;
   background: rgba(28, 26, 23, 0.32) !important;
   backdrop-filter: blur(3px) saturate(115%) !important;
 }
 
 .admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-card {
   width: min(560px, calc(100vw - 48px)) !important;
-  max-height: calc(100vh - 64px) !important;
+  max-height: calc(100dvh - 72px) !important;
   overflow: hidden auto !important;
   background: linear-gradient(180deg, #fffdf9 0%, #fbf7f1 100%) !important;
   border: 1px solid rgba(168, 92, 50, 0.14) !important;
@@ -96,6 +118,11 @@
 @media (max-width: 640px) {
   .admin-drawer-backdrop:has(.admin-modal-card) {
     padding: 16px !important;
+  }
+
+  .admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-card {
+    width: calc(100vw - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
   }
 
   .admin-drawer-backdrop:has(.admin-modal-card) .admin-modal-header,
