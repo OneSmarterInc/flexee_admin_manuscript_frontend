@@ -1,0 +1,7 @@
+/* Preserve the backend's structured Editor Summary formatting in ZIP chapter cards.
+   The cards currently use inline styles in Admin.jsx, so this small override is
+   imported after styles.css and targets that summary text block only. */
+.admin-modal-card .admin-modal-body div[style*="border-left: 3px solid var(--copper)"] {
+  white-space: pre-wrap;
+  color: var(--ink) !important;
+}
