@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import { venueMatches } from '../data/authorMockData.js'
@@ -10,6 +10,8 @@ function currentVenue() {
 
 export default function AuthorSubmissionStatus() {
   const venue = currentVenue()
+  const [submitted, setSubmitted] = useState(false)
+
   return <PublicationShell>
     <div className="wrap author-flow-page">
       <div className="crumb"><button className="author-text-link" type="button" onClick={() => go('/author')}>Author workspace</button> / Submission status</div>
@@ -19,10 +21,14 @@ export default function AuthorSubmissionStatus() {
       <div className="author-page-heading author-heading-row">
         <div>
           <p className="kicker">Submission status</p>
-          <h1 className="publication-title">Your packet is ready for {venue.name}.</h1>
-          <p className="publication-lede">This frontend preview shows the post-selection workspace. The backend will create the real venue submission, forms, files, audit events, and editorial decision history.</p>
+          <h1 className="publication-title">{submitted ? `Submitted to ${venue.name}.` : `Your packet is ready for ${venue.name}.`}</h1>
+          <p className="publication-lede">
+            {submitted
+              ? 'This preview now shows the state an author would see after formal submission. A production submission will be created by the backend and recorded in the audit trail.'
+              : 'This frontend preview shows the post-selection workspace. The backend will create the real venue submission, forms, files, audit events, and editorial decision history.'}
+          </p>
         </div>
-        <AuthorStatusPill tone="good">Packet ready</AuthorStatusPill>
+        <AuthorStatusPill tone="good">{submitted ? 'Under editorial review' : 'Packet ready'}</AuthorStatusPill>
       </div>
 
       <div className="author-status-layout">
@@ -33,7 +39,7 @@ export default function AuthorSubmissionStatus() {
               <h2>{venue.name}</h2>
               <p>Selected destination</p>
             </div>
-            <AuthorStatusPill tone="good">Ready to submit</AuthorStatusPill>
+            <AuthorStatusPill tone="good">{submitted ? 'Submitted' : 'Ready to submit'}</AuthorStatusPill>
           </div>
 
           <div className="author-packet-list">
@@ -44,13 +50,17 @@ export default function AuthorSubmissionStatus() {
             <div><span>✓</span><div><b>Editorial brief and evidence</b><small>Prepared for the human editorial team.</small></div></div>
           </div>
 
-          <div className="author-submit-callout">
+          <div className="author-submit-callout" aria-live="polite">
             <div>
-              <p className="kicker">Production action</p>
-              <h3>Submit to this venue</h3>
-              <p>The live button will create the formal venue submission only after the backend routing APIs are connected.</p>
+              <p className="kicker">{submitted ? 'Preview event recorded' : 'Production action'}</p>
+              <h3>{submitted ? 'Now with the editorial team' : 'Submit to this venue'}</h3>
+              <p>{submitted
+                ? 'No real submission was sent from this frontend prototype.'
+                : 'The live action will create the formal venue submission only after the backend routing APIs are connected.'}</p>
             </div>
-            <button className="copper-button" type="button">Submit packet</button>
+            <button className="copper-button" type="button" onClick={() => setSubmitted(true)} disabled={submitted}>
+              {submitted ? 'Submitted in preview' : 'Submit packet'}
+            </button>
           </div>
         </section>
 
@@ -62,8 +72,8 @@ export default function AuthorSubmissionStatus() {
               <div className="complete"><span></span><p><b>Manuscript created</b><small>Author details and file captured.</small></p></div>
               <div className="complete"><span></span><p><b>Readiness checked</b><small>Preventable gaps surfaced.</small></p></div>
               <div className="complete"><span></span><p><b>Venue selected</b><small>{venue.name}</small></p></div>
-              <div className="current"><span></span><p><b>Packet ready</b><small>Waiting for formal submission.</small></p></div>
-              <div><span></span><p><b>Editorial decision</b><small>Human editor decision will appear here.</small></p></div>
+              <div className={submitted ? 'complete' : 'current'}><span></span><p><b>Packet {submitted ? 'submitted' : 'ready'}</b><small>{submitted ? 'Preview submission created.' : 'Waiting for formal submission.'}</small></p></div>
+              <div className={submitted ? 'current' : ''}><span></span><p><b>Editorial decision</b><small>{submitted ? 'Waiting for a human editor.' : 'Human editor decision will appear here.'}</small></p></div>
             </div>
           </section>
           <section className="author-panel author-transfer-card">
