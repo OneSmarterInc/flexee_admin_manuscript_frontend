@@ -3,6 +3,7 @@ import Home from './pages/Home.jsx'
 import SubmitBook from './pages/SubmitBook.jsx'
 import SubmitArticle from './pages/SubmitArticle.jsx'
 import AdminPage from './pages/Admin.jsx'
+import AuthorDashboard from './pages/AuthorDashboard.jsx'
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
@@ -13,6 +14,7 @@ export default function App() {
   }, [])
   if (path === '/submit-book' || path === '/submit-book.html' || path === '/submit-book.php') return <SubmitBook />
   if (path === '/submit-article' || path === '/submit-article.html' || path === '/submit-article.php') return <SubmitArticle />
+  if (path === '/author') return <AuthorDashboard />
   if (path.startsWith('/admin')) return <AdminPage />
   return <Home />
 }
