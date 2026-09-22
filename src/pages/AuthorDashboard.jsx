@@ -37,7 +37,7 @@ export default function AuthorDashboard() {
             Prepare a manuscript, check its readiness, compare participating outlets, and choose where you want to submit.
           </p>
         </div>
-        <button className="copper-button author-primary-action" type="button" onClick={() => go('/')}>
+        <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>
           Start a new submission
         </button>
       </section>
@@ -81,7 +81,7 @@ export default function AuthorDashboard() {
               Start with one manuscript. You will be able to follow readiness checks, venue matches,
               submission status, and later transfers from this workspace.
             </p>
-            <button className="copper-button" type="button" onClick={() => go('/')}>
+            <button className="copper-button" type="button" onClick={() => go('/author/new')}>
               Start your first submission
             </button>
           </div>
