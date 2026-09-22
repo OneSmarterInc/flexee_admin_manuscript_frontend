@@ -145,3 +145,56 @@
 .admin-icon-btn{background:none;border:none;color:var(--muted);cursor:pointer;padding:8px;border-radius:10px;transition:all 0.2s cubic-bezier(0.2,0.8,0.2,1);display:flex;align-items:center;justify-content:center}
 .admin-icon-btn:hover{color:var(--copper);background:rgba(168,92,50,0.1);transform:scale(1.05)}
 .admin-icon-btn.delete-btn:hover{color:#ef4444;background:rgba(239,68,68,0.1)}
+
+
+/* Author workspace */
+.author-dashboard{max-width:1180px}
+.author-hero{display:flex;justify-content:space-between;gap:32px;align-items:flex-end;padding:10px 0 8px}
+.author-hero .publication-title{max-width:720px;margin-bottom:18px}
+.author-primary-action{white-space:nowrap;margin-bottom:10px}
+.author-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin:34px 0}
+.author-stat-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 4px 18px var(--shadow)}
+.author-stat-value{display:block;font-family:'Instrument Serif',Georgia,serif;font-size:38px;line-height:1;color:var(--ink)}
+.author-stat-label{display:block;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--copper);margin:8px 0 7px}
+.author-stat-card p{margin:0;color:var(--muted);font-size:13.5px;line-height:1.5}
+.author-dashboard-grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,.8fr);gap:22px;align-items:start}
+.author-panel{background:var(--card);border:1px solid var(--line);border-radius:18px;box-shadow:0 6px 24px var(--shadow)}
+.author-submissions-panel{min-height:440px;padding:28px}
+.author-panel-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;padding-bottom:20px;border-bottom:1px solid var(--line)}
+.author-panel h2,.author-section-heading h2{font-family:'Instrument Serif',Georgia,serif;font-weight:400;font-size:31px;line-height:1.15;margin:4px 0 0}
+.author-empty-state{min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:34px 20px}
+.author-empty-mark{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;background:#f7f1ec;color:var(--copper);font-size:30px;margin-bottom:16px}
+.author-empty-state h3{font-family:'Instrument Serif',Georgia,serif;font-size:28px;font-weight:400;margin:0 0 8px}
+.author-empty-state p{max-width:560px;color:var(--muted);margin:0 0 22px}
+.author-sidebar{display:grid;gap:22px}
+.author-guide-card,.author-human-card{padding:26px}
+.author-guide-card h2,.author-human-card h2{font-size:27px}
+.author-check-list{display:grid;gap:17px;margin-top:22px}
+.author-check-list>div{display:grid;grid-template-columns:30px 1fr;gap:11px;align-items:start}
+.author-check-list>div>span{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:#eef7ef;color:#25623a;font-weight:700;font-size:13px}
+.author-check-list p{margin:0}
+.author-check-list b{display:block;font-size:14.5px;margin-bottom:2px}
+.author-check-list small{display:block;color:var(--muted);font-size:13px;line-height:1.45}
+.author-human-card{background:#f7f1ec}
+.author-human-card p{color:var(--muted);margin:12px 0 0;font-size:14px}
+.author-human-pill{display:inline-block;border:1px solid #d9c1ae;border-radius:999px;padding:5px 9px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--copper);background:#fff}
+.author-journey{margin-top:54px;padding-top:36px;border-top:1px solid var(--line)}
+.author-section-heading{max-width:680px;margin-bottom:24px}
+.author-journey-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.author-journey-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;min-height:220px}
+.author-journey-card>span{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.1em;color:var(--copper);margin-bottom:32px}
+.author-journey-card h3{font-family:'Instrument Serif',Georgia,serif;font-size:25px;font-weight:400;line-height:1.15;margin:0 0 10px}
+.author-journey-card p{margin:0;color:var(--muted);font-size:13.5px}
+@media(max-width:900px){
+  .author-hero{align-items:flex-start;flex-direction:column}
+  .author-primary-action{margin:0}
+  .author-stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .author-dashboard-grid{grid-template-columns:1fr}
+  .author-journey-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:560px){
+  .author-stats,.author-journey-grid{grid-template-columns:1fr}
+  .author-submissions-panel,.author-guide-card,.author-human-card{padding:20px}
+  .author-stat-card{padding:18px}
+  .author-empty-state{padding:30px 6px}
+}
