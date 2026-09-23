@@ -1,30 +1,88 @@
-import React from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
+import { AuthorStatusPill } from '../components/AuthorFlow.jsx'
+import {
+  authorApi,
+  clearAuthorSession,
+  currentManuscriptPath,
+  currentSubmissionPath,
+  friendlyAuthorError,
+  getAuthorSession,
+} from '../authorApi.js'
 
 const journey = [
-  {
-    step: '01',
-    title: 'Upload once',
-    copy: 'Add your manuscript and core author details in one workspace.',
-  },
-  {
-    step: '02',
-    title: 'Check readiness',
-    copy: 'The system checks structure, required information, disclosures, and avoidable submission gaps.',
-  },
-  {
-    step: '03',
-    title: 'Compare venues',
-    copy: 'Participating outlets are compared against the manuscript, with clear reasons for fit and any missing requirements.',
-  },
-  {
-    step: '04',
-    title: 'You choose',
-    copy: 'Select the destination you want. The system prepares the venue-specific submission packet for editorial review.',
-  },
+  { step: '01', title: 'Upload once', copy: 'Add your manuscript and core author details in one secure workspace.' },
+  { step: '02', title: 'Check readiness', copy: 'Run deterministic checks and grounded semantic readiness analysis.' },
+  { step: '03', title: 'Compare venues', copy: 'Compare participating outlets against their own configured scope, policies, and priorities.' },
+  { step: '04', title: 'You choose', copy: 'Select the destination. The system prepares the venue-specific packet for human editorial review.' },
 ]
 
+function statusLabel(status) {
+  if (!status) return 'Manuscript created'
+  return String(status).replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase())
+}
+
 export default function AuthorDashboard() {
+  const [manuscript, setManuscript] = useState(null)
+  const [submission, setSubmission] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  async function loadCurrent() {
+    const session = getAuthorSession()
+    if (!session.manuscriptId || !session.accessToken) {
+      setLoading(false)
+      return
+    }
+
+    try {
+      const manuscriptPayload = await authorApi(currentManuscriptPath('/'))
+      setManuscript(manuscriptPayload.manuscript)
+      if (session.submissionId) {
+        try {
+          const submissionPayload = await authorApi(currentSubmissionPath('/'))
+          setSubmission(submissionPayload.submission)
+        } catch (err) {
+          if (err.status !== 404) throw err
+        }
+      }
+    } catch (err) {
+      setError(friendlyAuthorError(err))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadCurrent()
+  }, [])
+
+  const stats = useMemo(() => {
+    const readiness = manuscript?.latest_readiness?.summary || {}
+    const needsAttention = Number(readiness.blocking_issues || 0) + Number(readiness.warnings || 0) > 0
+    const submitted = ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(submission?.status)
+    const hasDecision = ['accepted', 'rejected', 'revision_requested'].includes(submission?.status) || Boolean(submission?.decision && Object.keys(submission.decision).length)
+    return {
+      drafts: manuscript && !submitted ? 1 : 0,
+      attention: needsAttention ? 1 : 0,
+      submitted: submitted ? 1 : 0,
+      decisions: hasDecision ? 1 : 0,
+    }
+  }, [manuscript, submission])
+
+  function resume() {
+    if (submission?.id) return go('/author/status')
+    if (manuscript?.parsed_profile?.semantic) return go('/author/venues')
+    return go('/author/readiness')
+  }
+
+  function forgetSession() {
+    clearAuthorSession()
+    setManuscript(null)
+    setSubmission(null)
+    setError('')
+  }
+
   return <PublicationShell>
     <div className="wrap author-dashboard">
       <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace</div>
@@ -32,93 +90,73 @@ export default function AuthorDashboard() {
       <section className="author-hero">
         <div>
           <p className="kicker">Author workspace</p>
-          <h1 className="publication-title">Your manuscripts, one place.</h1>
-          <p className="publication-lede">
-            Prepare a manuscript, check its readiness, compare participating outlets, and choose where you want to submit.
-          </p>
+          <h1 className="publication-title">Your manuscript workspace.</h1>
+          <p className="publication-lede">Prepare a manuscript, check its readiness, compare participating outlets, choose where you want to submit, and follow the venue-specific packet.</p>
         </div>
-        <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>
-          Start a new submission
-        </button>
+        <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>Start a new submission</button>
       </section>
 
+      {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Current manuscript unavailable.</b> {error}</div>}
+
       <section className="author-stats" aria-label="Submission overview">
-        <article className="author-stat-card">
-          <span className="author-stat-value">0</span>
-          <span className="author-stat-label">Drafts</span>
-          <p>Manuscripts you have started but not submitted.</p>
-        </article>
-        <article className="author-stat-card">
-          <span className="author-stat-value">0</span>
-          <span className="author-stat-label">Needs attention</span>
-          <p>Items with readiness gaps or required changes.</p>
-        </article>
-        <article className="author-stat-card">
-          <span className="author-stat-value">0</span>
-          <span className="author-stat-label">Submitted</span>
-          <p>Submissions currently with an editorial team.</p>
-        </article>
-        <article className="author-stat-card">
-          <span className="author-stat-value">0</span>
-          <span className="author-stat-label">Decisions</span>
-          <p>Editorial decisions available for review.</p>
-        </article>
+        <article className="author-stat-card"><span className="author-stat-value">{stats.drafts}</span><span className="author-stat-label">Drafts</span><p>Current browser-session manuscripts not formally submitted.</p></article>
+        <article className="author-stat-card"><span className="author-stat-value">{stats.attention}</span><span className="author-stat-label">Needs attention</span><p>Current manuscript with readiness warnings or blocking checks.</p></article>
+        <article className="author-stat-card"><span className="author-stat-value">{stats.submitted}</span><span className="author-stat-label">Submitted</span><p>Current venue submission recorded with the editorial workflow.</p></article>
+        <article className="author-stat-card"><span className="author-stat-value">{stats.decisions}</span><span className="author-stat-label">Decisions</span><p>Editorial decisions available in the current session.</p></article>
       </section>
 
       <div className="author-dashboard-grid">
         <section className="author-panel author-submissions-panel">
           <div className="author-panel-heading">
-            <div>
-              <p className="kicker">My submissions</p>
-              <h2>Your manuscript activity</h2>
-            </div>
+            <div><p className="kicker">Current browser session</p><h2>Manuscript activity</h2></div>
           </div>
 
-          <div className="author-empty-state">
-            <div className="author-empty-mark" aria-hidden="true">＋</div>
-            <h3>No manuscripts yet</h3>
-            <p>
-              Start with one manuscript. You will be able to follow readiness checks, venue matches,
-              submission status, and later transfers from this workspace.
-            </p>
-            <button className="copper-button" type="button" onClick={() => go('/author/new')}>
-              Start your first submission
-            </button>
-          </div>
+          {loading ? <div className="author-empty-state"><h3>Loading your manuscript…</h3></div> :
+            manuscript ? <div className="author-live-manuscript">
+              <div>
+                <span className="author-venue-type">{String(manuscript.manuscript_type || 'manuscript').replaceAll('_', ' ')}</span>
+                <h3>{manuscript.title}</h3>
+                <p>{manuscript.manuscript_filename}</p>
+              </div>
+              <div className="author-live-manuscript-meta">
+                <AuthorStatusPill tone={submission?.status === 'packet_ready' ? 'good' : 'neutral'}>{statusLabel(submission?.status)}</AuthorStatusPill>
+                <span>{manuscript.latest_readiness?.summary?.word_count ? `${manuscript.latest_readiness.summary.word_count.toLocaleString()} words` : 'Readiness available after analysis'}</span>
+              </div>
+              <div className="author-live-manuscript-actions">
+                <button className="copper-button" type="button" onClick={resume}>Continue workflow</button>
+                <button className="author-secondary-button" type="button" onClick={forgetSession}>Clear this browser session</button>
+              </div>
+            </div> : <div className="author-empty-state">
+              <div className="author-empty-mark" aria-hidden="true">＋</div>
+              <h3>No active manuscript in this browser session</h3>
+              <p>Start with one manuscript. The backend will store readiness, venue matches, evidence, submission status, and transfers while this browser keeps the secure access token.</p>
+              <button className="copper-button" type="button" onClick={() => go('/author/new')}>Start your first submission</button>
+            </div>}
         </section>
 
         <aside className="author-sidebar">
           <section className="author-panel author-guide-card">
             <p className="kicker">Before you submit</p>
-            <h2>What the workspace will check</h2>
+            <h2>What the workspace checks</h2>
             <div className="author-check-list">
-              <div><span aria-hidden="true">✓</span><p><b>Readiness</b><small>Structure, required information, disclosures, and preventable gaps.</small></p></div>
+              <div><span aria-hidden="true">✓</span><p><b>Readiness</b><small>Structure, required information, disclosures, and grounded semantic observations.</small></p></div>
               <div><span aria-hidden="true">✓</span><p><b>Venue fit</b><small>Scope, article type, policies, methods, and current editorial priorities.</small></p></div>
-              <div><span aria-hidden="true">✓</span><p><b>Evidence</b><small>Important findings should point back to manuscript text, venue policy, or a verifiable source.</small></p></div>
+              <div><span aria-hidden="true">✓</span><p><b>Evidence</b><small>Material findings point back to manuscript text, venue policy, or verified external sources.</small></p></div>
             </div>
           </section>
 
           <section className="author-panel author-human-card">
             <span className="author-human-pill">Human decision</span>
             <h2>AI prepares. Editors decide.</h2>
-            <p>
-              The workspace helps you prepare and route the submission. Final editorial and publication decisions remain with human editors.
-            </p>
+            <p>The workspace assists with preparation and routing. Final editorial and publication decisions remain with human editors.</p>
           </section>
         </aside>
       </div>
 
       <section className="author-journey">
-        <div className="author-section-heading">
-          <p className="kicker">How it works</p>
-          <h2>From manuscript to the right submission packet.</h2>
-        </div>
+        <div className="author-section-heading"><p className="kicker">How it works</p><h2>From manuscript to a venue-specific packet.</h2></div>
         <div className="author-journey-grid">
-          {journey.map(item => <article className="author-journey-card" key={item.step}>
-            <span>{item.step}</span>
-            <h3>{item.title}</h3>
-            <p>{item.copy}</p>
-          </article>)}
+          {journey.map(item => <article className="author-journey-card" key={item.step}><span>{item.step}</span><h3>{item.title}</h3><p>{item.copy}</p></article>)}
         </div>
       </section>
     </div>
