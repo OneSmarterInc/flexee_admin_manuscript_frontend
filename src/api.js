@@ -1,7 +1,11 @@
 const BASE = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '')
 
+export function apiUrl(path) {
+  return `${BASE}${path}`
+}
+
 export async function api(path, options = {}) {
-  const response = await fetch(`${BASE}${path}`, {
+  const response = await fetch(apiUrl(path), {
     credentials: 'include',
     ...options,
     headers: options.body instanceof FormData ? options.headers : {
@@ -19,4 +23,30 @@ export async function api(path, options = {}) {
     throw error
   }
   return payload
+}
+
+export async function apiBlob(path, options = {}) {
+  const response = await fetch(apiUrl(path), {
+    credentials: 'include',
+    ...options,
+    headers: {
+      ...(options.headers || {}),
+    },
+  })
+  if (!response.ok) {
+    let detail = `Request failed (${response.status})`
+    try {
+      const payload = await response.json()
+      detail = payload.detail || detail
+    } catch {
+      // Binary/download endpoints may not return JSON errors.
+    }
+    const error = new Error(detail)
+    error.status = response.status
+    throw error
+  }
+  return {
+    blob: await response.blob(),
+    disposition: response.headers.get('Content-Disposition') || '',
+  }
 }
