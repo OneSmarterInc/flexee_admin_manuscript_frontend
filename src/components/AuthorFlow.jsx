@@ -30,7 +30,7 @@ export function AuthorFlowNav({ active }) {
 
 export function AuthorPrototypeNotice() {
   return <div className="author-prototype-notice" role="note">
-    <b>Frontend preview.</b> The workflow is complete for review, but readiness scores, venue matches, and submission events are sample data until the new author APIs and agents are connected.
+    <b>Live author workflow.</b> Readiness, venue matching, assessment, and submission data on these pages now come from the backend. AI findings support preparation; the author chooses the destination and human editors retain the publication decision.
   </div>
 }
 
