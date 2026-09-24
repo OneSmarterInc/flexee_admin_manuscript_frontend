@@ -295,6 +295,18 @@ export default function EditorWorkspacePanel() {
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">AI-prepared editorial brief</p>
             <h3>{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h3>
+            
+            {detail.editorial_brief?.analysis_coverage && typeof detail.editorial_brief.analysis_coverage.coverage_percent !== 'undefined' && (
+              <article className="editor-brief-block">
+                <span>Analysis Coverage</span>
+                <p>
+                  Chunks analyzed: {detail.editorial_brief.analysis_coverage.chunks_analyzed} / {detail.editorial_brief.analysis_coverage.chunks_total}
+                  <br />
+                  Coverage: {detail.editorial_brief.analysis_coverage.coverage_percent}%
+                </p>
+              </article>
+            )}
+
             <div className="editor-brief-grid">
               <BriefBlock label="Outlet fit" value={detail.editorial_brief?.outlet_fit} />
               <BriefBlock label="Policy compliance" value={detail.editorial_brief?.policy_compliance} />
