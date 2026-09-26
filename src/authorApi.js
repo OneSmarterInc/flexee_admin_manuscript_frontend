@@ -1,4 +1,4 @@
-import { api } from './api.js'
+import { api, apiBlob } from './api.js'
 
 const SESSION_KEY = 'flexeeAuthorSessionV1'
 
@@ -76,6 +76,20 @@ export async function authorApi(path, options = {}) {
   }
 
   return api(path, {
+    ...options,
+    headers,
+  })
+}
+
+export async function authorApiBlob(path, options = {}) {
+  const session = getAuthorSession()
+  const headers = { ...(options.headers || {}) }
+
+  if (session.accessToken) {
+    headers['X-Manuscript-Token'] = session.accessToken
+  }
+
+  return apiBlob(path, {
     ...options,
     headers,
   })
