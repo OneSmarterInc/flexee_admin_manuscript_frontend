@@ -255,6 +255,11 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
     () => configs.find(item => item.active) || null,
     [configs],
   )
+  const selectedRole = memberships.find(
+    item => String(item.organization_id) === String(selectedVenue?.organization?.id || ''),
+  )?.role
+  const canManageSelected = platformSuperuser || selectedRole === 'owner'
+  const canCreateVenue = platformSuperuser || ownerMemberships.length > 0
 
   if (loading) {
     return <div className="venue-admin-state"><h3>Loading Venue Agents…</h3></div>
