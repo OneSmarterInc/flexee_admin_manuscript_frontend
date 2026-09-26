@@ -573,6 +573,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', paddingLeft: '16px' }}>Views</div>
         
+        {platformSuperuser && <>
         <button 
           style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '10px 16px', borderRadius: '10px', border: 'none', background: filters.kind === '' ? 'rgba(168,92,50,0.1)' : 'transparent', textAlign: 'left', cursor: 'pointer', color: filters.kind === '' ? 'var(--copper)' : 'var(--ink)', fontWeight: filters.kind === '' ? 600 : 500, transition: 'all 0.2s', fontSize: '15px' }} 
           onClick={() => setKindFilter('')}
@@ -604,6 +605,8 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
         </button>
         
         <div style={{ height: '1px', background: 'rgba(28,26,23,0.08)', margin: '16px 0' }}></div>
+
+        </>}
 
         <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', paddingLeft: '16px' }}>Scholarly network</div>
 
