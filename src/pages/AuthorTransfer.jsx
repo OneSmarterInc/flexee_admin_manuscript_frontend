@@ -8,6 +8,7 @@ import {
   friendlyAuthorError,
   getAuthorSession,
   saveAuthorSession,
+  pollAuthorJob,
 } from '../authorApi.js'
 
 export default function AuthorTransfer() {
@@ -66,7 +67,8 @@ export default function AuthorTransfer() {
       })
 
       try {
-        await authorApi(`/api/author/venue-submissions/${next.id}/assessment/run/`, { method: 'POST' })
+        const resp = await authorApi(`/api/author/venue-submissions/${next.id}/assessment/run/`, { method: 'POST' })
+        if (resp.job_id) await pollAuthorJob(resp.job_id)
         go('/author/status')
       } catch {
         // The transfer itself succeeded. If the AI assessment is temporarily

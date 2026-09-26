@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
-import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession } from '../authorApi.js'
+import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession, pollAuthorJob } from '../authorApi.js'
 
 function prettyType(value) {
   return String(value || 'other').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase())
@@ -52,7 +52,8 @@ export default function AuthorReadiness() {
     setSemanticBusy(true)
     setSemanticError('')
     try {
-      await authorApi(currentManuscriptPath('/readiness/semantic/'), { method: 'POST' })
+      const resp = await authorApi(currentManuscriptPath('/readiness/semantic/'), { method: 'POST' })
+      if (resp.job_id) await pollAuthorJob(resp.job_id)
       const refreshed = await authorApi(currentManuscriptPath('/readiness/'))
       setBundle(refreshed)
     } catch (err) {

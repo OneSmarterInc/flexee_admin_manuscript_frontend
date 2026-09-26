@@ -4,6 +4,13 @@ export function apiUrl(path) {
   return `${BASE}${path}`
 }
 
+export function errorText(value) {
+  if (typeof value === 'string') return value;
+  if (value && value.message) return value.message;
+  if (value && value.detail) return value.detail;
+  return 'Job failed';
+}
+
 export async function api(path, options = {}) {
   const response = await fetch(apiUrl(path), {
     credentials: 'include',
@@ -23,6 +30,41 @@ export async function api(path, options = {}) {
     throw error
   }
   return payload
+}
+
+export async function pollPublicSubmission(submissionId, onProgress) {
+  const timeoutMs = 10 * 60 * 1000
+  const intervalMs = 4000
+  const startTime = Date.now()
+  let failures = 0
+
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(async () => {
+      if (Date.now() - startTime > timeoutMs) {
+        clearInterval(interval)
+        reject(new Error('timeout'))
+        return
+      }
+      try {
+        const status = await api(`/api/submissions/${submissionId}/status/`)
+        failures = 0
+        if (onProgress) onProgress(status)
+        if (status.status === 'completed') {
+          clearInterval(interval)
+          resolve(status)
+        } else if (status.status === 'failed') {
+          clearInterval(interval)
+          reject(new Error(errorText(status.error)))
+        }
+      } catch (err) {
+        failures += 1
+        if (failures >= 4) {
+          clearInterval(interval)
+          reject(err)
+        }
+      }
+    }, intervalMs)
+  })
 }
 
 export async function apiBlob(path, options = {}) {

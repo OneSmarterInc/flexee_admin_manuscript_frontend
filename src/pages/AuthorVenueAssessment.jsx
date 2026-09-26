@@ -8,6 +8,7 @@ import {
   friendlyAuthorError,
   getAuthorSession,
   saveAuthorSession,
+  pollAuthorJob,
 } from '../authorApi.js'
 
 function routeSlug() {
@@ -105,9 +106,11 @@ export default function AuthorVenueAssessment() {
       }
 
       if (!current.editorial_brief || !Object.keys(current.editorial_brief).length) {
-        const assessed = await authorApi(`/api/author/venue-submissions/${current.id}/assessment/run/`, {
+        const resp = await authorApi(`/api/author/venue-submissions/${current.id}/assessment/run/`, {
           method: 'POST',
         })
+        if (resp.job_id) await pollAuthorJob(resp.job_id)
+        const assessed = await authorApi(`/api/author/venue-submissions/${current.id}/`)
         current = assessed.submission
         setSubmission(current)
       }

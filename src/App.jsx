@@ -4,6 +4,8 @@ import SubmitBook from './pages/SubmitBook.jsx'
 import SubmitArticle from './pages/SubmitArticle.jsx'
 import AdminPage from './pages/Admin.jsx'
 import AuthorDashboard from './pages/AuthorDashboard.jsx'
+import AuthorLogin from './pages/AuthorLogin.jsx'
+import AuthorSignup from './pages/AuthorSignup.jsx'
 import AuthorNewSubmission from './pages/AuthorNewSubmission.jsx'
 import AuthorReadiness from './pages/AuthorReadiness.jsx'
 import AuthorVenueMatches from './pages/AuthorVenueMatches.jsx'
@@ -22,6 +24,8 @@ export default function App() {
   if (path === '/submit-book' || path === '/submit-book.html' || path === '/submit-book.php') return <SubmitBook />
   if (path === '/submit-article' || path === '/submit-article.html' || path === '/submit-article.php') return <SubmitArticle />
 
+  if (path === '/author/login') return <AuthorLogin />
+  if (path === '/author/signup') return <AuthorSignup />
   if (path === '/author') return <AuthorDashboard />
   if (path === '/author/new') return <AuthorNewSubmission />
   if (path === '/author/readiness') return <AuthorReadiness />
@@ -30,6 +34,6 @@ export default function App() {
   if (path === '/author/status') return <AuthorSubmissionStatus />
   if (path === '/author/transfer') return <AuthorTransfer />
 
-  if (path.startsWith('/admin')) return <AdminPage />
+  if (path.startsWith('/admin')) return <AdminPage path={path} />
   return <Home />
 }

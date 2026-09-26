@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
-import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession, saveAuthorSession } from '../authorApi.js'
+import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession, saveAuthorSession, pollAuthorJob } from '../authorApi.js'
 
 function toneForEligibility(value) {
   if (value === 'eligible') return 'good'
@@ -68,14 +68,13 @@ export default function AuthorVenueMatches() {
     setAgentBusy(true)
     setAgentWarning('')
     try {
-      const payload = await authorApi(currentManuscriptPath('/matches/semantic/'), {
+      const resp = await authorApi(currentManuscriptPath('/matches/semantic/'), {
         method: 'POST',
         body: JSON.stringify({}),
       })
+      if (resp.job_id) await pollAuthorJob(resp.job_id)
+      const payload = await authorApi(currentManuscriptPath('/matches/'))
       setMatches(payload.matches || [])
-      if (payload.errors?.length) {
-        setAgentWarning(`Semantic matching completed with ${payload.errors.length} venue error${payload.errors.length === 1 ? '' : 's'}. Deterministic results are still shown for those venues.`)
-      }
     } catch (err) {
       setAgentWarning(`Semantic matching could not finish: ${friendlyAuthorError(err)} Deterministic venue checks remain available.`)
     } finally {

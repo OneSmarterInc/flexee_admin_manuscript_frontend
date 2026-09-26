@@ -24,6 +24,59 @@ function statusTone(status) {
   return 'neutral'
 }
 
+function DecisionBanner({ decision, status }) {
+  if (!decision || !Object.keys(decision).length) return null
+
+  const decisionValue = decision.decision || status
+  const isAccepted = decisionValue === 'accepted'
+  const isRejected = decisionValue === 'rejected'
+
+  const borderColor = isAccepted ? '#10b981' : isRejected ? '#ef4444' : '#f59e0b'
+  const bgColor = isAccepted
+    ? 'linear-gradient(135deg, rgba(16,185,129,0.08) 0%, rgba(16,185,129,0.03) 100%)'
+    : isRejected
+    ? 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.03) 100%)'
+    : 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.03) 100%)'
+  const borderStyle = `1px solid ${isAccepted ? 'rgba(16,185,129,0.2)' : isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)'}`
+
+  const icon = isAccepted ? '✓' : isRejected ? '✕' : '↩'
+  const headline = isAccepted
+    ? 'Congratulations — your manuscript has been accepted!'
+    : isRejected
+    ? 'Your submission was not accepted at this time.'
+    : 'The editor has requested revisions to your manuscript.'
+
+  return (
+    <div style={{ borderRadius: '12px', padding: '24px 28px', marginBottom: '24px', borderLeft: `4px solid ${borderColor}`, background: bgColor, border: borderStyle }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+        <div style={{
+          width: '40px', height: '40px', borderRadius: '50%',
+          background: borderColor, color: '#fff',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '20px', fontWeight: 'bold', flexShrink: 0,
+        }}>{icon}</div>
+        <div style={{ flex: 1 }}>
+          <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700, color: '#1c1917' }}>{headline}</h3>
+          {decision.note && (
+            <div style={{ background: 'rgba(255,255,255,0.7)', borderRadius: '8px', padding: '12px 16px', marginTop: '12px', fontSize: '15px', lineHeight: 1.6, color: '#374151' }}>
+              <p style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280' }}>Editor note</p>
+              <p style={{ margin: 0 }}>{decision.note}</p>
+            </div>
+          )}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '12px', fontSize: '13px', color: '#6b7280' }}>
+            {decision.decided_at && (
+              <span>🕐 {new Date(decision.decided_at).toLocaleString()}</span>
+            )}
+            {decision.decided_by && (
+              <span>👤 Decision by {decision.decided_by}</span>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function AuthorSubmissionStatus() {
   const [submission, setSubmission] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -68,6 +121,7 @@ export default function AuthorSubmissionStatus() {
   const canSubmit = submission?.status === 'packet_ready'
   const canTransfer = ['rejected', 'withdrawn'].includes(submission?.status)
   const submitted = ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(submission?.status)
+  const hasDecision = submission?.decision && Object.keys(submission.decision).length > 0
   const venue = submission?.venue
   const packet = submission?.packet || {}
   const brief = submission?.editorial_brief || {}
@@ -91,6 +145,9 @@ export default function AuthorSubmissionStatus() {
             <AuthorStatusPill tone={statusTone(submission.status)}>{statusLabel(submission.status)}</AuthorStatusPill>
           </div>
 
+          {/* Editorial Decision Banner – shown prominently when a human decision exists */}
+          {hasDecision && <DecisionBanner decision={submission.decision} status={submission.status} />}
+
           <div className="author-status-layout">
             <section className="author-panel author-status-card">
               <div className="author-status-header">
@@ -113,12 +170,22 @@ export default function AuthorSubmissionStatus() {
               <div className="author-submit-callout" aria-live="polite">
                 <div>
                   <p className="kicker">{submitted ? 'Editorial workflow' : 'Author action'}</p>
-                  <h3>{submitted ? 'The packet has been submitted.' : canSubmit ? 'Submit to this venue' : 'Finish the venue assessment first'}</h3>
-                  <p>{submitted
-                    ? 'The submission is now recorded in the backend. Human editorial decisions will appear here when the editor workflow is connected.'
-                    : canSubmit
-                      ? 'This records the formal venue submission using the prepared packet.'
-                      : 'A packet must be ready before the live submission action is enabled.'}</p>
+                  {!submitted ? (
+                    <>
+                      <h3>{canSubmit ? 'Submit to this venue' : 'Finish the venue assessment first'}</h3>
+                      <p>{canSubmit ? 'This records the formal venue submission using the prepared packet.' : 'A packet must be ready before the live submission action is enabled.'}</p>
+                    </>
+                  ) : hasDecision ? (
+                    <>
+                      <h3>Editorial decision recorded.</h3>
+                      <p>See the highlighted decision above for the editor's full note and reasoning.{canTransfer ? ' You may now transfer this manuscript to another venue.' : ''}</p>
+                    </>
+                  ) : (
+                    <>
+                      <h3>Your packet is submitted — awaiting editorial review.</h3>
+                      <p>The submission is now in the Editor Workspace queue. When the editor records a decision (accepted, rejected, or revision requested), it will appear here automatically.</p>
+                    </>
+                  )}
                 </div>
                 {!submitted && <button className="copper-button" type="button" onClick={submitPacket} disabled={!canSubmit || busy}>
                   {busy ? 'Submitting…' : 'Submit packet'}
@@ -136,7 +203,7 @@ export default function AuthorSubmissionStatus() {
                   <div className="complete"><span></span><p><b>Venue selected</b><small>{venue?.name}</small></p></div>
                   <div className={submission.status === 'draft' ? 'current' : 'complete'}><span></span><p><b>Packet {submission.status === 'draft' ? 'preparing' : 'ready'}</b><small>{submission.status === 'draft' ? 'Venue assessment still needed.' : 'Venue-specific materials prepared.'}</small></p></div>
                   <div className={submitted ? 'complete' : submission.status === 'packet_ready' ? 'current' : ''}><span></span><p><b>Submitted</b><small>{submission.submitted_at ? new Date(submission.submitted_at).toLocaleString() : 'Waiting for author submission.'}</small></p></div>
-                  <div className={submitted ? 'current' : ''}><span></span><p><b>Editorial decision</b><small>{submission.decision && Object.keys(submission.decision).length ? 'A decision is available.' : 'Human editorial decision pending.'}</small></p></div>
+                  <div className={hasDecision ? 'complete' : submitted ? 'current' : ''}><span></span><p><b>Editorial decision</b><small>{hasDecision ? `${statusLabel(submission.decision.decision || submission.status)} · ${submission.decision.decided_at ? new Date(submission.decision.decided_at).toLocaleString() : ''}` : 'Human editorial decision pending.'}</small></p></div>
                 </div>
               </section>
               <section className="author-panel author-transfer-card">

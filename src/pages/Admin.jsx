@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { QRCodeSVG } from 'qrcode.react'
 import { api } from '../api.js'
 import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
@@ -64,13 +63,14 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
   )
 }
 
+import { QRCodeSVG } from 'qrcode.react'
+
 function AdminLogin({ onLogin }) {
   const [step, setStep] = useState(1)
   const [creds, setCreds] = useState({ username: '', password: '' })
-  const [totpUri, setTotpUri] = useState('')
+  const [totpUri, setTotpUri] = useState(null)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [showQR, setShowQR] = useState(false)
 
   async function handleStep1(e) {
     e.preventDefault(); setBusy(true); setError('')
@@ -80,7 +80,8 @@ function AdminLogin({ onLogin }) {
     try {
       const res = await api('/api/admin/verify-password/', { method: 'POST', body: JSON.stringify({ username, password }) })
       setCreds({ username, password })
-      setTotpUri(res.totp_uri)
+      if (res.totp_setup_uri) setTotpUri(res.totp_setup_uri)
+      else setTotpUri(null)
       setStep(2)
     } catch (err) { setError(err.message) }
     finally { setBusy(false) }
@@ -117,21 +118,20 @@ function AdminLogin({ onLogin }) {
           <form onSubmit={handleStep2} className="admin-login-form">
             <input type="text" name="username" style={{ display: 'none' }} autoComplete="username" defaultValue={creds.username} />
             <input type="password" name="password" style={{ display: 'none' }} autoComplete="current-password" defaultValue={creds.password} />
+            
+            {totpUri && (
+              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                <p style={{ margin: '0 0 16px 0', fontSize: '15px', color: 'var(--ink)' }}>Scan this QR code with your authenticator app (e.g. Google Authenticator) to set up two-factor authentication.</p>
+                <div style={{ display: 'inline-block', padding: '16px', background: '#fff', borderRadius: '12px', border: '1px solid #e5e5e5' }}>
+                  <QRCodeSVG value={totpUri} size={180} />
+                </div>
+              </div>
+            )}
+
             <Field label="Authenticator code"><input name="totp" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength="6" autoComplete="one-time-code" required placeholder="000000" autoFocus /></Field>
             {error && <div className="admin-error" role="alert" style={{margin: 0}}>{error}</div>}
             <button className="admin-btn login-btn" type="submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}</button>
-            <div style={{ textAlign: 'center', marginTop: '16px' }}>
-              {!showQR ? (
-                <button type="button" onClick={() => setShowQR(true)} style={{ background: 'none', border: 'none', color: 'var(--copper)', cursor: 'pointer', fontSize: '14px', textDecoration: 'underline' }}>First time logging in? Setup Authenticator</button>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', marginTop: '16px', padding: '16px', background: 'var(--paper)', borderRadius: '8px', border: '1px solid var(--line)' }}>
-                  <p style={{ margin: 0, fontSize: '14px', color: 'var(--muted)' }}>Scan this QR code with Google Authenticator or Authy:</p>
-                  <div style={{ background: '#fff', padding: '12px', borderRadius: '8px' }}>
-                    <QRCodeSVG value={totpUri} size={150} />
-                  </div>
-                </div>
-              )}
-            </div>
+
           </form>
         )}
         
@@ -744,28 +744,45 @@ function AdminDashboard({ username, onLogout }) {
                   <div className="data-meta" style={{ fontSize: '12px' }}>{new Date(item.created_at).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}</div>
                 </td>
                 <td onClick={(e) => {
-                  if (item.zip_contents && item.zip_contents.length > 0) {
-                    e.stopPropagation();
-                    setZipViewItem(item);
-                  }
+                  e.stopPropagation();
+                  window.history.pushState({}, '', `/admin/submissions/${item.id}`)
+                  window.dispatchEvent(new Event('popstate'))
                 }}>
-                  <div className="data-summary" style={item.zip_contents && item.zip_contents.length > 0 ? { cursor: 'pointer', color: 'var(--copper)', fontWeight: 600 } : {}}>
-                    {item.zip_contents && item.zip_contents.length > 0 ? (
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        View summaries
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-                      </span>
-                    ) : (item.editor_summary || '—')}
+                  <div className="data-summary" style={{ cursor: 'pointer', color: 'var(--copper)', fontWeight: 600 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {item.zip_contents && item.zip_contents.length > 0 ? 'View ZIP summaries' : 'View summary'}
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                    </span>
                   </div>
                 </td>
                 <td><StatusPill value={item.status} /></td>
                 <td>
-                  {!item.admin_decision ? (
-                    <div className="admin-action-group">
-                      <button className="admin-action-btn accept" onClick={e => { e.stopPropagation(); setInlineAction({id:item.id, type:'accept'}) }}>Accept</button>
-                      <button className="admin-action-btn reject" onClick={e => { e.stopPropagation(); setInlineAction({id:item.id, type:'reject'}) }}>Reject</button>
-                    </div>
-                  ) : <StatusPill value={item.admin_decision} />}
+                  <div className="admin-action-group" style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'flex-start' }}>
+                    {!item.admin_decision ? (
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button className="admin-action-btn accept" onClick={e => { e.stopPropagation(); setInlineAction({id:item.id, type:'accept'}) }}>Accept</button>
+                        <button className="admin-action-btn reject" onClick={e => { e.stopPropagation(); setInlineAction({id:item.id, type:'reject'}) }}>Reject</button>
+                      </div>
+                    ) : <StatusPill value={item.admin_decision} />}
+                    
+                    {(item.status === 'failed' || !item.editor_summary?.trim()) && (
+                      <button className="admin-btn secondary" style={{padding:'6px 12px',fontSize:'12px',borderRadius:'8px', marginTop: '4px'}} onClick={async (e) => {
+                        e.stopPropagation()
+                        const pastedKey = window.prompt('Paste Anthropic API key for this one recovery. Leave blank to use backend ANTHROPIC_API_KEY.')
+                        if (pastedKey === null) return
+                        e.currentTarget.disabled = true
+                        e.currentTarget.textContent = 'Generating...'
+                        try {
+                          await api(`/api/admin/submissions/${item.id}/api-summary/`, { method: 'POST', body: JSON.stringify(pastedKey.trim() ? { api_key: pastedKey.trim() } : {}) })
+                          window.alert('API summary generated successfully.')
+                          load()
+                        } catch (err) {
+                          window.alert(err.message || 'API summary recovery failed')
+                          load()
+                        }
+                      }}>API Summary</button>
+                    )}
+                  </div>
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: '6px', justifyContent: 'flex-end', alignItems: 'center' }}>
@@ -795,10 +812,103 @@ function AdminDashboard({ username, onLogout }) {
   </AdminTop>
 }
 
-export default function AdminPage() {
+function AdminSubmissionSummaryPage({ submissionId, onBack }) {
+  const [item, setItem] = useState(null)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    api(`/api/admin/submissions/${submissionId}/`).then(setItem).catch(e => setError(e.message))
+  }, [submissionId])
+
+  if (error) return <AdminTop><div style={{padding: '40px'}}><button className="admin-btn secondary" onClick={onBack}>← Back</button><p style={{color: 'red', marginTop: '20px'}}>{error}</p></div></AdminTop>
+  if (!item) return <AdminTop><div style={{padding: '40px'}}><p>Loading...</p></div></AdminTop>
+
+  const docs = Array.isArray(item.zip_contents) ? item.zip_contents : []
+  return (
+    <AdminTop>
+      <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px'}}>
+        <div>
+          <h2 style={{fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '42px', fontWeight: '400', margin: '0 0 10px', color: 'var(--ink)', lineHeight: 1}}>
+            {item.title || item.manuscript_filename || 'Submission summary'}
+          </h2>
+          <div style={{color: 'var(--muted)', fontSize: '15px'}}>
+            {item.author_name || '—'} · {item.kind || '—'} · {item.manuscript_filename || ''}
+          </div>
+        </div>
+        <button style={{border: '1px solid rgba(28,26,23,0.1)', background: '#fff', borderRadius: '12px', padding: '10px 16px', fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(28,26,23,0.05)'}} onClick={onBack}>
+          ← Back to dashboard
+        </button>
+      </div>
+
+      <div style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px', marginBottom: '26px'}}>
+        {[{l: 'Status', v: item.status}, {l: 'AI Decision', v: item.decision}, {l: 'Words', v: Number(item.total_words || 0).toLocaleString()}, {l: 'Email State', v: item.notification_status}].map((m, i) => (
+          <div key={i} style={{background: 'rgba(255,255,255,0.78)', border: '1px solid rgba(255,255,255,0.9)', borderRadius: '18px', padding: '16px 18px', boxShadow: '0 8px 28px rgba(28,26,23,0.035)'}}>
+            <div style={{fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.09em', fontWeight: 800, color: 'var(--muted)', marginBottom: '8px'}}>{m.l}</div>
+            <div style={{fontSize: '15px', fontWeight: 700, color: 'var(--ink)'}}>{m.v || '—'}</div>
+          </div>
+        ))}
+      </div>
+
+      <section style={{background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(255,255,255,0.95)', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 16px 48px rgba(28,26,23,0.06)', marginBottom: '24px'}}>
+        <div style={{padding: '22px 24px', background: 'linear-gradient(135deg, rgba(168,92,50,0.08), rgba(255,255,255,0.6))', borderBottom: '1px solid rgba(168,92,50,0.12)'}}>
+          <h3 style={{margin: 0, fontSize: '22px', color: 'var(--ink)'}}>{docs.length ? 'Overall Editor Summary' : 'Editor Summary'}</h3>
+          <p style={{margin: '6px 0 0', color: 'var(--muted)', fontSize: '14px'}}>{docs.length ? 'Generated from all extracted ZIP documents.' : 'Generated for this submitted manuscript file.'}</p>
+        </div>
+        <div style={{whiteSpace: 'pre-wrap', lineHeight: '1.72', fontSize: '15px', color: 'var(--ink)', padding: '24px'}}>
+          {item.editor_summary || 'No summary available.'}
+        </div>
+      </section>
+
+      {docs.length > 0 && (
+        <section style={{background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(255,255,255,0.95)', borderRadius: '22px', overflow: 'hidden', boxShadow: '0 16px 48px rgba(28,26,23,0.06)', marginBottom: '24px'}}>
+          <div style={{padding: '22px 24px', background: 'linear-gradient(135deg, rgba(168,92,50,0.08), rgba(255,255,255,0.6))', borderBottom: '1px solid rgba(168,92,50,0.12)'}}>
+            <h3 style={{margin: 0, fontSize: '22px', color: 'var(--ink)'}}>Chapter-wise / PDF-wise Summaries</h3>
+            <p style={{margin: '6px 0 0', color: 'var(--muted)', fontSize: '14px'}}>{docs.length} document{docs.length === 1 ? '' : 's'}</p>
+          </div>
+          <div style={{padding: '24px'}}>
+            <div style={{display: 'grid', gap: '16px'}}>
+              {docs.map((doc, index) => (
+                <article key={index} style={{background: 'rgba(255,255,255,0.82)', border: '1px solid rgba(28,26,23,0.08)', borderRadius: '18px', overflow: 'hidden'}}>
+                  <div style={{display: 'flex', justifyContent: 'space-between', gap: '16px', alignItems: 'flex-start', padding: '18px 20px', background: '#fffaf5', borderBottom: '1px solid rgba(28,26,23,0.07)'}}>
+                    <div>
+                      <div style={{fontWeight: 800, color: 'var(--ink)', fontSize: '15px'}}>{index + 1}. {doc.filename || 'Document'}</div>
+                      <div style={{color: 'var(--muted)', fontSize: '12px', marginTop: '4px'}}>{doc.path || ''}</div>
+                    </div>
+                    <div style={{whiteSpace: 'nowrap', padding: '6px 11px', borderRadius: '999px', background: 'rgba(28,26,23,0.045)', color: 'var(--muted)', fontSize: '12px', fontWeight: 800}}>
+                      {Number(doc.word_count || 0).toLocaleString()} words
+                    </div>
+                  </div>
+                  <div style={{whiteSpace: 'pre-wrap', lineHeight: '1.68', padding: '18px 20px', fontSize: '14px', color: 'var(--ink)'}}>
+                    {doc.preview || '(no summary available)'}
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+    </AdminTop>
+  )
+}
+
+export default function AdminPage({ path }) {
   const [state, setState] = useState({ mode: 'checking', username: '' })
   async function check() { try { const s = await api('/api/admin/session/'); setState({ mode: s.authenticated ? 'in' : 'out', username: s.username || '' }) } catch { setState({ mode: 'out', username: '' }) } }
   useEffect(() => { check() }, [])
   if (state.mode === 'checking') return <AdminTop><p>Checking admin session…</p></AdminTop>
-  return state.mode === 'in' ? <AdminDashboard username={state.username} onLogout={() => setState({mode:'out',username:''})} /> : <AdminLogin onLogin={check} />
+
+  if (state.mode !== 'in') {
+    return <AdminLogin onLogin={check} />
+  }
+
+  const match = path?.match(/^\/admin\/submissions\/([^/]+)$/)
+  const submissionId = match ? match[1] : null
+
+  if (submissionId) {
+    return <AdminSubmissionSummaryPage submissionId={submissionId} onBack={() => {
+      window.history.pushState({}, '', '/admin')
+      window.dispatchEvent(new Event('popstate'))
+    }} />
+  }
+
+  return <AdminDashboard username={state.username} onLogout={() => setState({mode:'out',username:''})} />
 }

@@ -4,8 +4,6 @@ import App from './App.jsx'
 import './styles.css'
 import './zip-summary-format.css'
 import './admin-action-modal-polish.css'
-import './admin-summary-page.js'
-import './admin-api-summary-recovery.js'
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>

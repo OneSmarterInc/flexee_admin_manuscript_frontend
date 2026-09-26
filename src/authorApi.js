@@ -21,6 +21,39 @@ export function clearAuthorSession() {
   sessionStorage.removeItem(SESSION_KEY)
 }
 
+export async function authorLogin(email, password) {
+  const user = await api('/api/author/login/', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  })
+  return user
+}
+
+export async function authorRegister(name, email, password) {
+  const user = await api('/api/author/register/', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  })
+  return user
+}
+
+export async function authorLogout() {
+  await api('/api/author/logout/', { method: 'POST' })
+}
+
+export async function fetchAuthorSession() {
+  try {
+    return await api('/api/author/session/')
+  } catch (err) {
+    if (err.status === 401) return null
+    throw err
+  }
+}
+
+export async function fetchAuthorManuscripts() {
+  return await api('/api/author/manuscripts/list/')
+}
+
 export function hasAuthorSession() {
   const session = getAuthorSession()
   return Boolean(session.manuscriptId && session.accessToken)
@@ -28,18 +61,15 @@ export function hasAuthorSession() {
 
 export async function authorApi(path, options = {}) {
   const session = getAuthorSession()
-  if (!session.accessToken) {
-    const error = new Error('This browser session does not have access to the manuscript. Start a new submission or reopen it from the same session.')
-    error.code = 'author_session_missing'
-    throw error
+  const headers = { ...(options.headers || {}) }
+  
+  if (session.accessToken) {
+    headers['X-Manuscript-Token'] = session.accessToken
   }
 
   return api(path, {
     ...options,
-    headers: {
-      ...(options.headers || {}),
-      'X-Manuscript-Token': session.accessToken,
-    },
+    headers,
   })
 }
 
@@ -88,4 +118,29 @@ export function friendlyAuthorError(error) {
     return 'This browser no longer has access to the manuscript. Start a new submission to create a new secure author session.'
   }
   return error.message || 'Something went wrong.'
+}
+
+export async function fetchAuthorJobStatus(jobId) {
+  return await authorApi(`/api/author/jobs/${jobId}/`)
+}
+
+export async function pollAuthorJob(jobId, onProgress) {
+  return new Promise((resolve, reject) => {
+    const interval = setInterval(async () => {
+      try {
+        const status = await fetchAuthorJobStatus(jobId)
+        if (onProgress) onProgress(status)
+        if (status.status === 'completed') {
+          clearInterval(interval)
+          resolve(status)
+        } else if (status.status === 'failed') {
+          clearInterval(interval)
+          reject(new Error(status.error || 'Job failed'))
+        }
+      } catch (err) {
+        clearInterval(interval)
+        reject(err)
+      }
+    }, 2000)
+  })
 }

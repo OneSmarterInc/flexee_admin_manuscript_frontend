@@ -8,6 +8,10 @@ import {
   currentSubmissionPath,
   friendlyAuthorError,
   getAuthorSession,
+  fetchAuthorSession,
+  fetchAuthorManuscripts,
+  authorLogout,
+  saveAuthorSession
 } from '../authorApi.js'
 
 const journey = [
@@ -27,8 +31,21 @@ export default function AuthorDashboard() {
   const [submission, setSubmission] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [authorUser, setAuthorUser] = useState(null)
+  const [manuscriptsList, setManuscriptsList] = useState([])
 
   async function loadCurrent() {
+    try {
+      const user = await fetchAuthorSession()
+      if (user) {
+        setAuthorUser(user)
+        const res = await fetchAuthorManuscripts()
+        setManuscriptsList(res.manuscripts || [])
+      }
+    } catch (err) {
+      console.error(err)
+    }
+
     const session = getAuthorSession()
     if (!session.manuscriptId || !session.accessToken) {
       setLoading(false)
@@ -83,17 +100,40 @@ export default function AuthorDashboard() {
     setError('')
   }
 
+  async function handleLogout() {
+    await authorLogout()
+    setAuthorUser(null)
+    setManuscriptsList([])
+  }
+
+  function viewManuscript(ms) {
+    saveAuthorSession({
+      manuscriptId: ms.id,
+      accessToken: ms.access_token_hash ? '' : getAuthorSession().accessToken, // Note: real access token needs to be issued, but for now we rely on cookie
+    })
+    go('/author/status')
+  }
+
   return <PublicationShell>
     <div className="wrap author-dashboard">
       <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace</div>
 
       <section className="author-hero">
-        <div>
-          <p className="kicker">Author workspace</p>
-          <h1 className="publication-title">Your manuscript workspace.</h1>
-          <p className="publication-lede">Prepare a manuscript, check its readiness, compare participating outlets, choose where you want to submit, and follow the venue-specific packet.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'flex-start' }}>
+          <div>
+            <p className="kicker">Author workspace</p>
+            <h1 className="publication-title">{authorUser ? `Welcome, ${authorUser.name}` : 'Your manuscript workspace.'}</h1>
+            <p className="publication-lede">Prepare a manuscript, check its readiness, compare participating outlets, choose where you want to submit, and follow the venue-specific packet.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '1rem', flexShrink: 0 }}>
+            {authorUser ? (
+              <button className="author-secondary-button" type="button" onClick={handleLogout}>Log out</button>
+            ) : (
+              <button className="author-secondary-button" type="button" onClick={() => go('/author/login')}>Log in</button>
+            )}
+            <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>Start a new submission</button>
+          </div>
         </div>
-        <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>Start a new submission</button>
       </section>
 
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Current manuscript unavailable.</b> {error}</div>}
@@ -108,10 +148,29 @@ export default function AuthorDashboard() {
       <div className="author-dashboard-grid">
         <section className="author-panel author-submissions-panel">
           <div className="author-panel-heading">
-            <div><p className="kicker">Current browser session</p><h2>Manuscript activity</h2></div>
+            <div><p className="kicker">{authorUser ? 'Your account' : 'Current browser session'}</p><h2>Manuscript activity</h2></div>
           </div>
 
           {loading ? <div className="author-empty-state"><h3>Loading your manuscript…</h3></div> :
+            (authorUser && manuscriptsList.length > 0) ? (
+              <div className="author-manuscripts-list">
+                {manuscriptsList.map(ms => (
+                  <div key={ms.id} className="author-live-manuscript" style={{ marginBottom: '1rem' }}>
+                    <div>
+                      <span className="author-venue-type">{String(ms.manuscript_type || 'manuscript').replaceAll('_', ' ')}</span>
+                      <h3>{ms.title}</h3>
+                      <p>{ms.manuscript_filename}</p>
+                    </div>
+                    <div className="author-live-manuscript-meta">
+                      <AuthorStatusPill tone={ms.latest_submission?.status === 'packet_ready' ? 'good' : 'neutral'}>{statusLabel(ms.latest_submission?.status)}</AuthorStatusPill>
+                    </div>
+                    <div className="author-live-manuscript-actions">
+                      <button className="copper-button" type="button" onClick={() => viewManuscript(ms)}>View details</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) :
             manuscript ? <div className="author-live-manuscript">
               <div>
                 <span className="author-venue-type">{String(manuscript.manuscript_type || 'manuscript').replaceAll('_', ' ')}</span>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { api } from '../api.js'
+import { api, pollPublicSubmission } from '../api.js'
 import { PublicationShell } from '../components/SiteChrome.jsx'
 
 const sims = {
@@ -33,16 +33,41 @@ export default function SubmitBook() {
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [success, setSuccess] = useState(false)
+  const [processing, setProcessing] = useState(false)
+  const [timeoutMsg, setTimeoutMsg] = useState(false)
 
   async function submit(e) {
-    e.preventDefault(); setBusy(true); setError(''); setResult(null); setSuccess(false)
+    e.preventDefault(); setBusy(true); setError(''); setResult(null); setSuccess(false); setProcessing(false); setTimeoutMsg(false)
     const form = new FormData(e.currentTarget)
     form.set('type', 'book')
     try { 
-      setResult(await api('/api/submissions/', { method: 'POST', body: form })) 
-      setSuccess(true)
-      e.target.reset()
-      setSim('')
+      const response = await api('/api/submissions/', { method: 'POST', body: form })
+      if (response.job_id && response.submission_id) {
+        setProcessing(true)
+        try {
+          const finalStatus = await pollPublicSubmission(response.submission_id)
+          setResult(finalStatus)
+          setSuccess(true)
+          e.target.reset()
+          setSim('')
+        } catch (err) {
+          if (err.message === 'timeout') {
+            setTimeoutMsg(true)
+            setSuccess(true)
+            e.target.reset()
+            setSim('')
+          } else {
+            setError(err.message)
+          }
+        } finally {
+          setProcessing(false)
+        }
+      } else {
+        setResult(response)
+        setSuccess(true)
+        e.target.reset()
+        setSim('')
+      }
     }
     catch (err) { setError(err.message) }
     finally { setBusy(false) }
@@ -80,11 +105,12 @@ export default function SubmitBook() {
         <div className="row"><label htmlFor="disclosure">How did you use AI in writing this book? <span className="req">*</span></label><div className="hint">Be specific — drafting, figure generation, editing, research, and so on.</div><textarea id="disclosure" name="disclosure" required /></div>
         <div className="row"><label htmlFor="notes">Notes to the editor</label><textarea id="notes" name="notes" className="short-textarea" /></div>
         <div className="row check"><input id="attest-ui" type="checkbox" required /><label htmlFor="attest-ui">This manuscript is human-authored with AI assistance. It is not AI-authored. <span className="req">*</span></label></div>
-        <button className="copper-button" type="submit" disabled={busy}>{busy ? 'Reviewing manuscript…' : 'Submit manuscript'}</button>
-        {success && <p className="submit-status" style={{color: 'green'}}>Book has been uploaded successfully</p>}
-        {busy && <p className="submit-status">Keep this page open while the first-gate review runs.</p>}
+        <button className="copper-button" type="submit" disabled={busy || processing}>{busy ? 'Uploading manuscript…' : (processing ? 'Reviewing manuscript…' : 'Submit manuscript')}</button>
+        {success && !processing && !timeoutMsg && <p className="submit-status" style={{color: 'green'}}>Book has been uploaded successfully</p>}
+        {processing && <p className="submit-status">Keep this page open while the first-gate review runs.</p>}
+        {timeoutMsg && <p className="submit-status">We will email you when it finishes.</p>}
         {error && <p className="form-error">{error}</p>}
-        <ReviewResult data={result} />
+        {result && (!result.status || result.status === 'completed') && <ReviewResult data={result} />}
       </form>
     </div>
   </PublicationShell>
