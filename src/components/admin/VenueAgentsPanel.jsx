@@ -272,14 +272,16 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           <p className="venue-admin-kicker">Subscriber venues</p>
           <h3>Venue Agents</h3>
         </div>
-        <button className="admin-btn" type="button" onClick={() => setShowCreate(value => !value)}>+ Venue</button>
+        {canCreateVenue && <button className="admin-btn" type="button" onClick={() => setShowCreate(value => !value)}>+ Venue</button>}
       </div>
 
       {showCreate && <form className="venue-admin-create" onSubmit={createVenue}>
         <Field label="Venue name" full><input value={createForm.name} onChange={e => setCreateForm({...createForm, name:e.target.value})} required /></Field>
         <div className="venue-admin-two">
           <Field label="Type"><select value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select></Field>
-          <Field label="Organization"><input value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} /></Field>
+          {platformSuperuser
+            ? <Field label="Organization"><input value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} /></Field>
+            : <Field label="Organization"><select value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select></Field>}
         </div>
         <Field label="Description" full><textarea rows="3" value={createForm.description} onChange={e => setCreateForm({...createForm, description:e.target.value})} /></Field>
         <div className="venue-admin-actions">
@@ -332,7 +334,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
         <form className="venue-admin-card" onSubmit={saveVenue}>
           <div className="venue-admin-card-head">
             <div><p className="venue-admin-kicker">Identity</p><h3>Venue metadata</h3></div>
-            <button className="admin-btn secondary" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>
+            {canManageSelected && <button className="admin-btn secondary" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
           </div>
           <div className="venue-admin-form-grid">
             <Field label="Venue name"><input value={venueForm?.name || ''} onChange={e => setVenueForm({...venueForm, name:e.target.value})} required /></Field>
@@ -349,7 +351,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               <h3>Create the next configuration version</h3>
               <p>Saving creates a new immutable version and makes it active. Existing submissions remain pinned to the version they used.</p>
             </div>
-            <button className="admin-btn" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>
+            {canManageSelected && <button className="admin-btn" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
           </div>
 
           <div className="venue-admin-form-grid">
