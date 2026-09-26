@@ -299,6 +299,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">AI-prepared editorial brief</p>
             <h3>{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h3>
+            {detail.editorial_brief?.decision_authority && <p className="editor-decision-authority">{detail.editorial_brief.decision_authority}</p>}
             
             {detail.editorial_brief?.analysis_coverage && typeof detail.editorial_brief.analysis_coverage.coverage_percent !== 'undefined' && (
               <article className="editor-brief-block">
