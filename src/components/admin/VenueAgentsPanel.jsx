@@ -23,6 +23,7 @@ const emptyConfig = {
   desk_rejection_rules: '',
   structured_desk_rejection_rules: '[]',
   required_submission_items: '[]',
+  retention_days: '',
   deadlines: '{}',
   submission_capacity: '{}',
   current_demand: '{}',
@@ -51,6 +52,7 @@ function configToForm(config) {
     desk_rejection_rules: listToText(config.desk_rejection_rules),
     structured_desk_rejection_rules: JSON.stringify(config.structured_desk_rejection_rules || [], null, 2),
     required_submission_items: JSON.stringify(config.required_submission_items || [], null, 2),
+    retention_days: config.retention_days == null ? '' : String(config.retention_days),
     deadlines: jsonToText(config.deadlines),
     submission_capacity: jsonToText(config.submission_capacity),
     current_demand: jsonToText(config.current_demand),
@@ -91,6 +93,16 @@ function parseArrayJson(value, fieldName) {
   return parsed
 }
 
+function parseRetentionDays(value) {
+  const text = String(value ?? '').trim()
+  if (!text) return null
+  const parsed = Number(text)
+  if (!Number.isInteger(parsed) || parsed < 1 || parsed > 3650) {
+    throw new Error('Retention days must be a whole number from 1 to 3650, or left blank.')
+  }
+  return parsed
+}
+
 function configPayload(form) {
   return {
     aims_scope: form.aims_scope.trim(),
@@ -104,6 +116,7 @@ function configPayload(form) {
     desk_rejection_rules: parseList(form.desk_rejection_rules),
     structured_desk_rejection_rules: parseArrayJson(form.structured_desk_rejection_rules, 'Deterministic desk-rejection rules'),
     required_submission_items: parseArrayJson(form.required_submission_items, 'Required submission items'),
+    retention_days: parseRetentionDays(form.retention_days),
     deadlines: parseObject(form.deadlines, 'Deadlines'),
     submission_capacity: parseObject(form.submission_capacity, 'Submission capacity'),
     current_demand: parseObject(form.current_demand, 'Current demand'),
@@ -385,6 +398,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
             <Field label="Desk-rejection guidance" hint="Free-text guidance for the venue agent. One rule per line."><textarea rows="6" value={configForm.desk_rejection_rules} onChange={e => setConfigForm({...configForm, desk_rejection_rules:e.target.value})} /></Field>
             <Field label="Deterministic desk-rejection rules (JSON)" hint='Supported fields: word_count, manuscript_type, disclosure. A rule triggers when its condition is true. Example: [{"field":"word_count","operator":">","value":8000,"message":"Maximum length is 8,000 words."}]' full><textarea className="venue-admin-code" rows="10" value={configForm.structured_desk_rejection_rules} onChange={e => setConfigForm({...configForm, structured_desk_rejection_rules:e.target.value})} /></Field>
             <Field label="Required submission items (JSON)" hint='Supported types: text, textarea, url, checkbox, file. Example: [{"key":"cover_letter","label":"Cover letter","type":"file","required":true},{"key":"orcid","label":"ORCID","type":"text","required":true}]' full><textarea className="venue-admin-code" rows="10" value={configForm.required_submission_items} onChange={e => setConfigForm({...configForm, required_submission_items:e.target.value})} /></Field>
+            <Field label="Content retention (days)" hint="Optional. Starts when the author formally submits. Leave blank to keep content until a future policy is configured."><input type="number" min="1" max="3650" step="1" value={configForm.retention_days} onChange={e => setConfigForm({...configForm, retention_days:e.target.value})} placeholder="Example: 365" /></Field>
             <Field label="Policies (JSON)" hint='Structured rules such as {"word_count":{"min":1500,"max":3000}}' full><textarea className="venue-admin-code" rows="10" value={configForm.policies} onChange={e => setConfigForm({...configForm, policies:e.target.value})} /></Field>
             <Field label="Current demand (JSON)" hint='Special issues, tracks, priorities, or topics. Example: {"topics":["AI agents"]}'><textarea className="venue-admin-code" rows="7" value={configForm.current_demand} onChange={e => setConfigForm({...configForm, current_demand:e.target.value})} /></Field>
             <Field label="Deadlines (JSON)"><textarea className="venue-admin-code" rows="7" value={configForm.deadlines} onChange={e => setConfigForm({...configForm, deadlines:e.target.value})} /></Field>
