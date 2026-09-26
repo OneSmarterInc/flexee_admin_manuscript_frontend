@@ -11,14 +11,39 @@ export function errorText(value) {
   return 'Job failed';
 }
 
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS', 'TRACE'])
+
+async function getCsrfToken() {
+  const response = await fetch(apiUrl('/api/csrf/'), {
+    credentials: 'include',
+  })
+  if (!response.ok) {
+    throw new Error(`Unable to initialize CSRF protection (${response.status})`)
+  }
+  const payload = await response.json()
+  if (!payload?.csrfToken) {
+    throw new Error('CSRF token was not returned by the server')
+  }
+  return payload.csrfToken
+}
+
 export async function api(path, options = {}) {
+  const method = (options.method || 'GET').toUpperCase()
+  const headers = options.body instanceof FormData
+    ? { ...(options.headers || {}) }
+    : {
+        'Content-Type': 'application/json',
+        ...(options.headers || {}),
+      }
+
+  if (!SAFE_METHODS.has(method)) {
+    headers['X-CSRFToken'] = await getCsrfToken()
+  }
+
   const response = await fetch(apiUrl(path), {
     credentials: 'include',
     ...options,
-    headers: options.body instanceof FormData ? options.headers : {
-      'Content-Type': 'application/json',
-      ...(options.headers || {}),
-    },
+    headers,
   })
   const text = await response.text()
   let payload = {}
@@ -68,12 +93,17 @@ export async function pollPublicSubmission(submissionId, onProgress) {
 }
 
 export async function apiBlob(path, options = {}) {
+  const method = (options.method || 'GET').toUpperCase()
+  const headers = { ...(options.headers || {}) }
+
+  if (!SAFE_METHODS.has(method)) {
+    headers['X-CSRFToken'] = await getCsrfToken()
+  }
+
   const response = await fetch(apiUrl(path), {
     credentials: 'include',
     ...options,
-    headers: {
-      ...(options.headers || {}),
-    },
+    headers,
   })
   if (!response.ok) {
     let detail = `Request failed (${response.status})`
