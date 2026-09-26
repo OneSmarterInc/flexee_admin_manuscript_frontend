@@ -38,7 +38,15 @@ export async function authorRegister(name, email, password) {
 }
 
 export async function authorLogout() {
-  await api('/api/author/logout/', { method: 'POST' })
+  try {
+    await api('/api/author/logout/', { method: 'POST' })
+  } finally {
+    clearAuthorSession()
+  }
+}
+
+export async function resendAuthorVerification() {
+  return await api('/api/author/resend-verification/', { method: 'POST' })
 }
 
 export async function fetchAuthorSession() {
@@ -125,8 +133,16 @@ export async function fetchAuthorJobStatus(jobId) {
 }
 
 export async function pollAuthorJob(jobId, onProgress) {
+  const timeoutMs = 10 * 60 * 1000
+  const startTime = Date.now()
+
   return new Promise((resolve, reject) => {
     const interval = setInterval(async () => {
+      if (Date.now() - startTime > timeoutMs) {
+        clearInterval(interval)
+        reject(new Error('Background processing is taking longer than expected. Please retry from this page.'))
+        return
+      }
       try {
         const status = await fetchAuthorJobStatus(jobId)
         if (onProgress) onProgress(status)

@@ -11,6 +11,7 @@ import {
   fetchAuthorSession,
   fetchAuthorManuscripts,
   authorLogout,
+  resendAuthorVerification,
   saveAuthorSession
 } from '../authorApi.js'
 
@@ -33,6 +34,8 @@ export default function AuthorDashboard() {
   const [error, setError] = useState('')
   const [authorUser, setAuthorUser] = useState(null)
   const [manuscriptsList, setManuscriptsList] = useState([])
+  const [verifyBusy, setVerifyBusy] = useState(false)
+  const [verifyMessage, setVerifyMessage] = useState('')
 
   async function loadCurrent() {
     try {
@@ -104,6 +107,21 @@ export default function AuthorDashboard() {
     await authorLogout()
     setAuthorUser(null)
     setManuscriptsList([])
+    setManuscript(null)
+    setSubmission(null)
+  }
+
+  async function handleResendVerification() {
+    setVerifyBusy(true)
+    setVerifyMessage('')
+    try {
+      const result = await resendAuthorVerification()
+      setVerifyMessage(result.detail || 'Verification email sent.')
+    } catch (err) {
+      setVerifyMessage(err.message || 'Verification email could not be sent.')
+    } finally {
+      setVerifyBusy(false)
+    }
   }
 
   function viewManuscript(ms) {
@@ -137,6 +155,13 @@ export default function AuthorDashboard() {
       </section>
 
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Current manuscript unavailable.</b> {error}</div>}
+      {authorUser && !authorUser.email_verified && <div className="author-prototype-notice" role="status">
+        <b>Verify your email before uploading.</b> If the original message did not arrive, you can send a fresh verification link.
+        <div style={{ marginTop: '10px', display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button className="author-secondary-button" type="button" onClick={handleResendVerification} disabled={verifyBusy}>{verifyBusy ? 'Sending…' : 'Resend verification email'}</button>
+          {verifyMessage && <span>{verifyMessage}</span>}
+        </div>
+      </div>}
 
       <section className="author-stats" aria-label="Submission overview">
         <article className="author-stat-card"><span className="author-stat-value">{stats.drafts}</span><span className="author-stat-label">Drafts</span><p>Current browser-session manuscripts not formally submitted.</p></article>

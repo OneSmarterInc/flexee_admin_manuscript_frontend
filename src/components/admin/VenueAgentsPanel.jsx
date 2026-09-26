@@ -5,6 +5,7 @@ const emptyVenue = {
   name: '',
   venue_type: 'journal',
   description: '',
+  organization_id: '',
   organization_name: 'Flexee Publishing',
   organization_type: 'publisher',
   active: true,
@@ -103,7 +104,9 @@ function Field({ label, hint, children, full = false }) {
   </label>
 }
 
-export default function VenueAgentsPanel() {
+export default function VenueAgentsPanel({ platformSuperuser = false, memberships = [] }) {
+  const ownerMemberships = useMemo(() => memberships.filter(item => item.role === 'owner'), [memberships])
+  const defaultOwnerOrgId = String(ownerMemberships[0]?.organization_id || '')
   const [venues, setVenues] = useState([])
   const [selectedId, setSelectedId] = useState('')
   const [selectedVenue, setSelectedVenue] = useState(null)
@@ -111,7 +114,7 @@ export default function VenueAgentsPanel() {
   const [venueForm, setVenueForm] = useState(null)
   const [configForm, setConfigForm] = useState({ ...emptyConfig })
   const [showCreate, setShowCreate] = useState(false)
-  const [createForm, setCreateForm] = useState({ ...emptyVenue })
+  const [createForm, setCreateForm] = useState({ ...emptyVenue, organization_id: defaultOwnerOrgId })
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
@@ -163,16 +166,20 @@ export default function VenueAgentsPanel() {
 
   async function createVenue(e) {
     e.preventDefault()
+    if (!platformSuperuser && !ownerMemberships.length) return
     setBusy('create')
     setError('')
     setSuccess('')
     try {
+      const requestBody = platformSuperuser
+        ? createForm
+        : { ...createForm, organization_id: createForm.organization_id || defaultOwnerOrgId }
       const payload = await api('/api/admin/venues/', {
         method: 'POST',
-        body: JSON.stringify(createForm),
+        body: JSON.stringify(requestBody),
       })
       setShowCreate(false)
-      setCreateForm({ ...emptyVenue })
+      setCreateForm({ ...emptyVenue, organization_id: defaultOwnerOrgId })
       setSuccess(`${payload.venue.name} created. Add its first Venue Agent configuration next.`)
       await loadVenues(payload.venue.id)
     } catch (err) {
@@ -184,7 +191,7 @@ export default function VenueAgentsPanel() {
 
   async function saveVenue(e) {
     e.preventDefault()
-    if (!selectedId || !venueForm) return
+    if (!selectedId || !venueForm || !canManageSelected) return
     setBusy('venue')
     setError('')
     setSuccess('')
@@ -206,7 +213,7 @@ export default function VenueAgentsPanel() {
 
   async function createConfig(e) {
     e.preventDefault()
-    if (!selectedId) return
+    if (!selectedId || !canManageSelected) return
     setBusy('config')
     setError('')
     setSuccess('')
@@ -226,7 +233,7 @@ export default function VenueAgentsPanel() {
   }
 
   async function activateConfig(config) {
-    if (!selectedId || config.active) return
+    if (!selectedId || config.active || !canManageSelected) return
     setBusy(`activate-${config.id}`)
     setError('')
     setSuccess('')
@@ -248,6 +255,11 @@ export default function VenueAgentsPanel() {
     () => configs.find(item => item.active) || null,
     [configs],
   )
+  const selectedRole = memberships.find(
+    item => String(item.organization_id) === String(selectedVenue?.organization?.id || ''),
+  )?.role
+  const canManageSelected = platformSuperuser || selectedRole === 'owner'
+  const canCreateVenue = platformSuperuser || ownerMemberships.length > 0
 
   if (loading) {
     return <div className="venue-admin-state"><h3>Loading Venue Agents…</h3></div>
@@ -260,14 +272,16 @@ export default function VenueAgentsPanel() {
           <p className="venue-admin-kicker">Subscriber venues</p>
           <h3>Venue Agents</h3>
         </div>
-        <button className="admin-btn" type="button" onClick={() => setShowCreate(value => !value)}>+ Venue</button>
+        {canCreateVenue && <button className="admin-btn" type="button" onClick={() => setShowCreate(value => !value)}>+ Venue</button>}
       </div>
 
       {showCreate && <form className="venue-admin-create" onSubmit={createVenue}>
         <Field label="Venue name" full><input value={createForm.name} onChange={e => setCreateForm({...createForm, name:e.target.value})} required /></Field>
         <div className="venue-admin-two">
           <Field label="Type"><select value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select></Field>
-          <Field label="Organization"><input value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} /></Field>
+          {platformSuperuser
+            ? <Field label="Organization"><input value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} /></Field>
+            : <Field label="Organization"><select value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select></Field>}
         </div>
         <Field label="Description" full><textarea rows="3" value={createForm.description} onChange={e => setCreateForm({...createForm, description:e.target.value})} /></Field>
         <div className="venue-admin-actions">
@@ -314,13 +328,14 @@ export default function VenueAgentsPanel() {
           <div className="venue-admin-header-badges">
             <SmallPill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</SmallPill>
             <SmallPill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</SmallPill>
+            {!canManageSelected && <SmallPill>Read only</SmallPill>}
           </div>
         </div>
 
         <form className="venue-admin-card" onSubmit={saveVenue}>
           <div className="venue-admin-card-head">
             <div><p className="venue-admin-kicker">Identity</p><h3>Venue metadata</h3></div>
-            <button className="admin-btn secondary" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>
+            {canManageSelected && <button className="admin-btn secondary" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
           </div>
           <div className="venue-admin-form-grid">
             <Field label="Venue name"><input value={venueForm?.name || ''} onChange={e => setVenueForm({...venueForm, name:e.target.value})} required /></Field>
@@ -337,7 +352,7 @@ export default function VenueAgentsPanel() {
               <h3>Create the next configuration version</h3>
               <p>Saving creates a new immutable version and makes it active. Existing submissions remain pinned to the version they used.</p>
             </div>
-            <button className="admin-btn" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>
+            {canManageSelected && <button className="admin-btn" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
           </div>
 
           <div className="venue-admin-form-grid">
@@ -373,7 +388,7 @@ export default function VenueAgentsPanel() {
               </div>
               <div className="venue-admin-history-actions">
                 <button className="admin-btn secondary" type="button" onClick={() => setConfigForm(configToForm(config))}>Load into editor</button>
-                {!config.active && <button className="admin-btn secondary" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
+                {!config.active && canManageSelected && <button className="admin-btn secondary" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
               </div>
             </article>)}
             {!configs.length && <div className="venue-admin-empty">No Venue Agent configuration has been created yet.</div>}

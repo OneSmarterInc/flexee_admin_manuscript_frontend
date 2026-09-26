@@ -43,7 +43,7 @@ function BriefBlock({ label, value }) {
   </article>
 }
 
-export default function EditorWorkspacePanel() {
+export default function EditorWorkspacePanel({ platformSuperuser = false, memberships = [] }) {
   const [venues, setVenues] = useState([])
   const [filters, setFilters] = useState({ q: '', venue_id: '', status: '' })
   const [data, setData] = useState({ counts: {}, items: [] })
@@ -117,7 +117,7 @@ export default function EditorWorkspacePanel() {
   }
 
   async function startReview() {
-    if (!selectedId) return
+    if (!selectedId || !canEditSelected) return
     setBusy('review')
     setError('')
     setSuccess('')
@@ -137,7 +137,7 @@ export default function EditorWorkspacePanel() {
 
   async function recordDecision(e) {
     e.preventDefault()
-    if (!selectedId) return
+    if (!selectedId || !canEditSelected) return
     setBusy('decision')
     setError('')
     setSuccess('')
@@ -158,7 +158,7 @@ export default function EditorWorkspacePanel() {
 
   async function recordFeedback(e) {
     e.preventDefault()
-    if (!detail?.venue?.id || !selectedId) return
+    if (!detail?.venue?.id || !selectedId || !canEditSelected) return
     setBusy('feedback')
     setError('')
     setSuccess('')
@@ -199,7 +199,11 @@ export default function EditorWorkspacePanel() {
     }
   }
 
-  const decisionAllowed = detail && ['submitted', 'under_review', 'revision_requested'].includes(detail.status)
+  const selectedRole = memberships.find(
+    item => String(item.organization_id) === String(detail?.venue?.organization?.id || ''),
+  )?.role
+  const canEditSelected = platformSuperuser || ['owner', 'editor'].includes(selectedRole)
+  const decisionAllowed = canEditSelected && detail && ['submitted', 'under_review', 'revision_requested'].includes(detail.status)
 
   return <div className="editor-workspace">
     <div className="editor-workspace-head">
@@ -277,7 +281,7 @@ export default function EditorWorkspacePanel() {
 
           <div className="editor-detail-actions">
             <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download'}>{busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
-            {['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
+            {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
           </div>
 
           <section className="editor-detail-card">
@@ -353,7 +357,7 @@ export default function EditorWorkspacePanel() {
             <p className="venue-admin-kicker">Correct the agent</p>
             <h3>Record venue-specific editor feedback</h3>
             <p className="editor-card-copy">Corrections stay scoped to this venue. They do not rewrite another outlet's configuration or assessment history.</p>
-            <form className="editor-feedback-form" onSubmit={recordFeedback}>
+            {canEditSelected ? <form className="editor-feedback-form" onSubmit={recordFeedback}>
               <label><span>Assessment field</span><select value={feedbackField} onChange={e => setFeedbackField(e.target.value)}>
                 <option value="outlet_fit">Outlet fit</option>
                 <option value="policy_compliance">Policy compliance</option>
@@ -366,7 +370,7 @@ export default function EditorWorkspacePanel() {
               <label><span>Editor correction</span><textarea rows="3" value={feedbackValue} onChange={e => setFeedbackValue(e.target.value)} placeholder="What should the venue-specific assessment say instead?" /></label>
               <label><span>Reason / evidence for correction</span><textarea rows="3" required value={feedbackReason} onChange={e => setFeedbackReason(e.target.value)} placeholder="Explain why this correction should inform future assessments for this venue." /></label>
               <button className="admin-btn secondary" type="submit" disabled={busy === 'feedback'}>{busy === 'feedback' ? 'Recording…' : 'Record feedback'}</button>
-            </form>
+            </form> : <p className="editor-card-copy">Your role has read-only access to this venue's editorial workspace.</p>}
 
             {detail.feedback?.length > 0 && <div className="editor-feedback-history">
               <span>Recorded feedback</span>
