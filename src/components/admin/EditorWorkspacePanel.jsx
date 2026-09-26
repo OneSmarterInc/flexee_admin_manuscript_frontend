@@ -185,6 +185,22 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
     }
   }
 
+  async function downloadRequirementFile(item) {
+    if (!selectedId || !item?.key || !item?.file) return
+    setBusy(`requirement-${item.key}`)
+    setError('')
+    try {
+      const result = await apiBlob(
+        `/api/admin/venue-submissions/${selectedId}/requirements/${encodeURIComponent(item.key)}/download/`,
+      )
+      saveBlob(result.blob, result.disposition, item.file.name)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
   async function downloadManuscript() {
     if (!selectedId) return
     setBusy('download')
@@ -295,6 +311,22 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             {detail.manuscript?.abstract && <div className="editor-long-copy"><span>Abstract</span><p>{detail.manuscript.abstract}</p></div>}
             {detail.manuscript?.disclosure && <div className="editor-long-copy"><span>AI-use disclosure</span><p>{detail.manuscript.disclosure}</p></div>}
           </section>
+
+          {detail.requirements?.configured && <section className="editor-detail-card">
+            <p className="venue-admin-kicker">Venue submission requirements</p>
+            <h3>{detail.requirements.complete ? 'All required venue items were completed.' : 'Some venue requirements are incomplete.'}</h3>
+            <div className="editor-requirement-list">
+              {(detail.requirements.items || []).map(item => <article className="editor-brief-block" key={item.key}>
+                <span>{item.label}{item.required ? ' · Required' : ' · Optional'}</span>
+                {item.type === 'file' ? <>
+                  <p>{item.file?.name || 'No file supplied.'}</p>
+                  {item.file && <button className="admin-btn secondary" type="button" onClick={() => downloadRequirementFile(item)} disabled={busy === `requirement-${item.key}`}>
+                    {busy === `requirement-${item.key}` ? 'Downloading…' : 'Download file'}
+                  </button>}
+                </> : item.type === 'checkbox' ? <p>{item.value ? 'Confirmed' : 'Not confirmed'}</p> : <p>{item.value || 'No response supplied.'}</p>}
+              </article>)}
+            </div>
+          </section>}
 
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">AI-prepared editorial brief</p>
