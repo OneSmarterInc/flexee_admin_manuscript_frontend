@@ -328,6 +328,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           <div className="venue-admin-header-badges">
             <SmallPill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</SmallPill>
             <SmallPill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</SmallPill>
+            {!canManageSelected && <SmallPill>Read only</SmallPill>}
           </div>
         </div>
 
@@ -387,7 +388,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               </div>
               <div className="venue-admin-history-actions">
                 <button className="admin-btn secondary" type="button" onClick={() => setConfigForm(configToForm(config))}>Load into editor</button>
-                {!config.active && <button className="admin-btn secondary" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
+                {!config.active && canManageSelected && <button className="admin-btn secondary" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
               </div>
             </article>)}
             {!configs.length && <div className="venue-admin-empty">No Venue Agent configuration has been created yet.</div>}
