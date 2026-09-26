@@ -166,16 +166,20 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
 
   async function createVenue(e) {
     e.preventDefault()
+    if (!platformSuperuser && !ownerMemberships.length) return
     setBusy('create')
     setError('')
     setSuccess('')
     try {
+      const requestBody = platformSuperuser
+        ? createForm
+        : { ...createForm, organization_id: createForm.organization_id || defaultOwnerOrgId }
       const payload = await api('/api/admin/venues/', {
         method: 'POST',
-        body: JSON.stringify(createForm),
+        body: JSON.stringify(requestBody),
       })
       setShowCreate(false)
-      setCreateForm({ ...emptyVenue })
+      setCreateForm({ ...emptyVenue, organization_id: defaultOwnerOrgId })
       setSuccess(`${payload.venue.name} created. Add its first Venue Agent configuration next.`)
       await loadVenues(payload.venue.id)
     } catch (err) {
@@ -187,7 +191,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
 
   async function saveVenue(e) {
     e.preventDefault()
-    if (!selectedId || !venueForm) return
+    if (!selectedId || !venueForm || !canManageSelected) return
     setBusy('venue')
     setError('')
     setSuccess('')
@@ -209,7 +213,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
 
   async function createConfig(e) {
     e.preventDefault()
-    if (!selectedId) return
+    if (!selectedId || !canManageSelected) return
     setBusy('config')
     setError('')
     setSuccess('')
@@ -229,7 +233,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   }
 
   async function activateConfig(config) {
-    if (!selectedId || config.active) return
+    if (!selectedId || config.active || !canManageSelected) return
     setBusy(`activate-${config.id}`)
     setError('')
     setSuccess('')
