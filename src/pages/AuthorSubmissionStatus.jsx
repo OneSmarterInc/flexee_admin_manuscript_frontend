@@ -77,10 +77,21 @@ function DecisionBanner({ decision, status }) {
   )
 }
 
+function requirementValues(requirements) {
+  const values = {}
+  for (const item of requirements?.items || []) {
+    values[item.key] = item.type === 'checkbox' ? Boolean(item.value) : (item.value || '')
+  }
+  return values
+}
+
 export default function AuthorSubmissionStatus() {
   const [submission, setSubmission] = useState(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [requirementBusy, setRequirementBusy] = useState('')
+  const [requirementMessage, setRequirementMessage] = useState('')
+  const [requirementForm, setRequirementForm] = useState({})
   const [error, setError] = useState('')
 
   async function load() {
@@ -93,6 +104,7 @@ export default function AuthorSubmissionStatus() {
     try {
       const payload = await authorApi(currentSubmissionPath('/'))
       setSubmission(payload.submission)
+      setRequirementForm(requirementValues(payload.submission?.requirements))
     } catch (err) {
       setError(friendlyAuthorError(err))
     } finally {
@@ -103,6 +115,52 @@ export default function AuthorSubmissionStatus() {
   useEffect(() => {
     load()
   }, [])
+
+  async function saveRequirements() {
+    if (!submission?.requirements?.configured) return
+    setRequirementBusy('save')
+    setRequirementMessage('')
+    setError('')
+    try {
+      const responses = {}
+      for (const item of submission.requirements.items || []) {
+        if (item.type !== 'file') responses[item.key] = requirementForm[item.key]
+      }
+      const payload = await authorApi(currentSubmissionPath('/requirements/'), {
+        method: 'POST',
+        body: JSON.stringify({ responses }),
+      })
+      setSubmission(current => ({ ...current, requirements: payload.requirements }))
+      setRequirementForm(requirementValues(payload.requirements))
+      setRequirementMessage(payload.requirements.complete ? 'All required venue items are complete.' : 'Saved. Complete the remaining required items before submission.')
+    } catch (err) {
+      setError(friendlyAuthorError(err))
+    } finally {
+      setRequirementBusy('')
+    }
+  }
+
+  async function uploadRequirement(key, file) {
+    if (!file) return
+    setRequirementBusy(`file-${key}`)
+    setRequirementMessage('')
+    setError('')
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      const payload = await authorApi(
+        currentSubmissionPath(`/requirements/${encodeURIComponent(key)}/upload/`),
+        { method: 'POST', body: formData },
+      )
+      setSubmission(current => ({ ...current, requirements: payload.requirements }))
+      setRequirementForm(requirementValues(payload.requirements))
+      setRequirementMessage(`${file.name} uploaded.`)
+    } catch (err) {
+      setError(friendlyAuthorError(err))
+    } finally {
+      setRequirementBusy('')
+    }
+  }
 
   async function submitPacket() {
     if (!submission?.id) return
@@ -118,7 +176,9 @@ export default function AuthorSubmissionStatus() {
     }
   }
 
-  const canSubmit = submission?.status === 'packet_ready'
+  const requirements = submission?.requirements || { configured: false, complete: true, items: [] }
+  const packetReady = submission?.status === 'packet_ready'
+  const canSubmit = packetReady && requirements.complete !== false
   const canTransfer = ['rejected', 'withdrawn'].includes(submission?.status)
   const submitted = ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(submission?.status)
   const hasDecision = submission?.decision && Object.keys(submission.decision).length > 0
@@ -167,13 +227,69 @@ export default function AuthorSubmissionStatus() {
                 <div><span>{packet.evidence_count ? '✓' : '!'}</span><div><b>Evidence trail</b><small>{packet.evidence_count ? `${packet.evidence_count} evidence item${packet.evidence_count === 1 ? '' : 's'} attached.` : 'No evidence items are attached yet.'}</small></div></div>
               </div>
 
+              {requirements.configured && <section className="author-requirements-card" aria-label="Venue submission requirements">
+                <div className="author-panel-heading">
+                  <div>
+                    <p className="kicker">Venue requirements</p>
+                    <h2>Complete the items required by {venue?.name}.</h2>
+                  </div>
+                  <AuthorStatusPill tone={requirements.complete ? 'good' : 'warn'}>{requirements.complete ? 'Complete' : 'Action required'}</AuthorStatusPill>
+                </div>
+                <div className="author-requirements-list">
+                  {(requirements.items || []).map(item => <div className="row author-requirement-row" key={item.key}>
+                    {item.type === 'checkbox' ? <label className="author-attestation">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(requirementForm[item.key])}
+                        onChange={e => setRequirementForm(current => ({ ...current, [item.key]: e.target.checked }))}
+                        disabled={submitted || Boolean(requirementBusy)}
+                      />
+                      <span>{item.label}{item.required ? ' *' : ''}{item.help_text ? <small>{item.help_text}</small> : null}</span>
+                    </label> : <>
+                      <label htmlFor={`venue-requirement-${item.key}`}>{item.label} {item.required && <span className="req">*</span>}</label>
+                      {item.help_text && <small className="author-muted-copy">{item.help_text}</small>}
+                      {item.type === 'file' ? <>
+                        <input
+                          id={`venue-requirement-${item.key}`}
+                          type="file"
+                          accept=".pdf,.doc,.docx,.txt,.rtf,.csv,.xls,.xlsx,.png,.jpg,.jpeg"
+                          onChange={e => uploadRequirement(item.key, e.target.files?.[0])}
+                          disabled={submitted || Boolean(requirementBusy)}
+                        />
+                        <small>{item.file ? `Uploaded: ${item.file.name}` : 'No file uploaded yet.'}</small>
+                      </> : item.type === 'textarea' ? <textarea
+                        id={`venue-requirement-${item.key}`}
+                        value={requirementForm[item.key] || ''}
+                        maxLength={item.max_length || 4000}
+                        onChange={e => setRequirementForm(current => ({ ...current, [item.key]: e.target.value }))}
+                        disabled={submitted || Boolean(requirementBusy)}
+                      /> : <input
+                        id={`venue-requirement-${item.key}`}
+                        type={item.type === 'url' ? 'url' : 'text'}
+                        value={requirementForm[item.key] || ''}
+                        maxLength={item.max_length || 4000}
+                        onChange={e => setRequirementForm(current => ({ ...current, [item.key]: e.target.value }))}
+                        disabled={submitted || Boolean(requirementBusy)}
+                      />}
+                    </>}
+                    <small className="author-muted-copy">{item.completed ? '✓ Complete' : item.required ? 'Required before submission' : 'Optional'}</small>
+                  </div>)}
+                </div>
+                {!submitted && <div className="author-form-actions">
+                  <button className="author-secondary-button" type="button" onClick={saveRequirements} disabled={Boolean(requirementBusy)}>
+                    {requirementBusy === 'save' ? 'Saving…' : 'Save venue requirements'}
+                  </button>
+                  {requirementMessage && <span className="author-muted-copy">{requirementMessage}</span>}
+                </div>}
+              </section>}
+
               <div className="author-submit-callout" aria-live="polite">
                 <div>
                   <p className="kicker">{submitted ? 'Editorial workflow' : 'Author action'}</p>
                   {!submitted ? (
                     <>
-                      <h3>{canSubmit ? 'Submit to this venue' : 'Finish the venue assessment first'}</h3>
-                      <p>{canSubmit ? 'This records the formal venue submission using the prepared packet.' : 'A packet must be ready before the live submission action is enabled.'}</p>
+                      <h3>{canSubmit ? 'Submit to this venue' : packetReady && !requirements.complete ? 'Complete venue requirements first' : 'Finish the venue assessment first'}</h3>
+                      <p>{canSubmit ? 'This records the formal venue submission using the prepared packet.' : packetReady && !requirements.complete ? 'The venue requires additional items before formal submission.' : 'A packet must be ready before the live submission action is enabled.'}</p>
                     </>
                   ) : hasDecision ? (
                     <>
