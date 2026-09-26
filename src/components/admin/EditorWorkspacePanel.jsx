@@ -295,8 +295,15 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             <StatusPill value={detail.status} />
           </div>
 
+          {detail.retention_purged_at && <div className="venue-admin-success venue-admin-message">
+            Venue-retained manuscript content expired on {new Date(detail.retention_purged_at).toLocaleString()}. Editorial status and human decision metadata remain available.
+          </div>}
+          {!detail.retention_purged_at && detail.retention_expires_at && <div className="venue-admin-message">
+            Retention expiry: {new Date(detail.retention_expires_at).toLocaleString()}
+          </div>}
+
           <div className="editor-detail-actions">
-            <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download'}>{busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
+            <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download' || Boolean(detail.retention_purged_at)}>{detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
             {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
           </div>
 
@@ -306,7 +313,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               <div><span>Author</span><b>{detail.manuscript?.author_name}</b></div>
               <div><span>Email</span><b>{detail.manuscript?.author_email || '—'}</b></div>
               <div><span>Co-authors</span><b>{detail.manuscript?.coauthors || '—'}</b></div>
-              <div><span>File</span><b>{detail.manuscript?.manuscript_filename}</b></div>
+              <div><span>File</span><b>{detail.retention_purged_at ? 'Expired under retention policy' : detail.manuscript?.manuscript_filename || '—'}</b></div>
             </div>
             {detail.manuscript?.abstract && <div className="editor-long-copy"><span>Abstract</span><p>{detail.manuscript.abstract}</p></div>}
             {detail.manuscript?.disclosure && <div className="editor-long-copy"><span>AI-use disclosure</span><p>{detail.manuscript.disclosure}</p></div>}
