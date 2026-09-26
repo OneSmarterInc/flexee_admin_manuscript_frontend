@@ -5,6 +5,7 @@ const emptyVenue = {
   name: '',
   venue_type: 'journal',
   description: '',
+  organization_id: '',
   organization_name: 'Flexee Publishing',
   organization_type: 'publisher',
   active: true,
@@ -103,7 +104,9 @@ function Field({ label, hint, children, full = false }) {
   </label>
 }
 
-export default function VenueAgentsPanel() {
+export default function VenueAgentsPanel({ platformSuperuser = false, memberships = [] }) {
+  const ownerMemberships = useMemo(() => memberships.filter(item => item.role === 'owner'), [memberships])
+  const defaultOwnerOrgId = String(ownerMemberships[0]?.organization_id || '')
   const [venues, setVenues] = useState([])
   const [selectedId, setSelectedId] = useState('')
   const [selectedVenue, setSelectedVenue] = useState(null)
@@ -111,7 +114,7 @@ export default function VenueAgentsPanel() {
   const [venueForm, setVenueForm] = useState(null)
   const [configForm, setConfigForm] = useState({ ...emptyConfig })
   const [showCreate, setShowCreate] = useState(false)
-  const [createForm, setCreateForm] = useState({ ...emptyVenue })
+  const [createForm, setCreateForm] = useState({ ...emptyVenue, organization_id: defaultOwnerOrgId })
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState('')
   const [error, setError] = useState('')
