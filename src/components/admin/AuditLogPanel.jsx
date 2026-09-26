@@ -12,6 +12,8 @@ const actionLabels = {
   'venue_submission.review_started': 'Editorial review started',
   'venue_submission.feedback_recorded': 'Editor feedback recorded',
   'venue_submission.decision_recorded': 'Human decision recorded',
+  'venue_submission.retention_purged': 'Venue-retained content purged',
+  'manuscript.retention_purged': 'Shared manuscript content purged',
   'legacy_submission.viewed': 'Legacy submission viewed',
   'legacy_submission.manuscript_downloaded': 'Legacy manuscript downloaded',
   'legacy_submission.decision_recorded': 'Legacy decision recorded',
