@@ -513,3 +513,4 @@
   .venue-admin-header-badges{justify-content:flex-start}
   .editor-stats{grid-template-columns:repeat(2,1fr)}
 }
+.editor-decision-authority{margin:6px 0 0;font-size:12.5px;line-height:1.5;opacity:.78}

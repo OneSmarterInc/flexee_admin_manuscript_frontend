@@ -216,6 +216,7 @@ export default function AuthorVenueAssessment() {
                 <span className="author-human-pill">{assessed ? 'Human decision' : 'Author choice'}</span>
                 <h2>{assessed ? 'Editors decide.' : 'No automatic routing.'}</h2>
                 <p>{assessed ? 'The AI-generated brief supports editorial review; it does not make the publication decision.' : 'Review the fit and gaps, then choose whether this is the destination you want.'}</p>
+                {assessed && brief?.decision_authority && <small className="author-muted-copy">{brief.decision_authority}</small>}
               </section>
             </aside>
           </div>
