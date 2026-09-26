@@ -219,8 +219,15 @@ export default function AuthorSubmissionStatus() {
                 <AuthorStatusPill tone={statusTone(submission.status)}>{statusLabel(submission.status)}</AuthorStatusPill>
               </div>
 
+              {submission.retention_purged_at && <div className="author-prototype-notice">
+                <b>Venue retention period ended.</b> The venue-specific manuscript content, generated brief, evidence, and requirement files were removed on {new Date(submission.retention_purged_at).toLocaleString()}. Editorial status and human decision metadata remain available.
+              </div>}
+              {!submission.retention_purged_at && submission.retention_expires_at && <p className="author-muted-copy">
+                Venue content retention expires {new Date(submission.retention_expires_at).toLocaleString()}.
+              </p>}
+
               <div className="author-packet-list">
-                <div><span>✓</span><div><b>Manuscript file</b><small>{packet.manuscript_filename || 'Original manuscript retained.'}</small></div></div>
+                <div><span>{submission.retention_purged_at ? '—' : '✓'}</span><div><b>Manuscript file</b><small>{submission.retention_purged_at ? 'Expired under the venue retention policy.' : packet.manuscript_filename || 'Original manuscript retained.'}</small></div></div>
                 <div><span>✓</span><div><b>Author metadata</b><small>{packet.author_name || 'Author information retained.'}{packet.coauthors ? ` · ${packet.coauthors}` : ''}</small></div></div>
                 <div><span>✓</span><div><b>AI-use disclosure</b><small>{packet.disclosure || 'Disclosure retained with the manuscript.'}</small></div></div>
                 <div><span>{packet.editorial_brief_ready ? '✓' : '!'}</span><div><b>Editorial brief</b><small>{packet.editorial_brief_ready ? 'Venue-specific editorial brief prepared.' : 'Return to the assessment step to prepare the brief.'}</small></div></div>
