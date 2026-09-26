@@ -15,6 +15,7 @@ export default function AuthorTransfer() {
   const [submission, setSubmission] = useState(null)
   const [venues, setVenues] = useState([])
   const [choice, setChoice] = useState('')
+  const [shareReviewHistory, setShareReviewHistory] = useState(false)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -57,6 +58,7 @@ export default function AuthorTransfer() {
         body: JSON.stringify({
           venue_id: target.id,
           reason: 'Author selected a new destination from the transfer workflow.',
+          share_review_history: shareReviewHistory,
         }),
       })
       const next = payload.submission
@@ -132,6 +134,27 @@ export default function AuthorTransfer() {
               </label>) : <div className="author-prototype-notice"><b>No alternative venues.</b> There are no other active participating venues configured right now.</div>}
             </div>
 
+            <section className="author-requirements-card" aria-label="Prior review history consent">
+              <p className="kicker">Review-history sharing</p>
+              <h2>Your choice — off by default.</h2>
+              <label className="author-attestation">
+                <input
+                  type="checkbox"
+                  checked={shareReviewHistory}
+                  onChange={event => setShareReviewHistory(event.target.checked)}
+                  disabled={busy}
+                />
+                <span>
+                  Include prior editorial/review history in the transfer package.
+                  <small>
+                    If selected, the MECA package may include the prior editorial brief, evidence,
+                    editor feedback, and decision. The prior editor identity is not transferred.
+                    Leave this unchecked to transfer only the manuscript and transfer metadata.
+                  </small>
+                </span>
+              </label>
+            </section>
+
             <div className="author-form-actions">
               <button className="author-secondary-button" type="button" onClick={() => go('/author/status')}>Cancel</button>
               <button className="copper-button" type="button" onClick={prepareTransfer} disabled={!choice || busy || !['rejected', 'withdrawn'].includes(submission.status)}>{busy ? 'Preparing transfer…' : 'Prepare transfer packet'}</button>
@@ -146,6 +169,7 @@ export default function AuthorTransfer() {
                 <div><span aria-hidden="true">1</span><p><b>New venue submission</b><small>The original manuscript is reused; a new destination-specific record is created.</small></p></div>
                 <div><span aria-hidden="true">2</span><p><b>New policy assessment</b><small>The selected venue’s active configuration is pinned to the new submission.</small></p></div>
                 <div><span aria-hidden="true">3</span><p><b>New evidence packet</b><small>The venue assessment is regenerated against the new outlet’s rules.</small></p></div>
+                <div><span aria-hidden="true">4</span><p><b>MECA transfer package</b><small>The manuscript and transfer metadata are packaged for exchange. Prior review history is included only when you explicitly opt in.</small></p></div>
               </div>
             </section>
           </aside>

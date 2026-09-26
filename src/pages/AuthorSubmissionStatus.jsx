@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
-import { authorApi, currentSubmissionPath, friendlyAuthorError, getAuthorSession } from '../authorApi.js'
+import { authorApi, authorApiBlob, currentSubmissionPath, friendlyAuthorError, getAuthorSession } from '../authorApi.js'
 
 function statusLabel(status) {
   const labels = {
@@ -89,6 +89,7 @@ export default function AuthorSubmissionStatus() {
   const [submission, setSubmission] = useState(null)
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [mecaBusy, setMecaBusy] = useState(false)
   const [requirementBusy, setRequirementBusy] = useState('')
   const [requirementMessage, setRequirementMessage] = useState('')
   const [requirementForm, setRequirementForm] = useState({})
@@ -173,6 +174,27 @@ export default function AuthorSubmissionStatus() {
       setError(friendlyAuthorError(err))
     } finally {
       setBusy(false)
+    }
+  }
+
+  async function downloadMecaPackage() {
+    if (!submission?.transfer?.id || !submission.transfer.meca_available) return
+    setMecaBusy(true)
+    setError('')
+    try {
+      const { blob } = await authorApiBlob(currentSubmissionPath('/meca/'))
+      const objectUrl = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = objectUrl
+      link.download = `${submission.transfer.id}-meca.zip`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(objectUrl)
+    } catch (err) {
+      setError(friendlyAuthorError(err))
+    } finally {
+      setMecaBusy(false)
     }
   }
 
@@ -329,6 +351,30 @@ export default function AuthorSubmissionStatus() {
                   <div className={hasDecision ? 'complete' : submitted ? 'current' : ''}><span></span><p><b>Editorial decision</b><small>{hasDecision ? `${statusLabel(submission.decision.decision || submission.status)} · ${submission.decision.decided_at ? new Date(submission.decision.decided_at).toLocaleString() : ''}` : 'Human editorial decision pending.'}</small></p></div>
                 </div>
               </section>
+              {submission.transfer && <section className="author-panel author-transfer-card">
+                <p className="kicker">MECA transfer</p>
+                <h2>Portable transfer package.</h2>
+                <p>
+                  This submission was created from another venue using MECA-oriented transfer metadata.
+                  {submission.transfer.share_review_history
+                    ? ' You explicitly chose to include prior editorial/review history; prior editor identity is excluded.'
+                    : ' Prior editorial/review history was not shared.'}
+                </p>
+                {submission.transfer.review_history_consented_at && <p className="author-muted-copy">
+                  Review-history consent recorded {new Date(submission.transfer.review_history_consented_at).toLocaleString()}.
+                </p>}
+                <button
+                  className="author-secondary-button"
+                  type="button"
+                  onClick={downloadMecaPackage}
+                  disabled={!submission.transfer.meca_available || mecaBusy}
+                >
+                  {mecaBusy ? 'Preparing MECA package…' : submission.transfer.meca_available ? 'Download MECA package' : 'MECA package unavailable'}
+                </button>
+                {!submission.transfer.meca_available && <small className="author-muted-copy">
+                  The manuscript content is no longer available under the retention policy.
+                </small>}
+              </section>}
               <section className="author-panel author-transfer-card">
                 <p className="kicker">Transfer</p>
                 <h2>Reuse the manuscript for another venue.</h2>
