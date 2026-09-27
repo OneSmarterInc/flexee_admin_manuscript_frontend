@@ -64,10 +64,29 @@ export default function AuthorVenueAssessment() {
       if (session.submissionId && session.selectedVenueSlug === slug) {
         try {
           const submissionPayload = await authorApi(`/api/author/venue-submissions/${session.submissionId}/`)
-          setSubmission(submissionPayload.submission)
+          const currentSubmission = submissionPayload.submission
+          const belongsToRoute = currentSubmission?.venue?.slug === slug
+          const belongsToManuscript = String(currentSubmission?.manuscript_id || '') === String(session.manuscriptId || '')
+          const belongsToSelectedVenue = !session.selectedVenueId || String(currentSubmission?.venue?.id || '') === String(session.selectedVenueId)
+
+          if (belongsToRoute && belongsToManuscript && belongsToSelectedVenue) {
+            setSubmission(currentSubmission)
+          } else {
+            setSubmission(null)
+            saveAuthorSession({
+              submissionId: null,
+              selectedVenueId: null,
+              selectedVenueSlug: null,
+            })
+          }
         } catch (err) {
           if (err.status === 404) {
-            saveAuthorSession({ submissionId: null })
+            setSubmission(null)
+            saveAuthorSession({
+              submissionId: null,
+              selectedVenueId: null,
+              selectedVenueSlug: null,
+            })
           } else {
             throw err
           }
@@ -91,6 +110,18 @@ export default function AuthorVenueAssessment() {
 
     try {
       let current = submission
+      if (
+        current &&
+        (
+          String(current.manuscript_id || '') !== String(getAuthorSession().manuscriptId || '') ||
+          String(current.venue?.id || '') !== String(match.venue.id || '') ||
+          current.venue?.slug !== slug
+        )
+      ) {
+        current = null
+        setSubmission(null)
+      }
+
       if (!current || current.venue?.id !== match.venue.id) {
         const created = await authorApi(currentManuscriptPath('/submissions/'), {
           method: 'POST',
