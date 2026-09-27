@@ -119,37 +119,54 @@ export default function AuthorVenueMatches() {
       {agentWarning && <div className="author-prototype-notice author-error-banner" role="note"><b>Matching note.</b> {agentWarning} {!agentBusy && manuscript?.parsed_profile?.semantic && <button className="author-text-link author-inline-action" type="button" onClick={runSemanticMatching}>Retry semantic matching</button>}</div>}
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Venue matching</p><h2>Loading participating venues…</h2></section> :
-        matches.length ? <div className="author-match-list">
-          {matches.map((match, index) => <article className="author-match-card author-match-card-structured" key={match.id}>
-            <div className="author-match-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
-            <div className="author-match-main">
-              <div className="author-match-heading">
-                <div>
-                  <span className="author-venue-type">{match.venue.venue_type}</span>
-                  <h2>{match.venue.name}</h2>
-                </div>
-                <AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill>
-              </div>
-              <p className="author-match-summary">{match.fit_summary || 'Venue configuration is available for review.'}</p>
-              <div className="author-match-divider" />
-              <div className="author-match-columns">
-                <div>
-                  <h3>Why it may fit</h3>
-                  {match.reasons?.length ? <ul>{match.reasons.map((reason, index) => <li key={`${match.id}-reason-${index}`}>{reason}</li>)}</ul> : <p className="author-muted-copy">No positive alignment has been recorded yet.</p>}
-                </div>
-                <div>
-                  <h3>Before submission</h3>
-                  {match.gaps?.length ? <ul className="gaps">{match.gaps.map((gap, index) => <li key={`${match.id}-gap-${index}`}>{gap}</li>)}</ul> : <p className="author-muted-copy">No venue-specific gaps are currently recorded.</p>}
-                </div>
-              </div>
+        matches.length ? <section className="author-panel author-venue-table-card">
+          <div className="author-venue-table-head">
+            <div>
+              <p className="kicker">Participating venues</p>
+              <h2>Venue comparison</h2>
             </div>
-            <div className="author-match-action">
-              <button className="author-secondary-button" type="button" onClick={() => openVenue(match)}>
-                Review venue
-              </button>
-            </div>
-          </article>)}
-        </div> : !error && <section className="author-panel author-live-state">
+            <span>{matches.length} venue{matches.length === 1 ? '' : 's'}</span>
+          </div>
+          <div className="author-venue-table-wrap">
+            <table className="author-venue-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Venue</th>
+                  <th>Status</th>
+                  <th>Fit summary</th>
+                  <th>Why it may fit</th>
+                  <th>Before submission</th>
+                  <th aria-label="Actions"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {matches.map((match, index) => <tr key={match.id}>
+                  <td><span className="author-venue-row-index">{String(index + 1).padStart(2, '0')}</span></td>
+                  <td>
+                    <span className="author-venue-type">{match.venue.venue_type}</span>
+                    <b className="author-venue-table-name">{match.venue.name}</b>
+                  </td>
+                  <td>
+                    <AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill>
+                  </td>
+                  <td><p className="author-venue-table-summary">{match.fit_summary || 'Venue configuration is available for review.'}</p></td>
+                  <td>
+                    {match.reasons?.length ? <ul className="author-venue-table-list">{match.reasons.map((reason, reasonIndex) => <li key={`${match.id}-reason-${reasonIndex}`}>{reason}</li>)}</ul> : <span className="author-venue-table-empty">No positive alignment recorded.</span>}
+                  </td>
+                  <td>
+                    {match.gaps?.length ? <ul className="author-venue-table-list gaps">{match.gaps.map((gap, gapIndex) => <li key={`${match.id}-gap-${gapIndex}`}>{gap}</li>)}</ul> : <span className="author-venue-table-empty">No venue-specific gaps.</span>}
+                  </td>
+                  <td>
+                    <button className="author-secondary-button author-venue-table-action" type="button" onClick={() => openVenue(match)}>
+                      Review
+                    </button>
+                  </td>
+                </tr>)}
+              </tbody>
+            </table>
+          </div>
+        </section> : !error && <section className="author-panel author-live-state">
           <p className="kicker">No matches yet</p>
           <h2>No active participating venues are configured.</h2>
           <p className="author-muted-copy">An administrator needs to create and activate venue configurations before this manuscript can be matched.</p>
