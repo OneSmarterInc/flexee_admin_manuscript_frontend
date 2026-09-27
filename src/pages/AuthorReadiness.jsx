@@ -17,8 +17,8 @@ export default function AuthorReadiness() {
 
   async function loadReadiness({ runSemanticIfMissing = false } = {}) {
     const session = getAuthorSession()
-    if (!session.manuscriptId || !session.accessToken) {
-      setError('No secure manuscript session is available in this browser. Start a new submission.')
+    if (!session.manuscriptId) {
+      setError('No manuscript is selected. Return to the author workspace and choose a manuscript.')
       setLoading(false)
       return
     }
