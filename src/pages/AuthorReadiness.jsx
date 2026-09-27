@@ -98,18 +98,28 @@ export default function AuthorReadiness() {
         <p className="kicker">Readiness</p>
         <h2>Loading your manuscript…</h2>
       </section> : manuscript && <>
-        <div className="author-page-heading author-heading-row">
-          <div>
+        <section className="author-readiness-hero">
+          <div className="author-readiness-hero-copy">
             <p className="kicker">Readiness report</p>
             <h1 className="publication-title">{manuscript.title}</h1>
             <p className="publication-lede">Deterministic checks catch required structure and disclosure issues. The semantic agent adds grounded, advisory observations from the manuscript.</p>
           </div>
-          <div className="author-readiness-score">
-            <span>{bundle?.semantic_readiness?.status === 'completed' ? 'Deterministic + semantic' : 'Deterministic'}</span>
-            <strong>{ready ? (warnings ? `Ready with ${warnings} update${warnings === 1 ? '' : 's'}` : 'Ready for matching') : `${blockers} blocking issue${blockers === 1 ? '' : 's'}`}</strong>
-            <small>{semanticBusy ? 'Semantic readiness analysis is running now.' : displayed?.summary?.note || 'Readiness results are stored with this manuscript.'}</small>
+
+          <div className="author-readiness-summary">
+            <div className="author-readiness-score">
+              <span>{bundle?.semantic_readiness?.status === 'completed' ? 'Deterministic + semantic' : 'Deterministic'}</span>
+              <strong>{ready ? (warnings ? `Ready with ${warnings} update${warnings === 1 ? '' : 's'}` : 'Ready for matching') : `${blockers} blocking issue${blockers === 1 ? '' : 's'}`}</strong>
+              <small>{semanticBusy ? 'Semantic readiness analysis is running now.' : displayed?.summary?.note || 'Readiness results are stored with this manuscript.'}</small>
+            </div>
+
+            <div className="author-readiness-metrics" aria-label="Readiness summary">
+              <div><span>Blocking</span><b>{blockers}</b></div>
+              <div><span>Warnings</span><b>{warnings}</b></div>
+              <div><span>Words</span><b>{displayed?.summary?.word_count?.toLocaleString?.() || '—'}</b></div>
+              <div><span>Analysis</span><b>{bundle?.semantic_readiness?.status === 'completed' ? 'Complete' : semanticBusy ? 'Running' : 'Deterministic'}</b></div>
+            </div>
           </div>
-        </div>
+        </section>
 
         {semanticError && <div className="author-prototype-notice author-error-banner" role="alert">
           <b>Semantic analysis could not finish.</b> {semanticError}
