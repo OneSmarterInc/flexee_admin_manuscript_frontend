@@ -607,3 +607,53 @@
 @media(max-width:520px){
   .manuscript-hero-stats{grid-template-columns:1fr}
 }
+
+
+/* Professional manuscript details dashboard */
+.manuscript-detail-page{max-width:1320px}
+.manuscript-professional-hero{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 8px 28px rgba(28,26,23,.05);padding:24px 26px;margin:10px 0 20px}
+.manuscript-professional-hero-main{display:flex;justify-content:space-between;align-items:flex-start;gap:24px}
+.manuscript-professional-title-row{display:flex;align-items:flex-start;gap:14px}
+.manuscript-professional-title-row h1{font-family:'Instrument Serif',Georgia,serif;font-size:38px;font-weight:400;line-height:1.05;margin:3px 0 6px}
+.manuscript-professional-title-row p{margin:0;color:var(--muted);font-size:13.5px;overflow-wrap:anywhere}
+.manuscript-professional-title-row .author-status-pill{margin-top:4px}
+.manuscript-back-button{padding:10px 14px;font-size:12.5px;white-space:nowrap}
+.manuscript-professional-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;margin-top:18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.manuscript-professional-metrics>div{padding:13px 16px;border-right:1px solid var(--line);min-width:0}
+.manuscript-professional-metrics>div:first-child{padding-left:0}
+.manuscript-professional-metrics>div:last-child{border-right:0;padding-right:0}
+.manuscript-professional-metrics span{display:block;font-size:9.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.manuscript-professional-metrics b{display:block;font-size:13px;line-height:1.3;overflow-wrap:anywhere}
+.manuscript-professional-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,.8fr);gap:18px;align-items:start}
+.manuscript-primary-card{padding:22px 24px}
+.manuscript-professional-side{display:grid;gap:14px}
+.manuscript-side-card{padding:18px 20px}
+.manuscript-side-list .manuscript-detail-row{padding:8px 0}
+.manuscript-side-list .manuscript-detail-row:last-child{border-bottom:0}
+.manuscript-side-card .manuscript-section-head{margin-bottom:4px}
+.manuscript-side-card .manuscript-section-head h2{font-size:23px}
+.manuscript-professional-grid + .manuscript-compact-section{margin-top:18px}
+.manuscript-detail-page .manuscript-compact-section{padding:20px 22px}
+.manuscript-detail-page .manuscript-match-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.manuscript-detail-page .manuscript-match-card{box-shadow:none;background:#fdfbf9}
+.manuscript-detail-page .author-bottom-actions{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:18px}
+@media(max-width:1050px){
+  .manuscript-professional-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .manuscript-professional-metrics>div{border-bottom:1px solid var(--line)}
+  .manuscript-professional-metrics>div:nth-child(3n){border-right:0}
+  .manuscript-professional-grid{grid-template-columns:1fr}
+  .manuscript-professional-side{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .manuscript-professional-hero-main{flex-direction:column}
+  .manuscript-professional-title-row{display:block}
+  .manuscript-professional-title-row .author-status-pill{margin-top:10px}
+  .manuscript-professional-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .manuscript-professional-side,.manuscript-detail-page .manuscript-match-grid{grid-template-columns:1fr}
+}
+@media(max-width:520px){
+  .manuscript-professional-hero{padding:18px}
+  .manuscript-professional-title-row h1{font-size:31px}
+  .manuscript-professional-metrics{grid-template-columns:1fr}
+  .manuscript-professional-metrics>div{border-right:0!important;padding-left:0;padding-right:0}
+}
