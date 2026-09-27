@@ -13,6 +13,38 @@ import AuthorVenueAssessment from './pages/AuthorVenueAssessment.jsx'
 import AuthorSubmissionStatus from './pages/AuthorSubmissionStatus.jsx'
 import AuthorTransfer from './pages/AuthorTransfer.jsx'
 import AuthorManuscriptDetails from './pages/AuthorManuscriptDetails.jsx'
+import { fetchAuthorSession } from './authorApi.js'
+
+function RequireAuthor({ children }) {
+  const [allowed, setAllowed] = useState(false)
+
+  useEffect(() => {
+    let active = true
+
+    fetchAuthorSession()
+      .then(user => {
+        if (!active) return
+        if (user) {
+          setAllowed(true)
+          return
+        }
+        window.history.replaceState({}, '', '/author/login')
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+      .catch(() => {
+        if (!active) return
+        window.history.replaceState({}, '', '/author/login')
+        window.dispatchEvent(new PopStateEvent('popstate'))
+      })
+
+    return () => {
+      active = false
+    }
+  }, [])
+
+  if (!allowed) return null
+  return children
+}
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
@@ -27,14 +59,14 @@ export default function App() {
 
   if (path === '/author/login') return <AuthorLogin />
   if (path === '/author/signup') return <AuthorSignup />
-  if (path === '/author') return <AuthorDashboard />
-  if (path === '/author/new') return <AuthorNewSubmission />
-  if (path === '/author/manuscript-details') return <AuthorManuscriptDetails />
-  if (path === '/author/readiness') return <AuthorReadiness />
-  if (path === '/author/venues') return <AuthorVenueMatches />
-  if (path === '/author/venue-assessment' || path.startsWith('/author/venue-assessment/')) return <AuthorVenueAssessment />
-  if (path === '/author/status') return <AuthorSubmissionStatus />
-  if (path === '/author/transfer') return <AuthorTransfer />
+  if (path === '/author') return <RequireAuthor><AuthorDashboard /></RequireAuthor>
+  if (path === '/author/new') return <RequireAuthor><AuthorNewSubmission /></RequireAuthor>
+  if (path === '/author/manuscript-details') return <RequireAuthor><AuthorManuscriptDetails /></RequireAuthor>
+  if (path === '/author/readiness') return <RequireAuthor><AuthorReadiness /></RequireAuthor>
+  if (path === '/author/venues') return <RequireAuthor><AuthorVenueMatches /></RequireAuthor>
+  if (path === '/author/venue-assessment' || path.startsWith('/author/venue-assessment/')) return <RequireAuthor><AuthorVenueAssessment /></RequireAuthor>
+  if (path === '/author/status') return <RequireAuthor><AuthorSubmissionStatus /></RequireAuthor>
+  if (path === '/author/transfer') return <RequireAuthor><AuthorTransfer /></RequireAuthor>
 
   if (path.startsWith('/admin')) return <AdminPage path={path} />
   return <Home />
