@@ -179,7 +179,7 @@ export default function AuthorSubmissionStatus() {
   const requirements = submission?.requirements || { configured: false, complete: true, items: [] }
   const packetReady = submission?.status === 'packet_ready'
   const canSubmit = packetReady && requirements.complete !== false
-  const canTransfer = ['rejected', 'withdrawn'].includes(submission?.status)
+  const canTransfer = ['rejected', 'revision_requested', 'withdrawn'].includes(submission?.status)
   const submitted = ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(submission?.status)
   const hasDecision = submission?.decision && Object.keys(submission.decision).length > 0
   const venue = submission?.venue
@@ -334,7 +334,7 @@ export default function AuthorSubmissionStatus() {
                 <h2>Reuse the manuscript for another venue.</h2>
                 <p>{canTransfer
                   ? 'Reuse this manuscript for another venue without rebuilding the author metadata or readiness history.'
-                  : 'Transfer becomes available after a rejection or withdrawal. Before submission, return to venue matches if you want a different destination.'}</p>
+                  : 'Transfer becomes available after a rejection, revision request, or withdrawal. Before submission, return to venue matches if you want a different destination.'}</p>
                 <button className="author-secondary-button" type="button" onClick={() => go('/author/transfer')} disabled={!canTransfer}>Transfer to another venue</button>
               </section>
             </aside>
