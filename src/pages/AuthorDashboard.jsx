@@ -134,11 +134,7 @@ export default function AuthorDashboard() {
       selectedVenueSlug: latestSubmission?.venue?.slug || null,
     })
 
-    if (latestSubmission?.id) {
-      go('/author/status')
-    } else {
-      go('/author/readiness')
-    }
+    go('/author/manuscript-details')
   }
 
   return <PublicationShell>
