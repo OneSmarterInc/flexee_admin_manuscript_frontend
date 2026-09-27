@@ -328,3 +328,51 @@
   .author-readiness-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}
   .author-readiness-hero-copy .publication-title{font-size:27px!important}
 }
+
+
+/* Make the readiness report card compact and proportional to its content */
+.author-readiness-hero{
+  grid-template-columns:minmax(0,1.6fr) minmax(360px,.8fr);
+  align-items:start;
+  gap:12px;
+}
+.author-readiness-hero-copy{
+  padding:12px 14px;
+  border-radius:12px;
+  background:linear-gradient(135deg,#fff 0%,#fdfaf7 100%);
+  box-shadow:0 3px 12px rgba(28,26,23,.03);
+}
+.author-readiness-hero-copy .kicker{
+  margin:0 0 2px;
+}
+.author-readiness-hero-copy .publication-title{
+  font-size:27px!important;
+  line-height:1.02;
+  margin:1px 0 5px!important;
+}
+.author-readiness-hero-copy .publication-lede{
+  max-width:none;
+  font-size:11.5px;
+  line-height:1.4;
+  margin:0;
+}
+.author-readiness-summary{
+  align-self:start;
+}
+.author-readiness-summary .author-readiness-score{
+  padding:11px 13px;
+}
+.author-readiness-summary .author-readiness-score strong{
+  font-size:18px;
+}
+.author-readiness-summary .author-readiness-score small{
+  font-size:9.5px;
+  line-height:1.35;
+  margin-top:4px;
+}
+.author-readiness-metrics>div{
+  padding:7px 8px;
+}
+@media(max-width:980px){
+  .author-readiness-hero{grid-template-columns:1fr}
+}
