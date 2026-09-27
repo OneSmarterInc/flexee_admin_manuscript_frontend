@@ -45,8 +45,8 @@ export default function AuthorVenueAssessment() {
 
   async function load() {
     const session = getAuthorSession()
-    if (!session.manuscriptId || !session.accessToken) {
-      setError('No secure manuscript session is available. Start a new submission.')
+    if (!session.manuscriptId) {
+      setError('No manuscript is selected. Return to the author workspace and choose a manuscript.')
       setLoading(false)
       return
     }
