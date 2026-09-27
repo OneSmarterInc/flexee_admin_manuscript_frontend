@@ -17,3 +17,16 @@ npm install
 Copy-Item .env.example .env
 npm run dev
 ```
+
+
+## Production build
+
+For the recommended same-origin Nginx deployment, leave `VITE_API_BASE_URL` blank so browser requests use `/api/` on the same HTTPS host.
+
+```bash
+npm ci
+npm audit --audit-level=high
+npm run build
+```
+
+Deploy the generated `dist/` directory behind HTTPS. The backend repository contains `deploy/nginx-flexee.conf`, which serves this build and proxies `/api/` to Gunicorn on `127.0.0.1:8000`.
