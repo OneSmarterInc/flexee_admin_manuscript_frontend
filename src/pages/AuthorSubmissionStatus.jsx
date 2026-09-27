@@ -47,23 +47,18 @@ function DecisionBanner({ decision, status }) {
     : 'The editor has requested revisions to your manuscript.'
 
   return (
-    <div style={{ borderRadius: '12px', padding: '24px 28px', marginBottom: '24px', borderLeft: `4px solid ${borderColor}`, background: bgColor, border: borderStyle }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
-        <div style={{
-          width: '40px', height: '40px', borderRadius: '50%',
-          background: borderColor, color: '#fff',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: '20px', fontWeight: 'bold', flexShrink: 0,
-        }}>{icon}</div>
-        <div style={{ flex: 1 }}>
-          <h3 style={{ margin: '0 0 8px 0', fontSize: '18px', fontWeight: 700, color: '#1c1917' }}>{headline}</h3>
+    <div className="author-decision-banner" style={{ borderLeftColor: borderColor, background: bgColor, borderColor: isAccepted ? 'rgba(16,185,129,0.2)' : isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)' }}>
+      <div className="author-decision-banner-inner">
+        <div className="author-decision-icon" style={{ background: borderColor }}>{icon}</div>
+        <div className="author-decision-content">
+          <h3>{headline}</h3>
           {decision.note && (
-            <div style={{ background: 'rgba(255,255,255,0.7)', borderRadius: '8px', padding: '12px 16px', marginTop: '12px', fontSize: '15px', lineHeight: 1.6, color: '#374151' }}>
-              <p style={{ margin: '0 0 4px 0', fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#6b7280' }}>Editor note</p>
-              <p style={{ margin: 0 }}>{decision.note}</p>
+            <div className="author-decision-note">
+              <p className="author-decision-note-label">Editor note</p>
+              <p>{decision.note}</p>
             </div>
           )}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '12px', fontSize: '13px', color: '#6b7280' }}>
+          <div className="author-decision-meta">
             {decision.decided_at && (
               <span>🕐 {new Date(decision.decided_at).toLocaleString()}</span>
             )}
@@ -187,7 +182,7 @@ export default function AuthorSubmissionStatus() {
   const brief = submission?.editorial_brief || {}
 
   return <PublicationShell>
-    <div className="wrap author-flow-page">
+    <div className="wrap author-flow-page author-status-page">
       <div className="crumb"><button className="author-text-link" type="button" onClick={() => go('/author')}>Author workspace</button> / Submission status</div>
       <AuthorFlowNav active="status" />
       <AuthorPrototypeNotice />
