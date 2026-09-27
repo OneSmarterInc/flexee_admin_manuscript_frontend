@@ -301,7 +301,7 @@ function SMTPSettingsPage({ onSave }) {
   if (loading) return <p>Loading current settings…</p>;
 
   return (
-    <div style={{ maxWidth: '900px', margin: '0 auto', background: '#fff', border: '1px solid #e5e5e5', padding: '32px' }}>
+    <div className="admin-smtp-card">
       <form onSubmit={handleSave}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px 32px' }}>
           
