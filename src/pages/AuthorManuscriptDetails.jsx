@@ -148,53 +148,58 @@ export default function AuthorManuscriptDetails() {
           </div>
         </section>
 
-        <div className="manuscript-professional-grid">
-          <section className="author-panel manuscript-summary-card manuscript-primary-card">
-            <div className="manuscript-section-head"><div><p className="kicker">Manuscript</p><h2>Uploaded file and author details</h2></div></div>
-            <div className="manuscript-meta-grid">
-              <DetailRow label="Title" value={manuscript.title} />
-              <DetailRow label="Filename" value={manuscript.manuscript_filename} />
-              <DetailRow label="Manuscript type" value={pretty(manuscript.manuscript_type)} />
-              <DetailRow label="File size" value={formatBytes(manuscript.manuscript_bytes)} />
-              <DetailRow label="Author" value={manuscript.author_name} />
-              <DetailRow label="Author email" value={manuscript.author_email} />
-              <DetailRow label="Co-authors" value={manuscript.coauthors || 'None recorded'} />
-              <DetailRow label="Uploaded" value={formatDate(manuscript.created_at)} />
-              <DetailRow label="Last updated" value={formatDate(manuscript.updated_at)} />
-              <DetailRow label="Word count" value={wordCount ? Number(wordCount).toLocaleString() : 'Not available'} />
-            </div>
-            {manuscript.abstract && <div style={{ marginTop: '22px' }}><h3>Abstract</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.abstract}</p></div>}
-            {Array.isArray(manuscript.keywords) && manuscript.keywords.length > 0 && <div style={{ marginTop: '18px' }}><h3>Keywords</h3><p>{manuscript.keywords.join(', ')}</p></div>}
-            {manuscript.disclosure && <div style={{ marginTop: '18px' }}><h3>AI-use disclosure</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.disclosure}</p></div>}
-            {manuscript.notes && <div style={{ marginTop: '18px' }}><h3>Author notes</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.notes}</p></div>}
-          </section>
-          <aside className="manuscript-professional-side">
-            <section className="author-panel manuscript-side-card">
-              <div className="manuscript-section-head">
-                <div><p className="kicker">Workflow</p><h2>Current state</h2></div>
-              </div>
-              <div className="manuscript-side-list">
-                <DetailRow label="Readiness" value={mechanical?.status ? pretty(mechanical.status) : 'Not run'} />
-                <DetailRow label="Venue matches" value={matches.length ? `${matches.length} available` : 'None recorded'} />
-                <DetailRow label="Selected venue" value={submission?.venue?.name || 'Not selected'} />
-                <DetailRow label="Submission status" value={submission?.status ? pretty(submission.status) : 'No venue submission yet'} />
-                <DetailRow label="Retention" value={submission?.retention_purged_at ? `Purged ${formatDate(submission.retention_purged_at)}` : submission?.retention_expires_at ? `Expires ${formatDate(submission.retention_expires_at)}` : 'No expiry recorded'} />
-              </div>
-            </section>
+        <section className="author-panel manuscript-overview-card">
+          <div className="manuscript-section-head">
+            <div><p className="kicker">Overview</p><h2>Uploaded file, author and workflow</h2></div>
+          </div>
 
-            {submission && <section className="author-panel manuscript-side-card">
-              <div className="manuscript-section-head">
-                <div><p className="kicker">Latest submission</p><h2>{submission.venue?.name || 'Venue submission'}</h2></div>
+          <div className="manuscript-overview-top">
+            <div className="manuscript-overview-main">
+              <div className="manuscript-meta-grid">
+                <DetailRow label="Title" value={manuscript.title} />
+                <DetailRow label="Filename" value={manuscript.manuscript_filename} />
+                <DetailRow label="Manuscript type" value={pretty(manuscript.manuscript_type)} />
+                <DetailRow label="File size" value={formatBytes(manuscript.manuscript_bytes)} />
+                <DetailRow label="Author" value={manuscript.author_name} />
+                <DetailRow label="Author email" value={manuscript.author_email} />
+                <DetailRow label="Co-authors" value={manuscript.coauthors || 'None recorded'} />
+                <DetailRow label="Uploaded" value={formatDate(manuscript.created_at)} />
+                <DetailRow label="Last updated" value={formatDate(manuscript.updated_at)} />
+                <DetailRow label="Word count" value={wordCount ? Number(wordCount).toLocaleString() : 'Not available'} />
               </div>
-              <div className="manuscript-side-list">
-                <DetailRow label="Status" value={pretty(submission.status)} />
-                <DetailRow label="Submitted" value={formatDate(submission.submitted_at)} />
-                <DetailRow label="Requirements" value={requirements.configured ? (requirements.complete ? 'Complete' : 'Action required') : 'None configured'} />
-                <DetailRow label="Evidence" value={`${submission.evidence?.length || 0} item${(submission.evidence?.length || 0) === 1 ? '' : 's'}`} />
+
+              <div className="manuscript-text-grid">
+                {manuscript.abstract && <div><h3>Abstract</h3><p>{manuscript.abstract}</p></div>}
+                {Array.isArray(manuscript.keywords) && manuscript.keywords.length > 0 && <div><h3>Keywords</h3><p>{manuscript.keywords.join(', ')}</p></div>}
+                {manuscript.disclosure && <div><h3>AI-use disclosure</h3><p>{manuscript.disclosure}</p></div>}
+                {manuscript.notes && <div><h3>Author notes</h3><p>{manuscript.notes}</p></div>}
               </div>
-            </section>}
-          </aside>
-        </div>
+            </div>
+          </div>
+
+          <div className="manuscript-overview-status-grid">
+            <article>
+              <span>Readiness</span>
+              <b>{mechanical?.status ? pretty(mechanical.status) : 'Not run'}</b>
+              <small>{matches.length ? `${matches.length} venue matches available` : 'No venue matches recorded'}</small>
+            </article>
+            <article>
+              <span>Selected venue</span>
+              <b>{submission?.venue?.name || 'Not selected'}</b>
+              <small>{submission?.status ? `Status: ${pretty(submission.status)}` : 'No venue submission yet'}</small>
+            </article>
+            <article>
+              <span>Latest submission</span>
+              <b>{submission?.submitted_at ? formatDate(submission.submitted_at) : 'Not submitted'}</b>
+              <small>{requirements.configured ? (requirements.complete ? 'Requirements complete' : 'Requirements need attention') : 'No requirements configured'}</small>
+            </article>
+            <article>
+              <span>Retention & evidence</span>
+              <b>{submission?.retention_purged_at ? 'Purged' : submission?.retention_expires_at ? `Expires ${formatDate(submission.retention_expires_at)}` : 'No expiry recorded'}</b>
+              <small>{`${submission?.evidence?.length || 0} evidence item${(submission?.evidence?.length || 0) === 1 ? '' : 's'}`}</small>
+            </article>
+          </div>
+        </section>
 
         <section className="author-panel manuscript-compact-section">
           <div className="manuscript-section-head">
