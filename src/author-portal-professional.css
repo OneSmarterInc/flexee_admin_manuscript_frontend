@@ -172,3 +172,18 @@
   .author-flow-page .author-report-panel,
   .author-flow-page .author-transfer-main{padding:15px}
 }
+
+
+/* Tighter top-of-page composition for author workflow */
+.publication-main:has(.author-flow-page){padding-top:20px}
+.author-flow-page{padding-top:0}
+.author-flow-page>.crumb{margin:0 0 6px;font-size:10.5px;line-height:1.3}
+.author-flow-page .author-flow-nav{margin:0 0 8px;gap:6px}
+.author-flow-page .author-flow-step{min-height:36px;padding:6px 9px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(28,26,23,.025)}
+.author-flow-page .author-flow-step.active{box-shadow:0 3px 10px rgba(168,92,50,.08)}
+.author-flow-page .author-prototype-notice{margin:0 0 11px;padding:7px 10px;border-radius:8px}
+.author-flow-page .author-page-heading{margin:9px 0 15px}
+.author-flow-page .author-page-heading .kicker{margin-bottom:3px}
+@media(max-width:720px){
+  .publication-main:has(.author-flow-page){padding-top:14px}
+}
