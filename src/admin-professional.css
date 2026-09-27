@@ -826,3 +826,47 @@
   color:var(--admin-copper-dark);
   border-bottom-color:var(--admin-copper);
 }
+
+
+/* Keep sidebar navigation scrollable while account/logout stays visible */
+.admin-ui-v2 aside{
+  height:100vh!important;
+  min-height:0!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-inner{
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-content{
+  height:100%!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+.admin-ui-v2 .admin-ui-brand{
+  flex:0 0 auto;
+}
+.admin-ui-v2 .admin-ui-sidebar-nav{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  padding-right:4px;
+  scrollbar-width:thin;
+  scrollbar-color:#cdbeb3 transparent;
+}
+.admin-ui-v2 .admin-ui-sidebar-nav::-webkit-scrollbar{width:6px}
+.admin-ui-v2 .admin-ui-sidebar-nav::-webkit-scrollbar-track{background:transparent}
+.admin-ui-v2 .admin-ui-sidebar-nav::-webkit-scrollbar-thumb{
+  background:#cdbeb3;
+  border-radius:999px;
+}
+.admin-ui-v2 .admin-ui-sidebar-user{
+  flex:0 0 auto!important;
+  position:relative;
+  z-index:3;
+  margin-top:10px!important;
+  padding-top:12px!important;
+  padding-bottom:2px!important;
+  background:rgba(255,253,251,.98);
+}
