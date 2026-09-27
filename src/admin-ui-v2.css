@@ -919,3 +919,79 @@
 @media(max-width:760px){
   .admin-ui-v2 .editor-summary-grid{grid-template-columns:repeat(2,1fr)}
 }
+
+
+/* ---------- Submission summary route ---------- */
+.admin-summary-page > div:first-child{
+  margin-bottom:16px!important;
+}
+.admin-summary-page > div:first-child h2{
+  margin:0 0 5px!important;
+  font-family:'Instrument Serif',Georgia,serif!important;
+  font-size:36px!important;
+  font-weight:400!important;
+  line-height:1.03!important;
+}
+.admin-summary-page > div:first-child > div > div{
+  color:var(--admin-muted)!important;
+  font-size:12px!important;
+}
+.admin-summary-page > div:first-child > button{
+  min-height:36px!important;
+  padding:8px 13px!important;
+  border:1px solid var(--admin-line)!important;
+  border-radius:9px!important;
+  background:#fff!important;
+  box-shadow:none!important;
+  font-size:11px!important;
+}
+.admin-summary-page > div:nth-child(2){
+  gap:8px!important;
+  margin-bottom:12px!important;
+}
+.admin-summary-page > div:nth-child(2) > div{
+  padding:10px 11px!important;
+  border:1px solid var(--admin-line)!important;
+  border-radius:10px!important;
+  background:#fcfaf8!important;
+  box-shadow:none!important;
+}
+.admin-summary-page > div:nth-child(2) > div > div:first-child{
+  margin-bottom:4px!important;
+  color:var(--admin-muted)!important;
+  font-size:8.5px!important;
+}
+.admin-summary-page > div:nth-child(2) > div > div:last-child{
+  font-size:11.5px!important;
+}
+.admin-summary-page > section{
+  margin-bottom:12px!important;
+  overflow:hidden!important;
+  border:1px solid var(--admin-line)!important;
+  border-radius:12px!important;
+  background:#fff!important;
+  box-shadow:var(--admin-shadow-sm)!important;
+}
+.admin-summary-page > section > div:first-child{
+  padding:13px 15px!important;
+  border-bottom:1px solid var(--admin-line)!important;
+  background:#fcfaf8!important;
+}
+.admin-summary-page > section > div:first-child h3{
+  font-family:'Instrument Serif',Georgia,serif!important;
+  font-size:21px!important;
+  font-weight:400!important;
+}
+.admin-summary-page > section > div:first-child p{
+  font-size:10.5px!important;
+}
+.admin-summary-page > section > div:nth-child(2){
+  padding:15px!important;
+  font-size:11.5px!important;
+  line-height:1.55!important;
+}
+.admin-summary-page article{
+  border:1px solid var(--admin-line)!important;
+  border-radius:10px!important;
+  background:#fff!important;
+}
