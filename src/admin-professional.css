@@ -870,3 +870,120 @@
   padding-bottom:2px!important;
   background:rgba(255,253,251,.98);
 }
+
+
+/* =========================================================
+   Sidebar refinement — match the compact reference layout.
+   Keeps all navigation/logout behavior unchanged.
+   ========================================================= */
+.admin-ui-v2 aside{
+  height:100vh!important;
+  overflow:hidden!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-inner{
+  height:100%!important;
+  min-height:0!important;
+  padding-top:22px!important;
+  overflow:hidden!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-content{
+  height:100%!important;
+  min-height:0!important;
+  padding:0 18px 14px!important;
+  overflow:hidden!important;
+}
+.admin-ui-v2 .admin-ui-brand{
+  flex:0 0 auto;
+  gap:11px;
+  padding:0 6px 16px!important;
+  margin:0 0 4px;
+  border-bottom:1px solid var(--admin-line);
+}
+.admin-ui-v2 .admin-ui-brand-mark{
+  width:38px!important;
+  height:38px!important;
+  border-radius:9px!important;
+  font-size:23px!important;
+  box-shadow:none!important;
+}
+.admin-ui-v2 .admin-ui-brand h1{
+  font-size:27px!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-nav{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  overflow:visible!important;
+  padding:0!important;
+  scrollbar-width:none!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-nav::-webkit-scrollbar{
+  display:none!important;
+}
+.admin-ui-v2 .admin-ui-nav-label{
+  padding:10px 6px 5px!important;
+  font-size:9px!important;
+  letter-spacing:.1em!important;
+}
+.admin-ui-v2 .admin-side-nav-button{
+  min-height:35px!important;
+  margin:1px 0!important;
+  padding:8px 9px!important;
+  gap:9px!important;
+  border-radius:9px!important;
+  font-size:11.5px!important;
+}
+.admin-ui-v2 .admin-side-nav-button svg{
+  width:16px!important;
+  height:16px!important;
+  flex:0 0 16px;
+}
+.admin-ui-v2 .admin-ui-sidebar-nav>div[style*="height: 1px"]{
+  margin:10px 0!important;
+  background:var(--admin-line)!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-user{
+  flex:0 0 auto!important;
+  margin-top:auto!important;
+  padding:12px 6px 0!important;
+  border-top:1px solid var(--admin-line)!important;
+  background:transparent!important;
+}
+.admin-ui-v2 .admin-pro-avatar{
+  width:34px!important;
+  height:34px!important;
+  font-size:13px!important;
+}
+.admin-ui-v2 .admin-pro-account-copy b{
+  font-size:12px!important;
+}
+.admin-ui-v2 .admin-pro-account-copy span{
+  font-size:9.5px!important;
+}
+.admin-ui-v2 .admin-pro-logout{
+  width:31px!important;
+  height:31px!important;
+}
+
+/* Keep collapse control functional without consuming vertical sidebar space. */
+.admin-ui-v2 .admin-sidebar-toggle{
+  width:34px!important;
+  height:34px!important;
+  top:15px!important;
+  left:204px!important;
+  padding:0!important;
+  border-radius:8px!important;
+  background:transparent!important;
+  color:#8b8178!important;
+  box-shadow:none!important;
+  opacity:.35;
+}
+.admin-ui-v2 .admin-sidebar-toggle:hover{
+  opacity:1;
+  background:#f5eee9!important;
+  color:var(--admin-copper-dark)!important;
+  transform:none!important;
+}
+.admin-ui-v2 .admin-sidebar-toggle svg{
+  width:18px!important;
+  height:18px!important;
+}
