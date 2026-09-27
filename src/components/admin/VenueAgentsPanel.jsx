@@ -128,12 +128,95 @@ function SmallPill({ children, tone = 'neutral' }) {
   return <span className={`venue-admin-pill ${tone}`}>{children}</span>
 }
 
-function Field({ label, hint, children, full = false }) {
-  return <label className={`venue-admin-field ${full ? 'full' : ''}`}>
-    <span>{label}</span>
+function Field({ label, hint, children, full = false, help = null }) {
+  return <div className={`venue-admin-field ${full ? 'full' : ''}`}>
+    <div className="venue-admin-field-label-row">
+      <span>{label}</span>
+      {help && <details className="venue-admin-help">
+        <summary aria-label={`Show help for ${label}`} title={`Help for ${label}`}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/>
+            <circle cx="12" cy="12" r="2.7"/>
+          </svg>
+        </summary>
+        <div className="venue-admin-help-popover">
+          <b>What to enter</b>
+          <p>{help.description}</p>
+          <b>Example</b>
+          <pre>{help.example}</pre>
+        </div>
+      </details>}
+    </div>
     {hint && <small>{hint}</small>}
     {children}
-  </label>
+  </div>
+}
+
+const configFieldHelp = {
+  aims_scope: {
+    description: 'Describe what the venue publishes, its priority subject areas, and the boundaries of what is in or out of scope.',
+    example: 'This journal publishes applied artificial intelligence research in business and organizational environments, including enterprise AI adoption, automation, governance, digital transformation, and measurable organizational outcomes.'
+  },
+  article_types: {
+    description: 'Enter each manuscript type the venue accepts on a separate line.',
+    example: 'Research article\nCase study\nReview article\nIndustry report\nTechnical note'
+  },
+  accepted_methods: {
+    description: 'Enter accepted research methods or study designs, one per line. Leave this blank when the venue is method-neutral.',
+    example: 'Case study\nMixed methods\nSurvey research\nQualitative interviews'
+  },
+  quality_threshold: {
+    description: 'Describe the minimum quality expectations a submission should meet before an editor considers it suitable for review.',
+    example: 'Submissions should present a clear problem statement, evidence-based analysis, transparent methodology, practical relevance, measurable outcomes, and explicit limitations.'
+  },
+  reviewer_criteria: {
+    description: 'Enter reviewer expertise areas that are appropriate for this venue, one per line.',
+    example: 'Enterprise artificial intelligence\nDigital transformation\nAI governance\nBusiness process automation\nOrganizational change'
+  },
+  disclosures: {
+    description: 'Enter every disclosure authors must provide, one requirement per line.',
+    example: 'AI-use disclosure required\nFunding disclosure required\nConflict of interest disclosure required\nData availability statement required'
+  },
+  reporting_standards: {
+    description: 'Enter the reporting or manuscript-quality standards expected by the venue, one per line.',
+    example: 'Clear research objectives\nTransparent methodology\nEvidence-supported conclusions\nLimitations discussed\nReferences included'
+  },
+  desk_rejection_rules: {
+    description: 'Enter human-readable desk-rejection guidance for the venue agent. Put one rule on each line.',
+    example: 'No clear AI application\nInsufficient supporting evidence\nMissing methodology\nPurely promotional content\nMissing required disclosures'
+  },
+  structured_desk_rejection_rules: {
+    description: 'Enter deterministic desk-rejection rules as a JSON array. Supported fields include word_count, reference_count, required_sections, manuscript_type, and disclosure.',
+    example: '[\n  {\n    "field": "word_count",\n    "operator": ">",\n    "value": 8000,\n    "message": "Maximum length is 8,000 words."\n  },\n  {\n    "field": "required_sections",\n    "operator": "missing_any",\n    "value": ["Methods", "Results"],\n    "message": "Methods and Results are required."\n  }\n]'
+  },
+  required_submission_items: {
+    description: 'Define extra author submission requirements as a JSON array. Supported types are text, textarea, url, checkbox, and file.',
+    example: '[\n  {\n    "key": "cover_letter",\n    "label": "Cover letter",\n    "type": "file",\n    "required": true\n  },\n  {\n    "key": "orcid",\n    "label": "ORCID",\n    "type": "text",\n    "required": true\n  }\n]'
+  },
+  retention_days: {
+    description: 'Enter the number of days the venue may retain submitted manuscript content. The countdown starts at formal submission. Leave blank when no retention period is configured.',
+    example: '365'
+  },
+  policies: {
+    description: 'Enter structured venue policies as a JSON object. Use this for machine-readable limits or requirements.',
+    example: '{\n  "word_count": {\n    "min": 1500,\n    "max": 8000\n  },\n  "blind_review": true,\n  "requires_references": true\n}'
+  },
+  current_demand: {
+    description: 'Describe current special issues, editorial priorities, tracks, or topics as JSON.',
+    example: '{\n  "topics": [\n    "Generative AI",\n    "Enterprise AI",\n    "AI Governance",\n    "Digital Transformation"\n  ],\n  "priority": "high"\n}'
+  },
+  deadlines: {
+    description: 'Enter the venue\'s expected editorial timing as JSON. Use numeric day values where applicable.',
+    example: '{\n  "review_days": 30,\n  "revision_days": 21,\n  "publication_cycle_days": 90\n}'
+  },
+  submission_capacity: {
+    description: 'Enter operational submission capacity information as JSON, such as annual capacity or a planning acceptance-rate target.',
+    example: '{\n  "annual_capacity": 100,\n  "acceptance_rate_target": 0.25\n}'
+  },
+  config_notes: {
+    description: 'Enter internal notes explaining the purpose, source, or special context of this configuration version.',
+    example: 'Updated for the 2026 editorial cycle. Added mixed-methods submissions and expanded enterprise AI priorities.'
+  }
 }
 
 export default function VenueAgentsPanel({ platformSuperuser = false, memberships = [] }) {
@@ -414,22 +497,22 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           </div>
 
           <div className="venue-admin-form-grid">
-            <Field label="Aims & scope" hint="What this venue publishes and the boundaries of its subject matter." full><textarea rows="6" value={configForm.aims_scope} onChange={e => setConfigForm({...configForm, aims_scope:e.target.value})} /></Field>
-            <Field label="Accepted article types" hint="One per line. Example: Research article"><textarea rows="5" value={configForm.article_types} onChange={e => setConfigForm({...configForm, article_types:e.target.value})} /></Field>
-            <Field label="Accepted methods" hint="One per line. Leave blank if method-neutral."><textarea rows="5" value={configForm.accepted_methods} onChange={e => setConfigForm({...configForm, accepted_methods:e.target.value})} /></Field>
-            <Field label="Quality threshold" full><textarea rows="4" value={configForm.quality_threshold} onChange={e => setConfigForm({...configForm, quality_threshold:e.target.value})} /></Field>
-            <Field label="Reviewer criteria" hint="Expertise areas, one per line."><textarea rows="5" value={configForm.reviewer_criteria} onChange={e => setConfigForm({...configForm, reviewer_criteria:e.target.value})} /></Field>
-            <Field label="Required disclosures" hint="One per line."><textarea rows="5" value={configForm.disclosures} onChange={e => setConfigForm({...configForm, disclosures:e.target.value})} /></Field>
-            <Field label="Reporting standards" hint="One per line."><textarea rows="6" value={configForm.reporting_standards} onChange={e => setConfigForm({...configForm, reporting_standards:e.target.value})} /></Field>
-            <Field label="Desk-rejection guidance" hint="Free-text guidance for the venue agent. One rule per line."><textarea rows="6" value={configForm.desk_rejection_rules} onChange={e => setConfigForm({...configForm, desk_rejection_rules:e.target.value})} /></Field>
-            <Field label="Deterministic desk-rejection rules (JSON)" hint='Supported fields: word_count, reference_count, required_sections, manuscript_type, disclosure. Numeric fields use >, >=, <, <=, ==, !=. required_sections uses missing_any or missing_all with an array of section names. Example: [{"field":"word_count","operator":">","value":8000,"message":"Maximum length is 8,000 words."},{"field":"required_sections","operator":"missing_any","value":["Methods","Results"],"message":"Methods and Results are required."}]' full><textarea className="venue-admin-code" rows="10" value={configForm.structured_desk_rejection_rules} onChange={e => setConfigForm({...configForm, structured_desk_rejection_rules:e.target.value})} /></Field>
-            <Field label="Required submission items (JSON)" hint='Supported types: text, textarea, url, checkbox, file. Example: [{"key":"cover_letter","label":"Cover letter","type":"file","required":true},{"key":"orcid","label":"ORCID","type":"text","required":true}]' full><textarea className="venue-admin-code" rows="10" value={configForm.required_submission_items} onChange={e => setConfigForm({...configForm, required_submission_items:e.target.value})} /></Field>
-            <Field label="Content retention (days)" hint="Optional. Starts when the author formally submits. Leave blank to keep content until a future policy is configured."><input type="number" min="1" max="3650" step="1" value={configForm.retention_days} onChange={e => setConfigForm({...configForm, retention_days:e.target.value})} placeholder="Example: 365" /></Field>
-            <Field label="Policies (JSON)" hint='Structured rules such as {"word_count":{"min":1500,"max":3000}}' full><textarea className="venue-admin-code" rows="10" value={configForm.policies} onChange={e => setConfigForm({...configForm, policies:e.target.value})} /></Field>
-            <Field label="Current demand (JSON)" hint='Special issues, tracks, priorities, or topics. Example: {"topics":["AI agents"]}'><textarea className="venue-admin-code" rows="7" value={configForm.current_demand} onChange={e => setConfigForm({...configForm, current_demand:e.target.value})} /></Field>
-            <Field label="Deadlines (JSON)"><textarea className="venue-admin-code" rows="7" value={configForm.deadlines} onChange={e => setConfigForm({...configForm, deadlines:e.target.value})} /></Field>
-            <Field label="Submission capacity (JSON)"><textarea className="venue-admin-code" rows="7" value={configForm.submission_capacity} onChange={e => setConfigForm({...configForm, submission_capacity:e.target.value})} /></Field>
-            <Field label="Configuration notes"><textarea rows="7" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
+            <Field label="Aims & scope" hint="What this venue publishes and the boundaries of its subject matter." help={configFieldHelp.aims_scope} full><textarea rows="6" value={configForm.aims_scope} onChange={e => setConfigForm({...configForm, aims_scope:e.target.value})} /></Field>
+            <Field label="Accepted article types" hint="One per line. Example: Research article" help={configFieldHelp.article_types}><textarea rows="5" value={configForm.article_types} onChange={e => setConfigForm({...configForm, article_types:e.target.value})} /></Field>
+            <Field label="Accepted methods" hint="One per line. Leave blank if method-neutral." help={configFieldHelp.accepted_methods}><textarea rows="5" value={configForm.accepted_methods} onChange={e => setConfigForm({...configForm, accepted_methods:e.target.value})} /></Field>
+            <Field label="Quality threshold" help={configFieldHelp.quality_threshold} full><textarea rows="4" value={configForm.quality_threshold} onChange={e => setConfigForm({...configForm, quality_threshold:e.target.value})} /></Field>
+            <Field label="Reviewer criteria" hint="Expertise areas, one per line." help={configFieldHelp.reviewer_criteria}><textarea rows="5" value={configForm.reviewer_criteria} onChange={e => setConfigForm({...configForm, reviewer_criteria:e.target.value})} /></Field>
+            <Field label="Required disclosures" hint="One per line." help={configFieldHelp.disclosures}><textarea rows="5" value={configForm.disclosures} onChange={e => setConfigForm({...configForm, disclosures:e.target.value})} /></Field>
+            <Field label="Reporting standards" hint="One per line." help={configFieldHelp.reporting_standards}><textarea rows="6" value={configForm.reporting_standards} onChange={e => setConfigForm({...configForm, reporting_standards:e.target.value})} /></Field>
+            <Field label="Desk-rejection guidance" hint="Free-text guidance for the venue agent. One rule per line." help={configFieldHelp.desk_rejection_rules}><textarea rows="6" value={configForm.desk_rejection_rules} onChange={e => setConfigForm({...configForm, desk_rejection_rules:e.target.value})} /></Field>
+            <Field label="Deterministic desk-rejection rules (JSON)" hint='Supported fields: word_count, reference_count, required_sections, manuscript_type, disclosure. Numeric fields use >, >=, <, <=, ==, !=. required_sections uses missing_any or missing_all with an array of section names.' help={configFieldHelp.structured_desk_rejection_rules} full><textarea className="venue-admin-code" rows="10" value={configForm.structured_desk_rejection_rules} onChange={e => setConfigForm({...configForm, structured_desk_rejection_rules:e.target.value})} /></Field>
+            <Field label="Required submission items (JSON)" hint='Supported types: text, textarea, url, checkbox, file.' help={configFieldHelp.required_submission_items} full><textarea className="venue-admin-code" rows="10" value={configForm.required_submission_items} onChange={e => setConfigForm({...configForm, required_submission_items:e.target.value})} /></Field>
+            <Field label="Content retention (days)" hint="Optional. Starts when the author formally submits. Leave blank to keep content until a future policy is configured." help={configFieldHelp.retention_days}><input type="number" min="1" max="3650" step="1" value={configForm.retention_days} onChange={e => setConfigForm({...configForm, retention_days:e.target.value})} placeholder="Example: 365" /></Field>
+            <Field label="Policies (JSON)" hint='Structured venue policies in JSON.' help={configFieldHelp.policies} full><textarea className="venue-admin-code" rows="10" value={configForm.policies} onChange={e => setConfigForm({...configForm, policies:e.target.value})} /></Field>
+            <Field label="Current demand (JSON)" hint='Special issues, tracks, priorities, or topics.' help={configFieldHelp.current_demand}><textarea className="venue-admin-code" rows="7" value={configForm.current_demand} onChange={e => setConfigForm({...configForm, current_demand:e.target.value})} /></Field>
+            <Field label="Deadlines (JSON)" help={configFieldHelp.deadlines}><textarea className="venue-admin-code" rows="7" value={configForm.deadlines} onChange={e => setConfigForm({...configForm, deadlines:e.target.value})} /></Field>
+            <Field label="Submission capacity (JSON)" help={configFieldHelp.submission_capacity}><textarea className="venue-admin-code" rows="7" value={configForm.submission_capacity} onChange={e => setConfigForm({...configForm, submission_capacity:e.target.value})} /></Field>
+            <Field label="Configuration notes" help={configFieldHelp.config_notes}><textarea rows="7" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
           </div>
         </form>
 
