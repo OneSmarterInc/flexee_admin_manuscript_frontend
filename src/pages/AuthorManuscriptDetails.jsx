@@ -33,10 +33,15 @@ function formatBytes(bytes) {
 }
 
 function DetailRow({ label, value }) {
-  return <div style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,0,0,.07)' }}>
-    <div style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: 'var(--muted)', marginBottom: '4px' }}>{label}</div>
-    <div style={{ whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>{value || '—'}</div>
+  return <div className="manuscript-detail-row">
+    <div className="manuscript-detail-label">{label}</div>
+    <div className="manuscript-detail-value">{value || '—'}</div>
   </div>
+}
+
+function CompactList({ items = [], empty = 'None recorded' }) {
+  if (!items.length) return <span className="manuscript-detail-muted">{empty}</span>
+  return <ul className="manuscript-compact-list">{items.map((item, index) => <li key={index}>{item}</li>)}</ul>
 }
 
 export default function AuthorManuscriptDetails() {
@@ -106,19 +111,19 @@ export default function AuthorManuscriptDetails() {
   }, [matches, submission])
 
   if (loading) return <PublicationShell>
-    <div className="wrap author-flow-page">
+    <div className="wrap author-flow-page manuscript-detail-page">
       <section className="author-panel author-live-state"><p className="kicker">Manuscript details</p><h2>Loading manuscript…</h2></section>
     </div>
   </PublicationShell>
 
   return <PublicationShell>
-    <div className="wrap author-flow-page">
+    <div className="wrap author-flow-page manuscript-detail-page">
       <div className="crumb"><button className="author-text-link" type="button" onClick={() => go('/author')}>Author workspace</button> / Manuscript details</div>
 
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Manuscript unavailable.</b> {error}</div>}
 
       {manuscript && <>
-        <div className="author-page-heading author-heading-row">
+        <div className="author-page-heading author-heading-row manuscript-detail-heading">
           <div>
             <p className="kicker">Uploaded manuscript</p>
             <span className="author-venue-type">{pretty(manuscript.manuscript_type)}</span>
@@ -131,10 +136,10 @@ export default function AuthorManuscriptDetails() {
           </div>
         </div>
 
-        <div className="author-report-grid">
-          <section className="author-panel author-report-panel">
-            <div className="author-panel-heading"><div><p className="kicker">Manuscript</p><h2>Uploaded file and author details</h2></div></div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0 28px' }}>
+        <div className="manuscript-overview-grid">
+          <section className="author-panel manuscript-summary-card">
+            <div className="manuscript-section-head"><div><p className="kicker">Manuscript</p><h2>Uploaded file and author details</h2></div></div>
+            <div className="manuscript-meta-grid">
               <DetailRow label="Title" value={manuscript.title} />
               <DetailRow label="Filename" value={manuscript.manuscript_filename} />
               <DetailRow label="Manuscript type" value={pretty(manuscript.manuscript_type)} />
@@ -152,8 +157,8 @@ export default function AuthorManuscriptDetails() {
             {manuscript.notes && <div style={{ marginTop: '18px' }}><h3>Author notes</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.notes}</p></div>}
           </section>
 
-          <aside className="author-sidebar">
-            <section className="author-panel author-guide-card">
+          <aside className="manuscript-state-column">
+            <section className="author-panel manuscript-state-card">
               <p className="kicker">Workflow</p>
               <h2>Current state</h2>
               <DetailRow label="Readiness" value={mechanical?.status ? pretty(mechanical.status) : 'Not run'} />
@@ -165,19 +170,19 @@ export default function AuthorManuscriptDetails() {
           </aside>
         </div>
 
-        <section className="author-panel" style={{ marginTop: '24px' }}>
-          <div className="author-panel-heading">
+        <section className="author-panel manuscript-compact-section">
+          <div className="manuscript-section-head">
             <div><p className="kicker">Readiness</p><h2>Checks and findings</h2></div>
             {mechanical?.status && <AuthorStatusPill tone={statusTone(mechanical.status)}>{pretty(mechanical.status)}</AuthorStatusPill>}
           </div>
 
-          {mechanical?.summary && <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginBottom: '18px' }}>
+          {mechanical?.summary && <div className="manuscript-summary-pills">
             <span className="author-human-pill">{Number(mechanical.summary.blocking_issues || 0)} blocking</span>
             <span className="author-human-pill">{Number(mechanical.summary.warnings || 0)} warnings</span>
             <span className="author-human-pill">{mechanical.summary.ready_for_matching ? 'Ready for matching' : 'Needs attention'}</span>
           </div>}
 
-          {findings.length ? <div className="author-assessment-list">
+          {findings.length ? <div className="manuscript-findings-grid">
             {findings.map((finding, index) => <article key={finding.code || index}>
               <div><span>{finding.label || pretty(finding.code)}</span><AuthorStatusPill tone={statusTone(finding.status)}>{pretty(finding.status)}</AuthorStatusPill></div>
               <p>{finding.detail}</p>
@@ -185,10 +190,10 @@ export default function AuthorManuscriptDetails() {
             </article>)}
           </div> : <p className="author-muted-copy">No deterministic readiness findings are stored yet.</p>}
 
-          {semantic && <div style={{ marginTop: '26px' }}>
+          {semantic && <div className="manuscript-semantic-block">
             <h3>Semantic readiness</h3>
             {semantic.summary?.model && <p className="author-muted-copy">Model: {semantic.summary.model}</p>}
-            {semanticFindings.length ? <div className="author-assessment-list">
+            {semanticFindings.length ? <div className="manuscript-findings-grid manuscript-semantic-findings">
               {semanticFindings.map((finding, index) => <article key={finding.code || index}>
                 <div><span>{finding.label || finding.finding_type || `Finding ${index + 1}`}</span></div>
                 <p>{finding.detail || finding.summary || finding.claim || JSON.stringify(finding)}</p>
@@ -197,31 +202,31 @@ export default function AuthorManuscriptDetails() {
           </div>}
         </section>
 
-        <section className="author-panel" style={{ marginTop: '24px' }}>
-          <div className="author-panel-heading"><div><p className="kicker">Venue matching</p><h2>Recorded venue matches</h2></div></div>
-          {matches.length ? <div className="author-match-list">
-            {matches.map(match => <article className="author-match-card" key={match.id}>
-              <div className="author-match-main">
-                <div className="author-match-heading">
-                  <div><span className="author-venue-type">{pretty(match.venue?.venue_type)}</span><h2>{match.venue?.name}</h2></div>
-                  <AuthorStatusPill tone={statusTone(match.eligibility)}>{pretty(match.eligibility)}</AuthorStatusPill>
-                </div>
-                <p>{match.fit_summary || 'No fit summary recorded.'}</p>
-                {match.reasons?.length > 0 && <div><h3>Why it may fit</h3><ul>{match.reasons.map((item, index) => <li key={index}>{item}</li>)}</ul></div>}
-                {match.gaps?.length > 0 && <div><h3>Gaps</h3><ul className="gaps">{match.gaps.map((item, index) => <li key={index}>{item}</li>)}</ul></div>}
+        <section className="author-panel manuscript-compact-section">
+          <div className="manuscript-section-head"><div><p className="kicker">Venue matching</p><h2>Recorded venue matches</h2></div></div>
+          {matches.length ? <div className="manuscript-match-grid">
+            {matches.map(match => <article className="manuscript-match-card" key={match.id}>
+              <div className="manuscript-match-head">
+                <div><span className="author-venue-type">{pretty(match.venue?.venue_type)}</span><h3>{match.venue?.name}</h3></div>
+                <AuthorStatusPill tone={statusTone(match.eligibility)}>{pretty(match.eligibility)}</AuthorStatusPill>
+              </div>
+              <p className="manuscript-match-summary">{match.fit_summary || 'No fit summary recorded.'}</p>
+              <div className="manuscript-match-columns">
+                <div><b>Why it may fit</b><CompactList items={match.reasons || []} /></div>
+                <div><b>Gaps</b><CompactList items={match.gaps || []} empty="No gaps recorded" /></div>
               </div>
             </article>)}
           </div> : <p className="author-muted-copy">No venue matches have been recorded for this manuscript yet.</p>}
         </section>
 
-        <section className="author-panel" style={{ marginTop: '24px' }}>
-          <div className="author-panel-heading">
+        <section className="author-panel manuscript-compact-section">
+          <div className="manuscript-section-head">
             <div><p className="kicker">Latest venue submission</p><h2>{submission?.venue?.name || 'No venue selected yet'}</h2></div>
             {submission?.status && <AuthorStatusPill tone={statusTone(submission.status)}>{pretty(submission.status)}</AuthorStatusPill>}
           </div>
 
           {!submission ? <p className="author-muted-copy">This manuscript has not yet been attached to a venue submission.</p> : <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '0 28px' }}>
+            <div className="manuscript-meta-grid manuscript-submission-grid">
               <DetailRow label="Venue" value={submission.venue?.name} />
               <DetailRow label="Venue configuration" value={submission.venue_config_version ? `Version ${submission.venue_config_version}` : '—'} />
               <DetailRow label="Created" value={formatDate(submission.created_at)} />
@@ -230,11 +235,11 @@ export default function AuthorManuscriptDetails() {
               <DetailRow label="Evidence items" value={String(submission.evidence?.length || 0)} />
             </div>
 
-            {matchForSubmission?.fit_summary && <div style={{ marginTop: '20px' }}><h3>Venue fit</h3><p>{matchForSubmission.fit_summary}</p></div>}
+            {matchForSubmission?.fit_summary && <div className="manuscript-inline-block"><h3>Venue fit</h3><p>{matchForSubmission.fit_summary}</p></div>}
 
-            {brief.editor_summary && <div style={{ marginTop: '20px' }}><h3>Editorial brief</h3><p style={{ whiteSpace: 'pre-wrap' }}>{brief.editor_summary}</p></div>}
+            {brief.editor_summary && <div className="manuscript-inline-block"><h3>Editorial brief</h3><p style={{ whiteSpace: 'pre-wrap' }}>{brief.editor_summary}</p></div>}
 
-            {submission.evidence?.length > 0 && <div style={{ marginTop: '20px' }}>
+            {submission.evidence?.length > 0 && <div className="manuscript-inline-block">
               <h3>Evidence trail</h3>
               <div className="author-evidence-list">
                 {submission.evidence.map((item, index) => <article key={item.id || index}>
@@ -245,7 +250,7 @@ export default function AuthorManuscriptDetails() {
               </div>
             </div>}
 
-            {requirements.configured && <div style={{ marginTop: '20px' }}>
+            {requirements.configured && <div className="manuscript-inline-block">
               <h3>Venue requirements</h3>
               <div className="author-packet-list">
                 {(requirements.items || []).map(item => <div key={item.key}>
@@ -255,7 +260,7 @@ export default function AuthorManuscriptDetails() {
               </div>
             </div>}
 
-            {decision && Object.keys(decision).length > 0 && <div style={{ marginTop: '22px', padding: '18px', border: '1px solid rgba(0,0,0,.1)', borderRadius: '12px' }}>
+            {decision && Object.keys(decision).length > 0 && <div className="manuscript-decision-card">
               <p className="kicker">Human editorial decision</p>
               <h3>{pretty(decision.decision || submission.status)}</h3>
               {decision.note && <p style={{ whiteSpace: 'pre-wrap' }}>{decision.note}</p>}
