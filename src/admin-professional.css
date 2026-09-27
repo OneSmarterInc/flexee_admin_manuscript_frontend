@@ -1707,3 +1707,53 @@
   padding:5px 9px!important;
   font-size:9px!important;
 }
+
+
+/* Compact selected submission header with actions inline */
+.admin-ui-v2 .editor-detail-head{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:10px!important;
+  padding:9px 10px!important;
+}
+.admin-ui-v2 .editor-detail-head-copy{
+  min-width:0;
+}
+.admin-ui-v2 .editor-detail-head-controls{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  flex:0 0 auto;
+}
+.admin-ui-v2 .editor-detail-head-controls .editor-detail-actions{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin:0!important;
+  padding:0!important;
+}
+.admin-ui-v2 .editor-detail-head-controls .admin-btn{
+  min-height:29px!important;
+  padding:5px 8px!important;
+  font-size:8.8px!important;
+}
+.admin-ui-v2 .editor-detail-head h2{
+  font-size:22px!important;
+}
+.admin-ui-v2 .editor-detail-head .editor-venue-name{
+  display:block;
+  max-width:720px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+@media(max-width:980px){
+  .admin-ui-v2 .editor-detail-head{
+    grid-template-columns:1fr!important;
+    align-items:start!important;
+  }
+  .admin-ui-v2 .editor-detail-head-controls{
+    width:100%;
+    justify-content:space-between;
+  }
+}
