@@ -4,6 +4,7 @@ import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
 import EditorWorkspacePanel from '../components/admin/EditorWorkspacePanel.jsx'
 import AuditLogPanel from '../components/admin/AuditLogPanel.jsx'
+import '../admin-professional.css'
 
 const decisions = {
   PASS_TO_HUMAN: 'Pass to human',
@@ -57,7 +58,8 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
       )}
       <main className="admin-ui-main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
         <div className="admin-ui-topbar">
-          <h1>Editorial Admin</h1>
+          <div className="admin-pro-topbar-title"><strong>Flexee Admin</strong><span>Editorial operations</span></div>
+          <div className="admin-pro-topbar-actions"><span>Secure workspace</span></div>
         </div>
         <div className="admin-shell admin-ui-shell" style={{ maxWidth: '1500px', margin: '0 auto', padding: '24px 28px 40px' }}>
           {children}
@@ -301,111 +303,121 @@ function SMTPSettingsPage({ onSave }) {
   if (loading) return <p>Loading current settings…</p>;
 
   return (
-    <div className="admin-smtp-card">
-      <form onSubmit={handleSave}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px 32px' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sender Name</label>
-            <input type="text" value={form.sender_name} onChange={e => updateForm({ sender_name: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
-          </div>
+    <form className="admin-smtp-layout" onSubmit={handleSave}>
+      {error && <div className="admin-error admin-smtp-message">{error}</div>}
+      {success && <div className="venue-admin-success admin-smtp-message">{success}</div>}
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sender Email</label>
-            <input type="email" value={form.sender_email} onChange={e => updateForm({ sender_email: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
+      <section className="admin-pro-card admin-smtp-section">
+        <div className="admin-pro-section-head">
+          <div>
+            <p className="venue-admin-kicker">Identity</p>
+            <h3>Sender</h3>
+            <p>How outgoing messages identify the editorial platform.</p>
           </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reply-To Email (Optional)</label>
-            <input type="email" value={form.reply_to_email} onChange={e => updateForm({ reply_to_email: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Security Protocol</label>
-            <select value={getSecurityProtocol()} onChange={e => handleSecurityChange(e.target.value)}
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px', background: '#fff' }}>
-              <option value="TLS">TLS</option>
-              <option value="SSL">SSL</option>
-              <option value="None">None</option>
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Host</label>
-            <input type="text" value={form.host} onChange={e => updateForm({ host: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} required />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Port</label>
-            <input type="number" value={form.port} onChange={e => updateForm({ port: parseInt(e.target.value) || 587 })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} required />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Username</label>
-            <input type="text" value={form.username} onChange={e => updateForm({ username: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} required />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Password</label>
-            <input type="password" value={form.password} onChange={e => updateForm({ password: e.target.value })} 
-              placeholder="Leave blank to keep existing"
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: '1 / -1', marginTop: '16px', borderTop: '1px solid #e5e5e5', paddingTop: '24px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Notification Emails (Optional)</label>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>Comma-separated emails that will receive a BCC copy of all emails sent to authors (submissions, accepts, rejects, and custom emails).</p>
-            <input type="text" value={form.admin_notification_emails || ''} onChange={e => updateForm({ admin_notification_emails: e.target.value })} 
-              placeholder="e.g. editor1@flexee.org, editor2@flexee.org"
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: '1 / -1', marginTop: '8px', borderTop: '1px dashed #e5e5e5', paddingTop: '24px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Test Email Recipient (Optional)</label>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>Where should the test email be sent? If blank, it sends to the Sender Email.</p>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <input type="email" value={form.test_email || ''} onChange={e => updateForm({ test_email: e.target.value })} 
-                placeholder="e.g. test@example.com"
-                style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px', width: '400px', maxWidth: '100%' }} />
-              
-              <button type="button" onClick={handleTest} disabled={testing}
-                style={{ 
-                  background: '#f59e0b', color: '#fff', border: 'none', padding: '10px 20px', 
-                  fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.05em', 
-                  cursor: testing ? 'wait' : 'pointer', textTransform: 'uppercase',
-                  whiteSpace: 'nowrap'
-                }}>
-                {testing ? 'TESTING...' : 'TEST CONNECTION'}
-              </button>
-            </div>
-          </div>
-
         </div>
+        <div className="admin-pro-form-grid">
+          <label className="admin-pro-field">
+            <span>Sender name</span>
+            <input type="text" value={form.sender_name} onChange={e => updateForm({ sender_name: e.target.value })} />
+          </label>
+          <label className="admin-pro-field">
+            <span>Sender email</span>
+            <input type="email" value={form.sender_email} onChange={e => updateForm({ sender_email: e.target.value })} />
+          </label>
+          <label className="admin-pro-field admin-pro-field-full">
+            <span>Reply-to email <em>Optional</em></span>
+            <input type="email" value={form.reply_to_email} onChange={e => updateForm({ reply_to_email: e.target.value })} />
+          </label>
+        </div>
+      </section>
 
-        <div style={{ height: '1px', background: '#e5e5e5', margin: '32px 0 24px 0' }}></div>
+      <section className="admin-pro-card admin-smtp-section">
+        <div className="admin-pro-section-head">
+          <div>
+            <p className="venue-admin-kicker">Server</p>
+            <h3>SMTP connection</h3>
+            <p>Connection settings used for outbound author and editorial email.</p>
+          </div>
+        </div>
+        <div className="admin-pro-form-grid">
+          <label className="admin-pro-field">
+            <span>SMTP host</span>
+            <input type="text" value={form.host} onChange={e => updateForm({ host: e.target.value })} required />
+          </label>
+          <label className="admin-pro-field">
+            <span>SMTP port</span>
+            <input type="number" value={form.port} onChange={e => updateForm({ port: parseInt(e.target.value) || 587 })} required />
+          </label>
+          <label className="admin-pro-field">
+            <span>SMTP username</span>
+            <input type="text" value={form.username} onChange={e => updateForm({ username: e.target.value })} required />
+          </label>
+          <label className="admin-pro-field">
+            <span>SMTP password</span>
+            <input type="password" value={form.password} onChange={e => updateForm({ password: e.target.value })} placeholder="Leave blank to keep existing" />
+          </label>
+        </div>
+      </section>
 
-        {error && <div style={{ color: '#ef4444', marginBottom: '16px', fontSize: '14px' }}>{error}</div>}
-        {success && <div style={{ color: '#10b981', marginBottom: '16px', fontSize: '14px' }}>{success}</div>}
+      <section className="admin-pro-card admin-smtp-section">
+        <div className="admin-pro-section-head">
+          <div>
+            <p className="venue-admin-kicker">Security</p>
+            <h3>Connection protection</h3>
+            <p>Select the protocol required by your mail provider.</p>
+          </div>
+        </div>
+        <div className="admin-smtp-security-options">
+          {['TLS','SSL','None'].map(option => (
+            <button
+              type="button"
+              key={option}
+              className={`admin-smtp-security-option ${getSecurityProtocol() === option ? 'active' : ''}`}
+              onClick={() => handleSecurityChange(option)}
+            >
+              <b>{option}</b>
+              <span>{option === 'TLS' ? 'Recommended for port 587' : option === 'SSL' ? 'Commonly used with port 465' : 'Unencrypted SMTP connection'}</span>
+            </button>
+          ))}
+        </div>
+      </section>
 
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="submit" disabled={busy}
-            style={{ 
-              background: '#121212', 
-              color: '#fff', border: 'none', padding: '14px 24px', 
-              fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.05em', 
-              cursor: busy ? 'wait' : 'pointer', textTransform: 'uppercase'
-            }}>
-            {busy ? 'SAVING...' : 'SAVE CONFIGURATION'}
+      <section className="admin-pro-card admin-smtp-section">
+        <div className="admin-pro-section-head">
+          <div>
+            <p className="venue-admin-kicker">Notifications</p>
+            <h3>Editorial recipients</h3>
+            <p>Optional BCC recipients for author-facing notifications.</p>
+          </div>
+        </div>
+        <label className="admin-pro-field">
+          <span>Admin notification emails <em>Optional</em></span>
+          <input type="text" value={form.admin_notification_emails || ''} onChange={e => updateForm({ admin_notification_emails: e.target.value })} placeholder="editor1@flexee.org, editor2@flexee.org" />
+          <small>Comma-separated emails receive copies of submission, acceptance, rejection, and custom-email notifications.</small>
+        </label>
+      </section>
+
+      <section className="admin-pro-card admin-smtp-section admin-smtp-test-section">
+        <div className="admin-pro-section-head">
+          <div>
+            <p className="venue-admin-kicker">Delivery test</p>
+            <h3>Validate the configuration</h3>
+            <p>Send a test message before relying on these settings for production notifications.</p>
+          </div>
+          <button className="admin-btn secondary" type="button" onClick={handleTest} disabled={testing}>
+            {testing ? 'Testing…' : 'Send test email'}
           </button>
         </div>
-      </form>
-    </div>
+        <label className="admin-pro-field">
+          <span>Test recipient <em>Optional</em></span>
+          <input type="email" value={form.test_email || ''} onChange={e => updateForm({ test_email: e.target.value })} placeholder="Leave blank to use the sender email" />
+        </label>
+      </section>
+
+      <div className="admin-smtp-actions">
+        <button className="admin-btn" type="submit" disabled={busy}>{busy ? 'Saving…' : 'Save configuration'}</button>
+      </div>
+    </form>
   )
 }
 
@@ -649,23 +661,15 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
       </div>
 
       <div className="admin-ui-sidebar-user">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--copper), #e68d5c)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
-            {username.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--ink)' }}>{username}</div>
-            <div style={{ fontSize: '12px', color: 'var(--muted)' }}>Administrator</div>
+        <div className="admin-pro-account">
+          <div className="admin-pro-avatar">{username.charAt(0).toUpperCase()}</div>
+          <div className="admin-pro-account-copy">
+            <b>{username}</b>
+            <span>Administrator</span>
           </div>
         </div>
-        <button 
-          style={{ background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', padding: '6px', borderRadius: '6px', transition: 'all 0.2s' }}
-          onClick={logout}
-          title="Sign out"
-          onMouseEnter={e => { e.currentTarget.style.color = '#ef4444'; e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'var(--muted)'; e.currentTarget.style.background = 'transparent' }}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <button className="admin-pro-logout" type="button" onClick={logout} title="Log out" aria-label="Log out">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
         </button>
       </div>
     </div>
@@ -695,8 +699,8 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
         <div className="admin-ui-page-head">
           <div>
             <p className="venue-admin-kicker">Submission operations</p>
-            <h2>Dashboard Overview</h2>
-            <p>Review results, delivery state, and submission diagnostics.</p>
+            <h2>Manuscript dashboard</h2>
+            <p>Monitor submissions, review states, delivery status, and editorial outcomes.</p>
           </div>
         </div>
         <div className="admin-stats">
