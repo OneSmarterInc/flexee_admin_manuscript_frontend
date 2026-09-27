@@ -50,7 +50,7 @@ export default function AuthorDashboard() {
     }
 
     const session = getAuthorSession()
-    if (!session.manuscriptId || !session.accessToken) {
+    if (!session.manuscriptId) {
       setLoading(false)
       return
     }
@@ -125,11 +125,20 @@ export default function AuthorDashboard() {
   }
 
   function viewManuscript(ms) {
+    const latestSubmission = ms.latest_submission || null
     saveAuthorSession({
       manuscriptId: ms.id,
-      accessToken: ms.access_token_hash ? '' : getAuthorSession().accessToken, // Note: real access token needs to be issued, but for now we rely on cookie
+      manuscriptTitle: ms.title,
+      submissionId: latestSubmission?.id || null,
+      selectedVenueId: latestSubmission?.venue?.id || null,
+      selectedVenueSlug: latestSubmission?.venue?.slug || null,
     })
-    go('/author/status')
+
+    if (latestSubmission?.id) {
+      go('/author/status')
+    } else {
+      go('/author/readiness')
+    }
   }
 
   return <PublicationShell>
