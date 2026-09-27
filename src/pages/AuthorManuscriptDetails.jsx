@@ -196,9 +196,6 @@ export default function AuthorManuscriptDetails() {
           </aside>
         </div>
 
-
-        </div>
-
         <section className="author-panel manuscript-compact-section">
           <div className="manuscript-section-head">
             <div><p className="kicker">Readiness</p><h2>Checks and findings</h2></div>
