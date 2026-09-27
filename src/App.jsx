@@ -12,6 +12,7 @@ import AuthorVenueMatches from './pages/AuthorVenueMatches.jsx'
 import AuthorVenueAssessment from './pages/AuthorVenueAssessment.jsx'
 import AuthorSubmissionStatus from './pages/AuthorSubmissionStatus.jsx'
 import AuthorTransfer from './pages/AuthorTransfer.jsx'
+import AuthorManuscriptDetails from './pages/AuthorManuscriptDetails.jsx'
 
 export default function App() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
@@ -28,6 +29,7 @@ export default function App() {
   if (path === '/author/signup') return <AuthorSignup />
   if (path === '/author') return <AuthorDashboard />
   if (path === '/author/new') return <AuthorNewSubmission />
+  if (path === '/author/manuscript-details') return <AuthorManuscriptDetails />
   if (path === '/author/readiness') return <AuthorReadiness />
   if (path === '/author/venues') return <AuthorVenueMatches />
   if (path === '/author/venue-assessment' || path.startsWith('/author/venue-assessment/')) return <AuthorVenueAssessment />
