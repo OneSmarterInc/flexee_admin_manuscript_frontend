@@ -987,3 +987,40 @@
   width:18px!important;
   height:18px!important;
 }
+
+
+/* Make the sidebar toggle clearly visible at the portal's top-left corner */
+.admin-ui-v2 .admin-sidebar-toggle{
+  position:fixed!important;
+  top:18px!important;
+  left:18px!important;
+  z-index:100!important;
+  width:42px!important;
+  height:42px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:var(--admin-copper)!important;
+  color:#fff!important;
+  box-shadow:0 7px 18px rgba(180,95,47,.28)!important;
+  opacity:1!important;
+}
+.admin-ui-v2 .admin-sidebar-toggle:hover{
+  background:var(--admin-copper-dark)!important;
+  color:#fff!important;
+  opacity:1!important;
+  transform:translateY(-1px)!important;
+}
+.admin-ui-v2 .admin-sidebar-toggle svg{
+  width:21px!important;
+  height:21px!important;
+}
+
+/* Leave clean room for the visible toggle when the sidebar is open */
+.admin-ui-v2 .admin-ui-brand{
+  padding-left:48px!important;
+  min-height:44px;
+  align-items:center;
+}
