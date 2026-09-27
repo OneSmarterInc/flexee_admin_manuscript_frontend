@@ -561,7 +561,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   const [inlineAction, setInlineAction] = useState(null)
   const [emailActionId, setEmailActionId] = useState(null)
   const [zipViewItem, setZipViewItem] = useState(null)
-  const [currentView, setCurrentView] = useState(platformSuperuser ? 'dashboard' : 'editor')
+  const [currentView, setCurrentView] = useState('editor')
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const setKindFilter = (k) => { if (!platformSuperuser) return; const nf = {...filters, kind: k}; setFilters(nf); setApplied(nf); setCurrentView('dashboard'); }
   
