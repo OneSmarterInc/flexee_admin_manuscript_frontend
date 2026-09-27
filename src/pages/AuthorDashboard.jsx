@@ -73,19 +73,6 @@ export default function AuthorDashboard() {
   }, [])
 
   const stats = useMemo(() => {
-    if (authorUser && manuscriptsList.length) {
-      const statuses = manuscriptsList.map(ms => ms.latest_submission?.status || '')
-      return {
-        drafts: statuses.filter(status => !['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(status)).length,
-        attention: manuscriptsList.filter(ms => {
-          const summary = ms.latest_readiness?.summary || {}
-          return Number(summary.blocking_issues || 0) + Number(summary.warnings || 0) > 0
-        }).length,
-        submitted: statuses.filter(status => ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(status)).length,
-        decisions: statuses.filter(status => ['accepted', 'rejected', 'revision_requested'].includes(status)).length,
-      }
-    }
-
     const readiness = manuscript?.latest_readiness?.summary || {}
     const needsAttention = Number(readiness.blocking_issues || 0) + Number(readiness.warnings || 0) > 0
     const submitted = ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected'].includes(submission?.status)
@@ -96,7 +83,7 @@ export default function AuthorDashboard() {
       submitted: submitted ? 1 : 0,
       decisions: hasDecision ? 1 : 0,
     }
-  }, [authorUser, manuscriptsList, manuscript, submission])
+  }, [manuscript, submission])
 
   const statuses = useMemo(() => {
     const values = manuscriptsList.map(ms => ms.latest_submission?.status || 'manuscript_created')
