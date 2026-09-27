@@ -60,7 +60,7 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
       <main className="admin-ui-main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
         <div className="admin-ui-topbar">
           <div className="admin-pro-topbar-title"><strong>Flexee Admin</strong><span>Editorial operations</span></div>
-          <div className="admin-pro-topbar-actions"><span>Secure workspace</span></div>
+          <div className="admin-pro-topbar-actions"><button type="button" className="admin-topbar-help">Help</button></div>
         </div>
         <div className="admin-shell admin-ui-shell" style={{ maxWidth: '1500px', margin: '0 auto', padding: '24px 28px 40px' }}>
           {children}
