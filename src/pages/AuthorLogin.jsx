@@ -24,49 +24,71 @@ export default function AuthorLogin() {
 
   return (
     <PublicationShell>
-      <div className="wrap author-dashboard">
-        <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author Login</div>
-        <section className="author-hero" style={{ paddingBottom: '2rem' }}>
-          <div>
-            <h1 className="publication-title">Author Login</h1>
-            <p className="publication-lede">Sign in to manage your manuscripts, view feedback, and submit new work.</p>
+      <div className="wrap author-auth-page">
+        <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace / Sign in</div>
+
+        <section className="author-auth-shell">
+          <div className="author-auth-intro">
+            <p className="kicker">Author workspace</p>
+            <h1>Manage your manuscript journey in one secure place.</h1>
+            <p className="author-auth-lede">Sign in to prepare submissions, review readiness, compare venues, track editorial decisions, and transfer a manuscript when needed.</p>
+
+            <div className="author-auth-benefits" aria-label="Workspace benefits">
+              <div><span>01</span><p><b>One manuscript record</b><small>Keep your manuscript, readiness history, and venue-specific submissions connected.</small></p></div>
+              <div><span>02</span><p><b>Venue-specific preparation</b><small>Review scope, policy, evidence, and editorial requirements before submission.</small></p></div>
+              <div><span>03</span><p><b>Human editorial decisions</b><small>AI assists with preparation while editors retain publication authority.</small></p></div>
+            </div>
           </div>
-        </section>
 
-        <section className="author-form-section" style={{ maxWidth: '400px', margin: '0 auto' }}>
-          <form className="author-workflow-form" onSubmit={handleSubmit}>
-            {error && <div className="author-prototype-notice author-error-banner" role="alert">{error}</div>}
-            
-            <div className="row">
-              <label htmlFor="email">Email</label>
-              <input 
-                id="email" 
-                type="email" 
-                value={email} 
-                onChange={(e) => setEmail(e.target.value)} 
-                required 
-              />
+          <div className="author-auth-card">
+            <div className="author-auth-card-head">
+              <span className="author-auth-eyebrow">Welcome back</span>
+              <h2>Sign in to your account</h2>
+              <p>Use the email and password associated with your author account.</p>
             </div>
 
-            <div className="row">
-              <label htmlFor="password">Password</label>
-              <input 
-                id="password" 
-                type="password" 
-                value={password} 
-                onChange={(e) => setPassword(e.target.value)} 
-                required 
-              />
-            </div>
+            <form className="author-auth-form" onSubmit={handleSubmit}>
+              {error && <div className="author-prototype-notice author-error-banner" role="alert">{error}</div>}
 
-            <button type="submit" className="copper-button" disabled={loading} style={{ width: '100%', marginTop: '1rem' }}>
-              {loading ? 'Signing in...' : 'Sign in'}
+              <label htmlFor="email">
+                <span>Email address</span>
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="name@example.com"
+                  required
+                />
+              </label>
+
+              <label htmlFor="password">
+                <span>Password</span>
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                  required
+                />
+              </label>
+
+              <button type="submit" className="copper-button author-auth-submit" disabled={loading}>
+                {loading ? 'Signing in…' : 'Sign in'}
+              </button>
+            </form>
+
+            <div className="author-auth-divider"><span>New to Flexee?</span></div>
+
+            <button className="author-auth-secondary" type="button" onClick={() => go('/author/signup')}>
+              Create an author account
             </button>
 
-            <p style={{ marginTop: '1.5rem', textAlign: 'center', fontSize: '14.5px' }}>
-              Don't have an account? <a href="#" onClick={(e) => { e.preventDefault(); go('/author/signup') }}>Sign up</a>
-            </p>
-          </form>
+            <p className="author-auth-note">Your manuscript workspace is available only after authentication.</p>
+          </div>
         </section>
       </div>
     </PublicationShell>
