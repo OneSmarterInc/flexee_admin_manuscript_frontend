@@ -123,33 +123,33 @@ export default function AuthorManuscriptDetails() {
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Manuscript unavailable.</b> {error}</div>}
 
       {manuscript && <>
-        <div className="author-page-heading author-heading-row manuscript-detail-heading">
-          <div>
-            <p className="kicker">Uploaded manuscript</p>
-            <span className="author-venue-type">{pretty(manuscript.manuscript_type)}</span>
-            <h1 className="publication-title">{manuscript.title}</h1>
-            <p className="publication-lede">{manuscript.manuscript_filename}</p>
-          </div>
-          <aside className="manuscript-hero-summary">
-            <div className="manuscript-hero-summary-top">
-              <div>
-                <p className="kicker">At a glance</p>
-                <h2>Current manuscript state</h2>
+        <section className="manuscript-professional-hero">
+          <div className="manuscript-professional-hero-main">
+            <div>
+              <p className="kicker">Manuscript details</p>
+              <div className="manuscript-professional-title-row">
+                <div>
+                  <span className="author-venue-type">{pretty(manuscript.manuscript_type)}</span>
+                  <h1>{manuscript.title}</h1>
+                  <p>{manuscript.manuscript_filename}</p>
+                </div>
+                {submission?.status && <AuthorStatusPill tone={statusTone(submission.status)}>{pretty(submission.status)}</AuthorStatusPill>}
               </div>
-              {submission?.status && <AuthorStatusPill tone={statusTone(submission.status)}>{pretty(submission.status)}</AuthorStatusPill>}
             </div>
-            <div className="manuscript-hero-stats">
-              <div><span>Readiness</span><b>{mechanical?.status ? pretty(mechanical.status) : 'Not run'}</b></div>
-              <div><span>Word count</span><b>{wordCount ? Number(wordCount).toLocaleString() : '—'}</b></div>
-              <div><span>Venue matches</span><b>{matches.length || 0}</b></div>
-              <div><span>Selected venue</span><b>{submission?.venue?.name || 'Not selected'}</b></div>
-            </div>
-            <button className="author-secondary-button" type="button" onClick={() => go('/author')}>Back to workspace</button>
-          </aside>
-        </div>
+            <button className="author-secondary-button manuscript-back-button" type="button" onClick={() => go('/author')}>Back to workspace</button>
+          </div>
 
-        <div className="manuscript-overview-grid manuscript-overview-single">
-          <section className="author-panel manuscript-summary-card">
+          <div className="manuscript-professional-metrics">
+            <div><span>Readiness</span><b>{mechanical?.status ? pretty(mechanical.status) : 'Not run'}</b></div>
+            <div><span>Word count</span><b>{wordCount ? Number(wordCount).toLocaleString() : '—'}</b></div>
+            <div><span>Venue matches</span><b>{matches.length || 0}</b></div>
+            <div><span>Selected venue</span><b>{submission?.venue?.name || 'Not selected'}</b></div>
+            <div><span>Submission</span><b>{submission?.status ? pretty(submission.status) : 'Not submitted'}</b></div>
+          </div>
+        </section>
+
+        <div className="manuscript-professional-grid">
+          <section className="author-panel manuscript-summary-card manuscript-primary-card">
             <div className="manuscript-section-head"><div><p className="kicker">Manuscript</p><h2>Uploaded file and author details</h2></div></div>
             <div className="manuscript-meta-grid">
               <DetailRow label="Title" value={manuscript.title} />
@@ -168,6 +168,34 @@ export default function AuthorManuscriptDetails() {
             {manuscript.disclosure && <div style={{ marginTop: '18px' }}><h3>AI-use disclosure</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.disclosure}</p></div>}
             {manuscript.notes && <div style={{ marginTop: '18px' }}><h3>Author notes</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.notes}</p></div>}
           </section>
+          <aside className="manuscript-professional-side">
+            <section className="author-panel manuscript-side-card">
+              <div className="manuscript-section-head">
+                <div><p className="kicker">Workflow</p><h2>Current state</h2></div>
+              </div>
+              <div className="manuscript-side-list">
+                <DetailRow label="Readiness" value={mechanical?.status ? pretty(mechanical.status) : 'Not run'} />
+                <DetailRow label="Venue matches" value={matches.length ? `${matches.length} available` : 'None recorded'} />
+                <DetailRow label="Selected venue" value={submission?.venue?.name || 'Not selected'} />
+                <DetailRow label="Submission status" value={submission?.status ? pretty(submission.status) : 'No venue submission yet'} />
+                <DetailRow label="Retention" value={submission?.retention_purged_at ? `Purged ${formatDate(submission.retention_purged_at)}` : submission?.retention_expires_at ? `Expires ${formatDate(submission.retention_expires_at)}` : 'No expiry recorded'} />
+              </div>
+            </section>
+
+            {submission && <section className="author-panel manuscript-side-card">
+              <div className="manuscript-section-head">
+                <div><p className="kicker">Latest submission</p><h2>{submission.venue?.name || 'Venue submission'}</h2></div>
+              </div>
+              <div className="manuscript-side-list">
+                <DetailRow label="Status" value={pretty(submission.status)} />
+                <DetailRow label="Submitted" value={formatDate(submission.submitted_at)} />
+                <DetailRow label="Requirements" value={requirements.configured ? (requirements.complete ? 'Complete' : 'Action required') : 'None configured'} />
+                <DetailRow label="Evidence" value={`${submission.evidence?.length || 0} item${(submission.evidence?.length || 0) === 1 ? '' : 's'}`} />
+              </div>
+            </section>}
+          </aside>
+        </div>
+
 
         </div>
 
