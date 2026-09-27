@@ -174,7 +174,6 @@ export default function AuthorVenueMatches() {
 
       <div className="author-bottom-actions">
         <button className="author-secondary-button" type="button" onClick={() => go('/author/readiness')}>Back to readiness</button>
-        {matches.length > 0 && manuscript?.parsed_profile?.semantic && <button className="author-secondary-button" type="button" onClick={runSemanticMatching} disabled={agentBusy}>{agentBusy ? 'Refreshing…' : 'Refresh semantic explanations'}</button>}
       </div>
     </div>
   </PublicationShell>
