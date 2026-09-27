@@ -64,7 +64,7 @@ export async function fetchAuthorManuscripts() {
 
 export function hasAuthorSession() {
   const session = getAuthorSession()
-  return Boolean(session.manuscriptId && session.accessToken)
+  return Boolean(session.manuscriptId)
 }
 
 export async function authorApi(path, options = {}) {
