@@ -1655,3 +1655,273 @@
     justify-self:end;
   }
 }
+
+
+/* =========================================================
+   Professional compact submission status page
+   ========================================================= */
+.author-status-page .author-page-heading.author-heading-row{
+  max-width:none!important;
+  width:100%!important;
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:12px;
+  align-items:center;
+  margin:10px 0 12px;
+}
+.author-status-page .author-page-heading.author-heading-row>div:first-child{
+  max-width:none;
+  min-width:0;
+  padding:14px 16px;
+}
+.author-status-page .author-page-heading .publication-title{
+  font-size:30px!important;
+  line-height:1.04;
+  margin:2px 0 6px!important;
+}
+.author-status-page .author-page-heading .publication-lede{
+  max-width:980px;
+  font-size:12px;
+  line-height:1.45;
+}
+.author-status-page .author-page-heading>.author-status-pill{
+  align-self:center;
+  justify-self:end;
+  min-width:0;
+  width:auto!important;
+  height:auto!important;
+  writing-mode:horizontal-tb!important;
+  padding:5px 9px;
+  font-size:10px;
+  white-space:nowrap;
+}
+
+/* Decision banner */
+.author-decision-banner{
+  border:1px solid;
+  border-left-width:4px;
+  border-radius:12px;
+  padding:14px 16px;
+  margin-bottom:12px;
+}
+.author-decision-banner-inner{
+  display:flex;
+  align-items:flex-start;
+  gap:11px;
+}
+.author-decision-icon{
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:15px;
+  font-weight:700;
+  flex-shrink:0;
+}
+.author-decision-content{
+  min-width:0;
+  flex:1;
+}
+.author-decision-content>h3{
+  margin:1px 0 5px;
+  font-size:15px;
+  line-height:1.3;
+  color:#1c1917;
+}
+.author-decision-note{
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:8px;
+  background:rgba(255,255,255,.72);
+  color:#374151;
+}
+.author-decision-note-label{
+  margin:0 0 3px!important;
+  font-size:9px!important;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:#6b7280;
+}
+.author-decision-note p:last-child{
+  margin:0;
+  font-size:11.5px;
+  line-height:1.45;
+}
+.author-decision-meta{
+  display:flex;
+  flex-wrap:wrap;
+  gap:12px;
+  margin-top:7px;
+  color:#6b7280;
+  font-size:10.5px;
+}
+
+/* Main status cards */
+.author-status-page .author-status-layout{
+  grid-template-columns:minmax(0,1.85fr) minmax(270px,.58fr);
+  gap:12px;
+  align-items:start;
+}
+.author-status-page .author-status-card{
+  padding:16px 18px;
+  border-radius:13px;
+  box-shadow:0 5px 18px rgba(28,26,23,.035);
+}
+.author-status-page .author-status-header{
+  gap:14px;
+  padding-bottom:11px;
+}
+.author-status-page .author-status-header h2{
+  font-size:24px;
+  line-height:1.08;
+  margin:2px 0;
+}
+.author-status-page .author-status-header p{
+  font-size:10.5px;
+}
+.author-status-page .author-status-header .author-status-pill{
+  font-size:9px;
+  padding:3px 7px;
+}
+
+/* Packet checklist becomes compact structured grid */
+.author-status-page .author-packet-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  padding:10px 0 3px;
+}
+.author-status-page .author-packet-list>div{
+  grid-template-columns:22px 1fr;
+  gap:7px;
+  padding:8px 9px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fcfaf8;
+}
+.author-status-page .author-packet-list>div:last-child{
+  border-bottom:1px solid var(--line);
+}
+.author-status-page .author-packet-list>div>span{
+  width:19px;
+  height:19px;
+  font-size:9px;
+}
+.author-status-page .author-packet-list b{
+  font-size:11.5px;
+}
+.author-status-page .author-packet-list small{
+  font-size:10.25px;
+  line-height:1.35;
+  margin-top:2px;
+}
+
+/* Venue requirements */
+.author-status-page .author-requirements-card{
+  margin-top:12px;
+  padding-top:12px;
+}
+.author-status-page .author-requirements-list{
+  gap:8px;
+  margin-top:10px;
+}
+.author-status-page .author-requirement-row{
+  padding:9px 10px;
+  border-radius:9px;
+}
+
+/* Editorial workflow callout */
+.author-status-page .author-submit-callout{
+  gap:12px;
+  padding:12px 14px;
+  margin-top:10px;
+  border-radius:11px;
+}
+.author-status-page .author-submit-callout h3{
+  font-size:20px;
+  margin:1px 0 3px;
+}
+.author-status-page .author-submit-callout p{
+  font-size:10.75px;
+  line-height:1.4;
+}
+
+/* Sidebar */
+.author-status-page .author-sidebar{
+  position:static;
+  gap:10px;
+}
+.author-status-page .author-sidebar .author-guide-card,
+.author-status-page .author-sidebar .author-transfer-card{
+  padding:14px;
+  border-radius:12px;
+}
+.author-status-page .author-sidebar h2{
+  font-size:21px;
+  margin:3px 0 8px;
+}
+.author-status-page .author-timeline{
+  margin-top:10px;
+}
+.author-status-page .author-timeline>div{
+  grid-template-columns:15px 1fr;
+  gap:8px;
+  padding-bottom:12px;
+}
+.author-status-page .author-timeline>div::before{
+  left:5px;
+  top:11px;
+  bottom:-3px;
+}
+.author-status-page .author-timeline>div>span{
+  width:11px;
+  height:11px;
+  margin-top:2px;
+}
+.author-status-page .author-timeline b{
+  font-size:11.5px;
+}
+.author-status-page .author-timeline small{
+  font-size:10px;
+  line-height:1.35;
+}
+.author-status-page .author-transfer-card p{
+  font-size:10.75px;
+  line-height:1.42;
+}
+.author-status-page .author-transfer-card .author-secondary-button{
+  min-height:32px;
+  font-size:10.5px;
+}
+
+/* Bottom actions */
+.author-status-page .author-bottom-actions{
+  margin-top:10px;
+  padding-top:10px;
+}
+.author-status-page .author-bottom-actions button{
+  min-height:32px;
+  padding:6px 10px;
+  font-size:10.5px;
+}
+
+@media(max-width:980px){
+  .author-status-page .author-status-layout{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:680px){
+  .author-status-page .author-page-heading.author-heading-row{
+    grid-template-columns:1fr!important;
+  }
+  .author-status-page .author-page-heading>.author-status-pill{
+    justify-self:start;
+  }
+  .author-status-page .author-packet-list{
+    grid-template-columns:1fr;
+  }
+}
