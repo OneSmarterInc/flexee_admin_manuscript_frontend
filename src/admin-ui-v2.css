@@ -858,3 +858,64 @@
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* Editor workspace structural details from approved concept */
+.admin-ui-v2 .editor-queue{
+  overflow:hidden;
+}
+.admin-ui-v2 .editor-queue-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 16px;
+  border-bottom:1px solid var(--admin-line);
+  background:#fff;
+  position:sticky;
+  top:0;
+  z-index:2;
+}
+.admin-ui-v2 .editor-queue-head h2{
+  margin:0;
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:22px;
+  font-weight:400;
+}
+.admin-ui-v2 .editor-queue-head span{
+  color:var(--admin-muted);
+  font-size:10px;
+}
+.admin-ui-v2 .editor-queue-scroll{
+  max-height:620px;
+  overflow:auto;
+  scrollbar-width:thin;
+}
+.admin-ui-v2 .editor-summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:8px;
+  margin:0 0 10px;
+}
+.admin-ui-v2 .editor-summary-grid>div{
+  padding:9px 10px;
+  border:1px solid var(--admin-line);
+  border-radius:10px;
+  background:#fcfaf8;
+}
+.admin-ui-v2 .editor-summary-grid span{
+  display:block;
+  color:var(--admin-muted);
+  font-size:8px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.admin-ui-v2 .editor-summary-grid b{
+  display:block;
+  margin-top:3px;
+  font-size:11.5px;
+}
+@media(max-width:760px){
+  .admin-ui-v2 .editor-summary-grid{grid-template-columns:repeat(2,1fr)}
+}
