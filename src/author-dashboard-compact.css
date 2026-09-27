@@ -95,3 +95,50 @@
   .author-dashboard-topbar .author-compact-actions{width:100%;margin-left:0}
   .author-hero-summary-strip{display:none}
 }
+
+
+/* Wider, more readable author dashboard */
+.author-dashboard-compact{
+  max-width:1460px;
+  padding-left:22px;
+  padding-right:22px;
+}
+.author-dashboard-compact .crumb{
+  font-size:11.5px;
+}
+.author-compact-hero .publication-title{
+  font-size:36px;
+}
+.author-compact-hero .publication-lede{
+  font-size:13.5px;
+}
+.author-compact-stats .author-stat-label{
+  font-size:10px;
+}
+.author-table-toolbar .kicker{
+  font-size:10px;
+}
+.author-table-toolbar h2{
+  font-size:26px;
+}
+.author-manuscript-table th{
+  font-size:9.5px;
+}
+.author-manuscript-table td{
+  font-size:12px;
+}
+.author-manuscript-table td b{
+  font-size:12.25px;
+}
+.author-table-type{
+  font-size:10px;
+}
+.author-manuscript-table .author-status-pill{
+  font-size:10px;
+}
+.author-table-action{
+  font-size:11px;
+}
+@media(max-width:1200px){
+  .author-dashboard-compact{max-width:100%}
+}
