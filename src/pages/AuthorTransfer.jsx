@@ -22,7 +22,7 @@ export default function AuthorTransfer() {
   useEffect(() => {
     async function load() {
       const session = getAuthorSession()
-      if (!session.submissionId || !session.accessToken) {
+      if (!session.submissionId) {
         setError('No venue submission is available to transfer.')
         setLoading(false)
         return
@@ -47,7 +47,7 @@ export default function AuthorTransfer() {
 
   async function prepareTransfer() {
     const target = venues.find(item => item.id === choice)
-    if (!target || !submission || !['rejected', 'withdrawn'].includes(submission.status)) return
+    if (!target || !submission || !['rejected', 'revision_requested', 'withdrawn'].includes(submission.status)) return
 
     setBusy(true)
     setError('')
@@ -95,10 +95,10 @@ export default function AuthorTransfer() {
       </div>
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Transfer</p><h2>Loading available venues…</h2></section> :
-        submission && !['rejected', 'withdrawn'].includes(submission.status) ? <section className="author-panel author-live-state">
+        submission && !['rejected', 'revision_requested', 'withdrawn'].includes(submission.status) ? <section className="author-panel author-live-state">
           <p className="kicker">Transfer not available yet</p>
           <h2>This submission has not reached a transferable state.</h2>
-          <p className="author-muted-copy">Transfers are available after a rejection or withdrawal. If you have not submitted yet and want another destination, return to venue matches instead.</p>
+          <p className="author-muted-copy">Transfers are available after a rejection, revision request, or withdrawal. If you have not submitted yet and want another destination, return to venue matches instead.</p>
           <button className="author-secondary-button" type="button" onClick={() => go('/author/status')}>Back to submission status</button>
         </section> :
         submission && <div className="author-transfer-layout">
@@ -134,7 +134,7 @@ export default function AuthorTransfer() {
 
             <div className="author-form-actions">
               <button className="author-secondary-button" type="button" onClick={() => go('/author/status')}>Cancel</button>
-              <button className="copper-button" type="button" onClick={prepareTransfer} disabled={!choice || busy || !['rejected', 'withdrawn'].includes(submission.status)}>{busy ? 'Preparing transfer…' : 'Prepare transfer packet'}</button>
+              <button className="copper-button" type="button" onClick={prepareTransfer} disabled={!choice || busy || !['rejected', 'revision_requested', 'withdrawn'].includes(submission.status)}>{busy ? 'Preparing transfer…' : 'Prepare transfer packet'}</button>
             </div>
           </section>
 
