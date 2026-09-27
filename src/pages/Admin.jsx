@@ -18,7 +18,7 @@ function StatusPill({ value }) { return <span className={`admin-badge ${value ||
 
 function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
   return (
-    <div className="admin-page" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div className="admin-page admin-ui-v2" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
       
       {sidebar && (
         <button 
@@ -37,7 +37,7 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
 
       {sidebar && (
         <aside style={{ 
-          width: sidebarOpen ? '280px' : '0px', 
+          width: sidebarOpen ? '250px' : '0px', 
           opacity: sidebarOpen ? 1 : 0,
           overflow: 'hidden',
           flexShrink: 0, 
@@ -50,13 +50,19 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
           zIndex: 10,
           transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
         }}>
-          <div style={{ width: '280px', height: '100%', paddingTop: '80px' }}>
+          <div className="admin-ui-sidebar-inner" style={{ width: '250px', height: '100%', paddingTop: '72px' }}>
             {sidebar}
           </div>
         </aside>
       )}
-      <main style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
-        <div className="admin-shell" style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 48px' }}>
+      <main className="admin-ui-main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+        <div className="admin-ui-topbar">
+          <div>
+            <span>Flexee</span>
+            <strong>Editorial Admin</strong>
+          </div>
+        </div>
+        <div className="admin-shell admin-ui-shell" style={{ maxWidth: '1500px', margin: '0 auto', padding: '24px 28px 40px' }}>
           {children}
         </div>
       </main>
@@ -565,7 +571,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   useEffect(() => { load() }, [query, currentView])
   async function logout() { await api('/api/admin/logout/', { method: 'POST', body: '{}' }); onLogout() }
   const sidebarContent = (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 24px 32px 24px' }}>
+    <div className="admin-ui-sidebar-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 16px 20px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px', paddingLeft: '8px' }}>
         <div style={{ width: '32px', height: '32px', background: 'var(--copper)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: '18px', fontFamily: "'Instrument Serif', serif" }}>F</div>
         <h1 style={{ margin: 0, fontSize: '28px', fontFamily: "'Instrument Serif', Georgia, serif", color: 'var(--ink)', lineHeight: 1, fontWeight: 'bold' }}>Flexee</h1>
