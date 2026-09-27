@@ -853,3 +853,282 @@
 @media(max-width:760px){
   .author-venue-table-wrap{max-height:none}
 }
+
+
+/* =========================================================
+   Author portal visual system pass
+   Wider desktop canvas + readable typography + consistent UI
+   Presentation only: no workflow or API behavior changes.
+   ========================================================= */
+
+.publication-main:has(.author-flow-page){
+  padding-top:18px;
+}
+.author-flow-page{
+  max-width:1480px;
+  padding-left:22px;
+  padding-right:22px;
+}
+
+/* Shared typography */
+.author-flow-page .kicker{
+  font-size:10px;
+  letter-spacing:.105em;
+}
+.author-flow-page .publication-lede,
+.author-flow-page .author-muted-copy{
+  font-size:12.5px;
+  line-height:1.5;
+}
+.author-flow-page .author-page-heading .publication-title{
+  font-size:34px;
+}
+.author-flow-page .author-status-pill{
+  font-size:10px;
+  padding:3px 7px;
+}
+
+/* Progress bar */
+.author-flow-page .author-flow-nav{
+  gap:7px;
+}
+.author-flow-page .author-flow-step{
+  min-height:40px;
+  padding:7px 10px;
+  border-radius:10px;
+}
+.author-flow-page .author-flow-number{
+  width:21px;
+  height:21px;
+  font-size:9.5px;
+}
+.author-flow-page .author-flow-step>span:last-child{
+  font-size:11.5px;
+}
+.author-flow-page .author-prototype-notice{
+  font-size:11.5px;
+  line-height:1.45;
+  padding:8px 11px;
+}
+
+/* Buttons */
+.author-flow-page .copper-button,
+.author-flow-page .author-secondary-button,
+.author-flow-page button.author-primary-action{
+  min-height:36px;
+  padding:8px 14px;
+  font-size:12px;
+  border-radius:8px;
+}
+
+/* New submission */
+.author-flow-page .author-form-layout{
+  grid-template-columns:minmax(0,2.2fr) minmax(250px,.62fr);
+  gap:16px;
+}
+.author-flow-page .author-form-section{
+  padding:20px;
+}
+.author-flow-page .author-form-section h2{
+  font-size:25px;
+}
+.author-flow-page .author-form-section-head p{
+  font-size:12px;
+}
+.author-flow-page .author-workflow-form label{
+  font-size:12px;
+}
+.author-flow-page .author-workflow-form input[type=text],
+.author-flow-page .author-workflow-form input[type=email],
+.author-flow-page .author-workflow-form input[type=number],
+.author-flow-page .author-workflow-form select,
+.author-flow-page .author-workflow-form textarea{
+  font-size:12.5px;
+  min-height:38px;
+}
+.author-flow-page .author-workflow-form textarea{
+  min-height:88px;
+}
+.author-flow-page .author-mini-note b,
+.author-flow-page .author-mini-note span{
+  font-size:11.5px;
+}
+
+/* Readiness */
+.author-readiness-hero{
+  grid-template-columns:minmax(0,1.9fr) minmax(380px,.8fr);
+}
+.author-readiness-hero-copy{
+  padding:13px 15px;
+}
+.author-readiness-hero-copy .publication-title{
+  font-size:29px!important;
+}
+.author-readiness-hero-copy .publication-lede{
+  font-size:12.5px;
+}
+.author-readiness-summary .author-readiness-score small{
+  font-size:10.5px;
+}
+.author-readiness-metrics span{
+  font-size:8.5px;
+}
+.author-readiness-metrics b{
+  font-size:11.5px;
+}
+.author-flow-page .author-check-title h3{
+  font-size:12px;
+}
+.author-flow-page .author-check-row p{
+  font-size:11.5px;
+}
+.author-flow-page .author-evidence-locator{
+  font-size:10px;
+}
+.author-flow-page .author-definition-list dt{
+  font-size:9.5px;
+}
+.author-flow-page .author-definition-list dd{
+  font-size:11.5px;
+}
+
+/* Venue matching header */
+.author-venues-hero{
+  grid-template-columns:minmax(0,1.9fr) minmax(330px,.62fr);
+  padding:15px 17px;
+}
+.author-venues-hero .publication-title{
+  font-size:33px!important;
+}
+.author-venues-hero .publication-lede{
+  font-size:12.5px;
+  max-width:900px;
+}
+.author-venues-summary span{
+  font-size:8.5px;
+}
+.author-venues-summary b{
+  font-size:21px;
+}
+
+/* Venue comparison table: compact but readable */
+.author-venue-table-wrap{
+  max-height:590px;
+}
+.author-venue-table{
+  min-width:1260px;
+}
+.author-venue-table thead th{
+  font-size:9px;
+  padding:9px 10px;
+}
+.author-venue-table tbody td{
+  font-size:10.75px;
+  line-height:1.38;
+  padding:10px;
+}
+.author-venue-table th:nth-child(1),.author-venue-table td:nth-child(1){width:4%}
+.author-venue-table th:nth-child(2),.author-venue-table td:nth-child(2){width:18%}
+.author-venue-table th:nth-child(3),.author-venue-table td:nth-child(3){width:10%}
+.author-venue-table th:nth-child(4),.author-venue-table td:nth-child(4){width:23%}
+.author-venue-table th:nth-child(5),.author-venue-table td:nth-child(5){width:19%}
+.author-venue-table th:nth-child(6),.author-venue-table td:nth-child(6){width:19%}
+.author-venue-table th:nth-child(7),.author-venue-table td:nth-child(7){width:7%}
+.author-venue-row-index{
+  width:25px;
+  height:25px;
+  font-size:9px;
+}
+.author-venue-table .author-venue-type{
+  font-size:8.5px;
+}
+.author-venue-table-name{
+  font-size:16.5px;
+  line-height:1.12;
+}
+.author-venue-table .author-status-pill{
+  font-size:9px;
+  padding:3px 7px;
+}
+.author-venue-table-summary{
+  font-size:10.75px;
+  line-height:1.42;
+}
+.author-venue-table-list{
+  font-size:10.25px;
+  line-height:1.38;
+  padding-left:15px;
+}
+.author-venue-table-list li{
+  margin-bottom:2px;
+}
+.author-venue-table-empty{
+  font-size:10.25px;
+}
+.author-flow-page .author-venue-table-action{
+  min-height:31px;
+  padding:6px 10px;
+  font-size:10px;
+}
+.author-venue-table tbody tr:nth-child(even) td{
+  background:rgba(250,247,243,.45);
+}
+.author-venue-table tbody tr:hover td{
+  background:#fff7f1;
+}
+
+/* Assessment, evidence, status and transfer */
+.author-flow-page .author-venue-context p,
+.author-flow-page .author-assessment-list p,
+.author-flow-page .author-evidence-list p,
+.author-flow-page .author-transfer-option p{
+  font-size:11.5px;
+}
+.author-flow-page .author-assessment-list span{
+  font-size:12px;
+}
+.author-flow-page .author-evidence-list h3{
+  font-size:12px;
+}
+.author-flow-page .author-transfer-option h3{
+  font-size:21px;
+}
+.author-flow-page .author-reuse-grid>div{
+  font-size:11.5px;
+}
+
+/* Manuscript detail readability */
+.manuscript-detail-page{
+  max-width:1480px;
+}
+.manuscript-detail-page .manuscript-detail-value,
+.manuscript-detail-page .manuscript-text-grid p,
+.manuscript-detail-page .manuscript-overview-status-grid b{
+  font-size:11.5px;
+}
+.manuscript-detail-page .manuscript-detail-label,
+.manuscript-detail-page .manuscript-text-grid h3,
+.manuscript-detail-page .manuscript-overview-status-grid span{
+  font-size:9px;
+}
+
+/* Responsive guardrails */
+@media(max-width:1200px){
+  .author-flow-page{
+    max-width:100%;
+    padding-left:20px;
+    padding-right:20px;
+  }
+}
+@media(max-width:980px){
+  .author-readiness-hero,
+  .author-venues-hero{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:600px){
+  .author-flow-page{
+    padding-left:16px;
+    padding-right:16px;
+  }
+}
