@@ -91,6 +91,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   const [feedbackField, setFeedbackField] = useState('outlet_fit')
   const [feedbackValue, setFeedbackValue] = useState('')
   const [feedbackReason, setFeedbackReason] = useState('')
+  const [detailTab, setDetailTab] = useState('brief')
 
   const query = useMemo(() => {
     const params = new URLSearchParams({ scope: 'editor' })
@@ -135,6 +136,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
       setDecisionNote('')
       setFeedbackValue('')
       setFeedbackReason('')
+      setDetailTab('brief')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -352,6 +354,22 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             <div><span>Status</span><b>{statusLabels[detail.status] || pretty(detail.status)}</b></div>
           </div>
 
+          <nav className="editor-detail-tabs" aria-label="Editorial packet sections">
+            {[
+              ['brief','Editorial brief'],
+              ['evidence','Evidence'],
+              ['rules','Venue rules'],
+              ['feedback','Agent feedback'],
+              ['decision','Decision'],
+            ].map(([value,label]) => <button
+              type="button"
+              key={value}
+              className={detailTab === value ? 'active' : ''}
+              onClick={() => setDetailTab(value)}
+            >{label}</button>)}
+          </nav>
+
+          {detailTab === 'brief' && <>
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">Manuscript</p>
             <div className="editor-manuscript-meta">
@@ -414,6 +432,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             </div>}
           </section>
 
+          </>}
+
+          {detailTab === 'evidence' && <>
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">Evidence trail</p>
             <h3>Findings linked to manuscript, venue policy, or verified sources</h3>
@@ -426,7 +447,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               </article>) : <p className="venue-admin-empty">No evidence findings are attached.</p>}
             </div>
           </section>
+          </>}
 
+          {detailTab === 'rules' && <>
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">Venue rule snapshot</p>
             <h3>Configuration used for this submission</h3>
@@ -437,7 +460,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               <div><span>Current demand</span><pre>{JSON.stringify(detail.venue_config.current_demand || {}, null, 2)}</pre></div>
             </div> : <p className="venue-admin-empty">No venue configuration snapshot is attached.</p>}
           </section>
+          </>}
 
+          {detailTab === 'feedback' && <>
           <section className="editor-detail-card">
             <p className="venue-admin-kicker">Correct the agent</p>
             <h3>Record venue-specific editor feedback</h3>
@@ -476,7 +501,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               </article>)}
             </div>}
           </section>
+          </>}
 
+          {detailTab === 'decision' && <>
           <section className="editor-detail-card editor-decision-card">
             <p className="venue-admin-kicker">Human decision</p>
             <h3>Final editorial authority stays here.</h3>
@@ -496,6 +523,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               <button className={`admin-btn ${decision === 'rejected' ? 'danger' : ''}`} type="submit" disabled={busy === 'decision'}>{busy === 'decision' ? 'Recording…' : `Record: ${statusLabels[decision]}`}</button>
             </form> : <p className="editor-card-copy">This submission is currently {statusLabels[detail.status] || detail.status}; no new decision action is available from this state.</p>}
           </section>
+          </>}
         </>}
       </section>
     </div>
