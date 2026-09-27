@@ -331,12 +331,18 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           <h3>The editorial brief, evidence, and decision tools will appear here.</h3>
         </div> : detailLoading || !detail ? <div className="venue-admin-state"><h3>Loading editorial packet…</h3></div> : <>
           <div className="editor-detail-head">
-            <div>
+            <div className="editor-detail-head-copy">
               <span className="editor-venue-name">{detail.venue?.name} · config v{detail.venue_config_version || '—'}</span>
               <h2>{detail.manuscript?.title}</h2>
               <p>{detail.manuscript?.author_name} · {pretty(detail.manuscript?.manuscript_type)}</p>
             </div>
-            <StatusPill value={detail.status} />
+            <div className="editor-detail-head-controls">
+              <StatusPill value={detail.status} />
+              <div className="editor-detail-actions">
+                <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download' || Boolean(detail.retention_purged_at)}>{detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
+                {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
+              </div>
+            </div>
           </div>
 
           {detail.retention_purged_at && <div className="venue-admin-success venue-admin-message">
@@ -345,11 +351,6 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           {!detail.retention_purged_at && detail.retention_expires_at && <div className="venue-admin-message">
             Retention expiry: {new Date(detail.retention_expires_at).toLocaleString()}
           </div>}
-
-          <div className="editor-detail-actions">
-            <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download' || Boolean(detail.retention_purged_at)}>{detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
-            {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
-          </div>
 
           <div className="editor-summary-grid">
             <div><span>Venue config</span><b>{detail.venue_config_version ? `v${detail.venue_config_version}` : '—'}</b></div>
