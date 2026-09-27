@@ -1641,3 +1641,17 @@
     justify-self:end;
   }
 }
+
+
+/* Assessment header must span full author-page width so the action card sits at far right */
+@media(min-width:1051px){
+  .author-flow-page .author-page-heading.author-heading-row{
+    max-width:none !important;
+    width:100% !important;
+    grid-template-columns:minmax(0,1fr) 360px !important;
+  }
+  .author-flow-page .author-page-heading.author-heading-row .author-assessment-choice{
+    margin-left:auto;
+    justify-self:end;
+  }
+}
