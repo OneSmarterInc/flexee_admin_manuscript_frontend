@@ -102,19 +102,26 @@ export default function AuthorVenueMatches() {
 
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Venue matching unavailable.</b> {error}</div>}
 
-      <div className="author-page-heading">
-        <p className="kicker">Venue matching</p>
-        <h1 className="publication-title">Compare fit before you choose.</h1>
-        <p className="publication-lede">Each participating venue is checked against the manuscript independently. The system explains alignment and gaps; it does not rank destinations or choose one for you.</p>
-      </div>
+      <section className="author-venues-hero">
+        <div>
+          <p className="kicker">Venue matching</p>
+          <h1 className="publication-title">Compare fit before you choose.</h1>
+          <p className="publication-lede">Each participating venue is checked against the manuscript independently. The system explains alignment and gaps; it does not rank destinations or choose one for you.</p>
+        </div>
+        <div className="author-venues-summary" aria-label="Venue matching summary">
+          <div><span>Venues</span><b>{matches.length}</b></div>
+          <div><span>Eligible</span><b>{matches.filter(item => item.eligibility === 'eligible').length}</b></div>
+          <div><span>Needs changes</span><b>{matches.filter(item => item.eligibility === 'needs_changes').length}</b></div>
+        </div>
+      </section>
 
       {agentBusy && <div className="author-prototype-notice" role="status"><b>Semantic matching is running.</b> The agent is evaluating each configured venue independently.</div>}
       {agentWarning && <div className="author-prototype-notice author-error-banner" role="note"><b>Matching note.</b> {agentWarning} {!agentBusy && manuscript?.parsed_profile?.semantic && <button className="author-text-link author-inline-action" type="button" onClick={runSemanticMatching}>Retry semantic matching</button>}</div>}
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Venue matching</p><h2>Loading participating venues…</h2></section> :
         matches.length ? <div className="author-match-list">
-          {matches.map(match => <article className="author-match-card" key={match.id}>
-            <div className="author-match-rank" aria-hidden="true">•</div>
+          {matches.map((match, index) => <article className="author-match-card author-match-card-structured" key={match.id}>
+            <div className="author-match-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</div>
             <div className="author-match-main">
               <div className="author-match-heading">
                 <div>
@@ -124,6 +131,7 @@ export default function AuthorVenueMatches() {
                 <AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill>
               </div>
               <p className="author-match-summary">{match.fit_summary || 'Venue configuration is available for review.'}</p>
+              <div className="author-match-divider" />
               <div className="author-match-columns">
                 <div>
                   <h3>Why it may fit</h3>
