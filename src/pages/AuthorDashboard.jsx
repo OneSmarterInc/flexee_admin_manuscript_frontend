@@ -160,7 +160,7 @@ export default function AuthorDashboard() {
         <div className="author-compact-hero-row">
           <div>
             <p className="kicker">Author workspace</p>
-            <h1 className="publication-title">{authorUser ? \`Welcome, \${authorUser.name}\` : 'Your manuscript workspace.'}</h1>
+            <h1 className="publication-title">{authorUser ? `Welcome, ${authorUser.name}` : 'Your manuscript workspace.'}</h1>
             <p className="publication-lede">Manage manuscripts, readiness, venue submissions, and editorial decisions.</p>
           </div>
           <div className="author-compact-actions">
