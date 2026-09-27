@@ -96,8 +96,8 @@ export default function AuthorSubmissionStatus() {
 
   async function load() {
     const session = getAuthorSession()
-    if (!session.submissionId || !session.accessToken) {
-      setError('No venue submission is active in this browser session. Choose a venue first.')
+    if (!session.submissionId) {
+      setError('No venue submission is active for this manuscript. Choose a venue first.')
       setLoading(false)
       return
     }
