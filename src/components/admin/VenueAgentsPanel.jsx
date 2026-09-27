@@ -143,6 +143,8 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   const [selectedId, setSelectedId] = useState('')
   const [selectedVenue, setSelectedVenue] = useState(null)
   const [configs, setConfigs] = useState([])
+  const [feedback, setFeedback] = useState([])
+  const [selectedFeedbackIds, setSelectedFeedbackIds] = useState([])
   const [venueForm, setVenueForm] = useState(null)
   const [configForm, setConfigForm] = useState({ ...emptyConfig })
   const [showCreate, setShowCreate] = useState(false)
@@ -163,6 +165,8 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
     else {
       setSelectedVenue(null)
       setConfigs([])
+      setFeedback([])
+      setSelectedFeedbackIds([])
       setVenueForm(null)
       setConfigForm({ ...emptyConfig })
     }
@@ -171,12 +175,15 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
 
   async function loadVenue(id) {
     setError('')
-    const [venuePayload, configPayloadResult] = await Promise.all([
+    const [venuePayload, configPayloadResult, feedbackPayload] = await Promise.all([
       api(`/api/admin/venues/${id}/`),
       api(`/api/admin/venues/${id}/configs/`),
+      api(`/api/admin/venues/${id}/feedback/`),
     ])
     const venue = venuePayload.venue
     const history = configPayloadResult.configs || []
+    setFeedback(feedbackPayload.feedback || [])
+    setSelectedFeedbackIds([])
     setSelectedVenue(venue)
     setVenueForm({
       name: venue.name || '',
@@ -275,6 +282,25 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
         body: '{}',
       })
       setSuccess(`Configuration v${config.version} is active again.`)
+      await loadVenue(selectedId)
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setBusy('')
+    }
+  }
+
+  async function createFeedbackDraft() {
+    if (!selectedId || !canManageSelected || !selectedFeedbackIds.length) return
+    setBusy('feedback-draft')
+    setError('')
+    setSuccess('')
+    try {
+      const result = await api(`/api/admin/venues/${selectedId}/feedback/draft-config/`, {
+        method: 'POST',
+        body: JSON.stringify({ feedback_ids: selectedFeedbackIds }),
+      })
+      setSuccess(`Draft configuration v${result.config.version} created from editor feedback. Review it below and activate it only if approved.`)
       await loadVenue(selectedId)
     } catch (err) {
       setError(err.message)
@@ -406,6 +432,40 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
             <Field label="Configuration notes"><textarea rows="7" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
           </div>
         </form>
+
+        <section className="venue-admin-card">
+          <div className="venue-admin-card-head">
+            <div>
+              <p className="venue-admin-kicker">Editor feedback</p>
+              <h3>Venue-specific learning queue</h3>
+              <p>Assessment corrections remain evidence only. Venue-rule corrections can be turned into an inactive draft configuration for owner review; the live Venue Agent is never changed automatically.</p>
+            </div>
+            {canManageSelected && selectedFeedbackIds.length > 0 && <button className="admin-btn" type="button" onClick={createFeedbackDraft} disabled={busy === 'feedback-draft'}>{busy === 'feedback-draft' ? 'Creating draft…' : `Create draft from ${selectedFeedbackIds.length} selected`}</button>}
+          </div>
+          <div className="venue-admin-history">
+            {feedback.length ? feedback.map(item => {
+              const selectable = item.draftable && !item.applied_to_config_version && canManageSelected
+              const selected = selectedFeedbackIds.includes(item.id)
+              return <article key={item.id}>
+                <div>
+                  <div className="venue-admin-history-title">
+                    {selectable && <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={e => setSelectedFeedbackIds(current => e.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))}
+                      aria-label={`Select ${item.assessment_field} feedback`}
+                    />}
+                    <b>{String(item.assessment_field || '').replaceAll('_', ' ')}</b>
+                    <SmallPill tone={item.draftable ? 'good' : 'neutral'}>{item.draftable ? 'Venue rule' : 'Assessment only'}</SmallPill>
+                    {item.applied_to_config_version && <SmallPill>Draft v{item.applied_to_config_version}</SmallPill>}
+                  </div>
+                  <p>{item.reason || 'No reason recorded.'}</p>
+                  <small>Recorded {new Date(item.created_at).toLocaleString()}{item.venue_config_version ? ` · Based on config v${item.venue_config_version}` : ''}</small>
+                </div>
+              </article>
+            }) : <div className="venue-admin-empty">No editor feedback has been recorded for this venue yet.</div>}
+          </div>
+        </section>
 
         <section className="venue-admin-card">
           <div className="venue-admin-card-head">
