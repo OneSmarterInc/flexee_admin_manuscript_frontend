@@ -1925,3 +1925,42 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* Make editorial decision banner more compact */
+.author-status-page .author-decision-banner{
+  padding:10px 12px;
+  margin-bottom:10px;
+  border-radius:10px;
+}
+.author-status-page .author-decision-banner-inner{
+  gap:9px;
+}
+.author-status-page .author-decision-icon{
+  width:26px;
+  height:26px;
+  font-size:13px;
+}
+.author-status-page .author-decision-content>h3{
+  margin:0 0 4px;
+  font-size:13.5px;
+  line-height:1.25;
+}
+.author-status-page .author-decision-note{
+  margin-top:6px;
+  padding:6px 8px;
+  border-radius:7px;
+}
+.author-status-page .author-decision-note-label{
+  margin-bottom:2px!important;
+  font-size:8px!important;
+}
+.author-status-page .author-decision-note p:last-child{
+  font-size:10.75px;
+  line-height:1.35;
+}
+.author-status-page .author-decision-meta{
+  gap:10px;
+  margin-top:5px;
+  font-size:9.75px;
+}
