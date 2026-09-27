@@ -1,0 +1,174 @@
+/* Professional compact author portal
+   Presentation-only overrides: no workflow, data, API, or navigation behavior changes. */
+
+.author-flow-page{max-width:1240px}
+.author-flow-page>.crumb{font-size:11px;margin-bottom:8px}
+.author-flow-page .kicker{font-size:9px;letter-spacing:.11em}
+.author-flow-page .publication-lede{font-size:13px;line-height:1.5}
+.author-flow-page .author-muted-copy{font-size:11.5px;line-height:1.45}
+
+/* Progress navigation */
+.author-flow-page .author-flow-nav{gap:6px;margin:0 0 10px}
+.author-flow-page .author-flow-step{gap:7px;border-radius:9px;padding:7px 9px;min-height:38px}
+.author-flow-page .author-flow-number{width:20px;height:20px;font-size:9px}
+.author-flow-page .author-flow-step>span:last-child{font-size:10.5px}
+.author-flow-page .author-prototype-notice{border-radius:9px;padding:8px 11px;font-size:11px;line-height:1.45;margin-bottom:14px}
+
+/* Page headings */
+.author-flow-page .author-page-heading{max-width:900px;margin:12px 0 18px}
+.author-flow-page .author-page-heading .publication-title{font-size:36px;line-height:1.04;margin:3px 0 8px}
+.author-flow-page .author-heading-row{gap:20px;align-items:flex-start}
+.author-flow-page .author-heading-row>div:first-child{max-width:760px}
+
+/* Universal author buttons */
+.author-flow-page .copper-button,
+.author-flow-page .author-secondary-button,
+.author-flow-page button.author-primary-action{min-height:34px;padding:8px 13px;border-radius:8px;font-size:11.5px;line-height:1.2}
+.author-flow-page .author-text-link{font-size:inherit}
+.author-flow-page .author-status-pill{padding:3px 7px;font-size:9px}
+
+/* Panels/cards */
+.author-flow-page .author-panel{border-radius:13px;box-shadow:0 4px 16px rgba(28,26,23,.04)}
+.author-flow-page .author-panel h2{font-size:24px}
+.author-flow-page .author-guide-card,
+.author-flow-page .author-human-card,
+.author-flow-page .author-next-card,
+.author-flow-page .author-evidence-card,
+.author-flow-page .author-transfer-card{padding:17px}
+.author-flow-page .author-sidebar{gap:12px}
+.author-flow-page .author-guide-card h2,
+.author-flow-page .author-human-card h2{font-size:22px}
+.author-flow-page .author-human-card p,
+.author-flow-page .author-next-card p,
+.author-flow-page .author-transfer-card p{font-size:11.5px;line-height:1.45}
+.author-flow-page .author-human-pill{padding:3px 7px;font-size:9px}
+
+/* New submission form */
+.author-flow-page .author-form-layout{grid-template-columns:minmax(0,1.9fr) minmax(230px,.58fr);gap:14px}
+.author-flow-page .author-workflow-form{gap:13px}
+.author-flow-page .author-form-section{border-radius:13px;padding:18px;box-shadow:0 4px 16px rgba(28,26,23,.04)}
+.author-flow-page .author-form-section-head{gap:10px;padding-bottom:12px;margin-bottom:14px}
+.author-flow-page .author-form-section-head>span{width:25px;height:25px;font-size:9px}
+.author-flow-page .author-form-section h2{font-size:24px}
+.author-flow-page .author-form-section-head p{font-size:11.5px}
+.author-flow-page .author-workflow-form .row{margin-bottom:12px}
+.author-flow-page .author-workflow-form label{font-size:11.5px;margin-bottom:5px}
+.author-flow-page .author-workflow-form input[type=text],
+.author-flow-page .author-workflow-form input[type=email],
+.author-flow-page .author-workflow-form input[type=number],
+.author-flow-page .author-workflow-form select,
+.author-flow-page .author-workflow-form textarea{width:100%;min-height:36px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;background:#fff;color:var(--ink);font-size:11.5px}
+.author-flow-page .author-workflow-form textarea{min-height:82px;line-height:1.45}
+.author-flow-page .author-workflow-form input[type=file]{width:100%;min-height:36px;border-radius:8px;padding:7px;font-size:10.5px}
+.author-flow-page .author-attestation{gap:8px!important;font-size:11px!important;line-height:1.45}
+.author-flow-page .author-form-actions{gap:8px;margin-top:0}
+.author-flow-page .author-form-aside{gap:10px;top:82px}
+.author-flow-page .author-mini-note{gap:2px;padding:11px 13px;border-radius:10px}
+.author-flow-page .author-mini-note b,.author-flow-page .author-mini-note span{font-size:10.5px}
+.author-flow-page .author-check-list{gap:11px;margin-top:13px}
+.author-flow-page .author-check-list>div{grid-template-columns:24px 1fr;gap:8px}
+.author-flow-page .author-check-list>div>span{width:22px;height:22px;font-size:10px}
+.author-flow-page .author-check-list b{font-size:11.5px}
+.author-flow-page .author-check-list small{font-size:10.5px;line-height:1.4}
+
+/* Readiness */
+.author-flow-page .author-readiness-score{min-width:220px;border-radius:12px;padding:13px 15px}
+.author-flow-page .author-readiness-score>span{font-size:8.5px}
+.author-flow-page .author-readiness-score strong{font-size:21px}
+.author-flow-page .author-readiness-score small{font-size:10.5px;margin-top:5px}
+.author-flow-page .author-report-grid{grid-template-columns:minmax(0,1.8fr) minmax(240px,.62fr);gap:14px}
+.author-flow-page .author-report-panel{padding:18px}
+.author-flow-page .author-check-row{grid-template-columns:27px 1fr;gap:10px;padding:12px 0}
+.author-flow-page .author-check-icon{width:24px;height:24px;font-size:10px}
+.author-flow-page .author-check-title h3{font-size:12px}
+.author-flow-page .author-check-row p{font-size:11px;line-height:1.45;margin-top:4px}
+.author-flow-page .author-definition-list{margin-top:11px}
+.author-flow-page .author-definition-list>div{grid-template-columns:68px 1fr;gap:9px;padding:7px 0}
+.author-flow-page .author-definition-list dt{font-size:9px}
+.author-flow-page .author-definition-list dd{font-size:10.5px}
+
+/* Venue matching */
+.author-flow-page .author-match-list{gap:10px}
+.author-flow-page .author-match-card{grid-template-columns:42px minmax(0,1fr) auto;gap:14px;border-radius:13px;padding:16px}
+.author-flow-page .author-match-rank{font-size:24px}
+.author-flow-page .author-match-heading h2{font-size:24px}
+.author-flow-page .author-venue-type{font-size:8.5px}
+.author-flow-page .author-match-summary{font-size:11.5px;line-height:1.45;margin:7px 0 11px}
+.author-flow-page .author-match-columns{gap:16px}
+.author-flow-page .author-match-columns h3{font-size:9px;margin-bottom:5px}
+.author-flow-page .author-match-columns ul{font-size:10.5px;line-height:1.4}
+.author-flow-page .author-match-columns li{margin:3px 0}
+
+/* Assessment */
+.author-flow-page .author-assessment-choice{min-width:200px;border-radius:12px;padding:13px;gap:7px}
+.author-flow-page .author-assessment-choice small{font-size:9.5px}
+.author-flow-page .author-venue-context{border-radius:12px;margin-bottom:14px}
+.author-flow-page .author-venue-context>div{padding:12px 14px}
+.author-flow-page .author-venue-context span{font-size:8.5px}
+.author-flow-page .author-venue-context p{font-size:10.5px;margin-top:4px}
+.author-flow-page .author-assessment-list article{padding:12px 0}
+.author-flow-page .author-assessment-list span{font-size:11.5px}
+.author-flow-page .author-assessment-list b{font-size:10px}
+.author-flow-page .author-assessment-list p{font-size:10.5px}
+.author-flow-page .author-evidence-list{gap:8px;margin-top:12px}
+.author-flow-page .author-evidence-list article{border-radius:9px;padding:10px}
+.author-flow-page .author-evidence-list h3{font-size:11px}
+.author-flow-page .author-evidence-list p{font-size:10.5px}
+
+/* Status / transfer */
+.author-flow-page .author-bottom-actions{gap:8px;margin-top:16px;padding-top:13px}
+.author-flow-page .author-transfer-layout{grid-template-columns:minmax(0,1.85fr) minmax(240px,.6fr);gap:14px}
+.author-flow-page .author-transfer-main{padding:18px}
+.author-flow-page .author-transfer-reuse{padding-bottom:15px}
+.author-flow-page .author-transfer-main h2{font-size:24px;margin:2px 0 9px}
+.author-flow-page .author-reuse-grid{gap:7px}
+.author-flow-page .author-reuse-grid>div{border-radius:8px;padding:8px 9px;font-size:10.5px}
+.author-flow-page .author-transfer-options{padding:15px 0 3px}
+.author-flow-page .author-transfer-option{grid-template-columns:17px 1fr;gap:10px;border-radius:10px;padding:11px!important;margin:8px 0!important}
+.author-flow-page .author-transfer-option h3{font-size:20px}
+.author-flow-page .author-transfer-option p{font-size:10.5px}
+.author-flow-page .author-transfer-meta{gap:7px;margin-top:7px}
+.author-flow-page .author-transfer-meta>span:last-child{font-size:9.5px}
+
+/* Manuscript details */
+.manuscript-detail-page .manuscript-professional-hero{border-radius:14px;padding:17px 19px;margin:6px 0 13px}
+.manuscript-detail-page .manuscript-professional-title-row h1{font-size:30px}
+.manuscript-detail-page .manuscript-professional-title-row p{font-size:11px}
+.manuscript-detail-page .manuscript-professional-metrics{margin-top:12px}
+.manuscript-detail-page .manuscript-professional-metrics>div{padding:9px 11px}
+.manuscript-detail-page .manuscript-professional-metrics span{font-size:8px}
+.manuscript-detail-page .manuscript-professional-metrics b{font-size:10.5px}
+.manuscript-detail-page .manuscript-overview-card,
+.manuscript-detail-page .manuscript-compact-section{padding:15px 17px;margin-top:12px}
+.manuscript-detail-page .manuscript-section-head{padding-bottom:8px;margin-bottom:8px}
+.manuscript-detail-page .manuscript-section-head h2{font-size:21px}
+.manuscript-detail-page .manuscript-detail-label{font-size:8px}
+.manuscript-detail-page .manuscript-detail-value{font-size:10.5px}
+.manuscript-detail-page .manuscript-text-grid{gap:7px 12px;margin-top:10px}
+.manuscript-detail-page .manuscript-text-grid>div{padding:8px 9px}
+.manuscript-detail-page .manuscript-text-grid h3{font-size:9px}
+.manuscript-detail-page .manuscript-text-grid p{font-size:10.5px}
+.manuscript-detail-page .manuscript-overview-status-grid{gap:7px;margin-top:11px;padding-top:11px}
+.manuscript-detail-page .manuscript-overview-status-grid article{padding:9px 10px}
+.manuscript-detail-page .manuscript-overview-status-grid span{font-size:8px}
+.manuscript-detail-page .manuscript-overview-status-grid b{font-size:10.5px}
+.manuscript-detail-page .manuscript-overview-status-grid small{font-size:9px}
+
+/* Keep compact presentation usable on smaller screens */
+@media(max-width:980px){
+  .author-flow-page .author-form-layout,
+  .author-flow-page .author-report-grid,
+  .author-flow-page .author-transfer-layout{grid-template-columns:1fr}
+  .author-flow-page .author-form-aside{position:static;grid-template-columns:1fr 1fr}
+}
+@media(max-width:720px){
+  .author-flow-page .author-page-heading .publication-title{font-size:31px}
+  .author-flow-page .author-form-aside{grid-template-columns:1fr}
+  .author-flow-page .author-match-card{grid-template-columns:35px 1fr}
+}
+@media(max-width:560px){
+  .author-flow-page{padding:0 16px}
+  .author-flow-page .author-form-section,
+  .author-flow-page .author-report-panel,
+  .author-flow-page .author-transfer-main{padding:15px}
+}
