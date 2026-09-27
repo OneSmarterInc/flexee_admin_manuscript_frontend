@@ -1626,3 +1626,18 @@
     max-width:360px;
   }
 }
+
+
+/* Force assessment action card to the far-right edge */
+@media(min-width:1051px){
+  .author-flow-page .author-heading-row{
+    grid-template-columns:minmax(0,1fr) 360px;
+    width:100%;
+  }
+  .author-flow-page .author-assessment-choice{
+    width:360px;
+    max-width:360px;
+    margin-left:auto;
+    justify-self:end;
+  }
+}
