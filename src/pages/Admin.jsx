@@ -57,10 +57,7 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
       )}
       <main className="admin-ui-main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
         <div className="admin-ui-topbar">
-          <div>
-            <span>Flexee</span>
-            <strong>Editorial Admin</strong>
-          </div>
+          <h1>Editorial Admin</h1>
         </div>
         <div className="admin-shell admin-ui-shell" style={{ maxWidth: '1500px', margin: '0 auto', padding: '24px 28px 40px' }}>
           {children}
@@ -572,40 +569,34 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   async function logout() { await api('/api/admin/logout/', { method: 'POST', body: '{}' }); onLogout() }
   const sidebarContent = (
     <div className="admin-ui-sidebar-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 16px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '40px', paddingLeft: '8px' }}>
-        <div style={{ width: '32px', height: '32px', background: 'var(--copper)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 'bold', fontSize: '18px', fontFamily: "'Instrument Serif', serif" }}>F</div>
-        <h1 style={{ margin: 0, fontSize: '28px', fontFamily: "'Instrument Serif', Georgia, serif", color: 'var(--ink)', lineHeight: 1, fontWeight: 'bold' }}>Flexee</h1>
+      <div className="admin-ui-brand">
+        <div className="admin-ui-brand-mark">F</div>
+        <h1>Flexee</h1>
       </div>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', paddingLeft: '16px' }}>Views</div>
+        <div className="admin-ui-nav-label">Views</div>
         
         {platformSuperuser && <>
         <button 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '10px 16px', borderRadius: '10px', border: 'none', background: filters.kind === '' ? 'rgba(168,92,50,0.1)' : 'transparent', textAlign: 'left', cursor: 'pointer', color: filters.kind === '' ? 'var(--copper)' : 'var(--ink)', fontWeight: filters.kind === '' ? 600 : 500, transition: 'all 0.2s', fontSize: '15px' }} 
+          className={`admin-side-nav-button ${currentView === 'dashboard' && filters.kind === '' ? 'active' : ''}`}
           onClick={() => setKindFilter('')}
-          onMouseEnter={e => e.currentTarget.style.background = filters.kind === '' ? 'rgba(168,92,50,0.1)' : 'rgba(28,26,23,0.04)'}
-          onMouseLeave={e => e.currentTarget.style.background = filters.kind === '' ? 'rgba(168,92,50,0.1)' : 'transparent'}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           All Submissions
         </button>
 
         <button 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '10px 16px', borderRadius: '10px', border: 'none', background: filters.kind === 'book' ? 'rgba(168,92,50,0.1)' : 'transparent', textAlign: 'left', cursor: 'pointer', color: filters.kind === 'book' ? 'var(--copper)' : 'var(--ink)', fontWeight: filters.kind === 'book' ? 600 : 500, transition: 'all 0.2s', fontSize: '15px' }} 
+          className={`admin-side-nav-button ${currentView === 'dashboard' && filters.kind === 'book' ? 'active' : ''}`}
           onClick={() => setKindFilter('book')}
-          onMouseEnter={e => e.currentTarget.style.background = filters.kind === 'book' ? 'rgba(168,92,50,0.1)' : 'rgba(28,26,23,0.04)'}
-          onMouseLeave={e => e.currentTarget.style.background = filters.kind === 'book' ? 'rgba(168,92,50,0.1)' : 'transparent'}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
           Books Only
         </button>
 
         <button 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '10px 16px', borderRadius: '10px', border: 'none', background: filters.kind === 'article' ? 'rgba(168,92,50,0.1)' : 'transparent', textAlign: 'left', cursor: 'pointer', color: filters.kind === 'article' ? 'var(--copper)' : 'var(--ink)', fontWeight: filters.kind === 'article' ? 600 : 500, transition: 'all 0.2s', fontSize: '15px' }} 
+          className={`admin-side-nav-button ${currentView === 'dashboard' && filters.kind === 'article' ? 'active' : ''}`}
           onClick={() => setKindFilter('article')}
-          onMouseEnter={e => e.currentTarget.style.background = filters.kind === 'article' ? 'rgba(168,92,50,0.1)' : 'rgba(28,26,23,0.04)'}
-          onMouseLeave={e => e.currentTarget.style.background = filters.kind === 'article' ? 'rgba(168,92,50,0.1)' : 'transparent'}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
           Articles Only
@@ -615,7 +606,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
 
         </>}
 
-        <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', paddingLeft: '16px' }}>Scholarly network</div>
+        <div className="admin-ui-nav-label">Scholarly network</div>
 
         <button
           className={`admin-side-nav-button ${currentView === 'editor' ? 'active' : ''}`}
@@ -646,20 +637,18 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
 
         <div style={{ height: '1px', background: 'rgba(28,26,23,0.08)', margin: '16px 0' }}></div>
         
-        <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 700, color: 'var(--muted)', marginBottom: '8px', paddingLeft: '16px' }}>Settings</div>
+        <div className="admin-ui-nav-label">Settings</div>
         
         {platformSuperuser && <button 
-          style={{ display: 'flex', alignItems: 'center', gap: '12px', width: '100%', padding: '10px 16px', borderRadius: '10px', border: 'none', background: currentView === 'smtp' ? 'rgba(168,92,50,0.1)' : 'transparent', textAlign: 'left', cursor: 'pointer', color: currentView === 'smtp' ? 'var(--copper)' : 'var(--ink)', fontWeight: 500, transition: 'all 0.2s', fontSize: '15px' }} 
+          className={`admin-side-nav-button ${currentView === 'smtp' ? 'active' : ''}`}
           onClick={() => setCurrentView('smtp')}
-          onMouseEnter={e => e.currentTarget.style.background = currentView === 'smtp' ? 'rgba(168,92,50,0.1)' : 'rgba(28,26,23,0.04)'}
-          onMouseLeave={e => e.currentTarget.style.background = currentView === 'smtp' ? 'rgba(168,92,50,0.1)' : 'transparent'}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
           Configure SMTP
         </button>}
       </div>
 
-      <div style={{ marginTop: 'auto', paddingTop: '20px', borderTop: '1px solid rgba(28,26,23,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="admin-ui-sidebar-user">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'linear-gradient(135deg, var(--copper), #e68d5c)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '14px' }}>
             {username.charAt(0).toUpperCase()}
@@ -686,10 +675,11 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
     
     {currentView === 'smtp' ? (
       <>
-        <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div className="admin-ui-page-head">
           <div>
-            <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '42px', fontWeight: 'normal', margin: '0 0 12px 0', color: 'var(--ink)', letterSpacing: '0', lineHeight: 1 }}>Setup SMTP</h2>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '16px' }}>Configure email delivery settings for notifications.</p>
+            <p className="venue-admin-kicker">Settings</p>
+            <h2>Setup SMTP</h2>
+            <p>Configure email delivery settings for notifications.</p>
           </div>
         </div>
         <SMTPSettingsPage />
@@ -702,10 +692,11 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
       <AuditLogPanel />
     ) : (
       <>
-        <div style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+        <div className="admin-ui-page-head">
           <div>
-            <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '42px', fontWeight: 'normal', margin: '0 0 12px 0', color: 'var(--ink)', letterSpacing: '0', lineHeight: 1 }}>Dashboard Overview</h2>
-            <p style={{ margin: 0, color: 'var(--muted)', fontSize: '16px' }}>Review results, delivery state, and submission diagnostics.</p>
+            <p className="venue-admin-kicker">Submission operations</p>
+            <h2>Dashboard Overview</h2>
+            <p>Review results, delivery state, and submission diagnostics.</p>
           </div>
         </div>
         <div className="admin-stats">
