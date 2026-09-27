@@ -69,16 +69,20 @@ export default function AuditLogPanel() {
     setApplied({ ...filters })
   }
 
-  return <div>
-    <div style={{ marginBottom: '28px' }}>
-      <p className="venue-admin-kicker">Production controls</p>
-      <h2 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '42px', fontWeight: 'normal', margin: '0 0 10px', color: 'var(--ink)' }}>Audit log</h2>
-      <p style={{ margin: 0, color: 'var(--muted)', maxWidth: '760px' }}>
-        Immutable records of editor/admin access and important editorial or configuration actions. Organization users only see events from organizations they belong to.
-      </p>
-    </div>
+  return <div className="audit-page">
+    <section className="audit-hero">
+      <div>
+        <p className="venue-admin-kicker">Production controls</p>
+        <h2>Audit log</h2>
+        <p>Immutable records of editor/admin access and important editorial or configuration actions. Organization users only see events from organizations they belong to.</p>
+      </div>
+      <div className="audit-hero-metric" aria-label="Audit event count">
+        <span>Recorded events</span>
+        <b>{loading ? '—' : total.toLocaleString()}</b>
+      </div>
+    </section>
 
-    <form className="admin-filters" onSubmit={apply}>
+    <form className="admin-filters audit-filters" onSubmit={apply}>
       <input
         type="search"
         placeholder="Search actor, action, role, or resource ID"
@@ -98,12 +102,16 @@ export default function AuditLogPanel() {
 
     {error && <div className="admin-error">{error}</div>}
 
-    <section className="admin-table-card">
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(28,26,23,0.08)', color: 'var(--muted)', fontSize: '13px' }}>
-        {loading ? 'Loading audit events…' : total.toLocaleString() + ' event' + (total === 1 ? '' : 's') + (total > 200 ? ' · showing newest 200' : '')}
+    <section className="admin-table-card audit-table-card">
+      <div className="audit-table-head">
+        <div>
+          <p className="venue-admin-kicker">Event history</p>
+          <h3>{loading ? 'Loading audit events…' : total.toLocaleString() + ' event' + (total === 1 ? '' : 's')}</h3>
+        </div>
+        {!loading && total > 200 && <span className="audit-limit-pill">Showing newest 200</span>}
       </div>
-      <div className="admin-table-wrap">
-        <table>
+      <div className="admin-table-wrap audit-table-wrap">
+        <table className="audit-table">
           <thead>
             <tr>
               <th>When</th>
@@ -115,8 +123,8 @@ export default function AuditLogPanel() {
           </thead>
           <tbody>
             {!loading && events.map(event => <tr key={event.id}>
-              <td style={{ whiteSpace: 'nowrap' }}>
-                <div>{new Date(event.occurred_at).toLocaleDateString()}</div>
+              <td className="audit-when">
+                <div className="audit-date">{new Date(event.occurred_at).toLocaleDateString()}</div>
                 <div className="data-meta">{new Date(event.occurred_at).toLocaleTimeString()}</div>
               </td>
               <td>
@@ -124,8 +132,8 @@ export default function AuditLogPanel() {
                 <div className="data-meta">{event.actor_role || '—'}</div>
               </td>
               <td>
-                <b>{labelAction(event.action)}</b>
-                <div className="data-meta">{event.action}</div>
+                <span className="audit-action-chip">{labelAction(event.action)}</span>
+                <div className="data-meta audit-action-code">{event.action}</div>
               </td>
               <td>
                 <div>{event.resource_type || '—'}</div>
@@ -135,9 +143,9 @@ export default function AuditLogPanel() {
                 {event.venue_submission_id && <div className="data-meta">Submission: {shortId(event.venue_submission_id)}</div>}
                 {event.venue_id && <div className="data-meta">Venue: {shortId(event.venue_id)}</div>}
                 {event.organization_id && <div className="data-meta">Organization: {shortId(event.organization_id)}</div>}
-                {event.detail && Object.keys(event.detail).length > 0 && <details style={{ marginTop: '6px' }}>
-                  <summary style={{ cursor: 'pointer', color: 'var(--copper)', fontSize: '12px' }}>Details</summary>
-                  <pre style={{ whiteSpace: 'pre-wrap', maxWidth: '420px', fontSize: '11px', margin: '8px 0 0' }}>{JSON.stringify(event.detail, null, 2)}</pre>
+                {event.detail && Object.keys(event.detail).length > 0 && <details className="audit-details">
+                  <summary>Details</summary>
+                  <pre>{JSON.stringify(event.detail, null, 2)}</pre>
                 </details>}
               </td>
             </tr>)}
