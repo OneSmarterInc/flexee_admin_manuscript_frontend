@@ -5,6 +5,7 @@ import './styles.css'
 import './admin-action-modal-polish.css'
 import './zip-summary-format.css'
 import './author-auth.css'
+import './author-dashboard-compact.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode><App /></React.StrictMode>
