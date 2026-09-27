@@ -1132,3 +1132,167 @@
     padding-right:16px;
   }
 }
+
+
+/* Structured professional venue cards */
+.author-venue-card-section{
+  margin-top:0;
+}
+.author-venue-card-section-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:16px;
+  margin:0 0 8px;
+  padding:0 2px;
+}
+.author-venue-card-section-head .kicker{margin:0 0 2px}
+.author-venue-card-section-head h2{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:24px;
+  font-weight:400;
+  line-height:1;
+  margin:0;
+}
+.author-venue-card-section-head>span{
+  font-size:10px;
+  font-weight:700;
+  color:var(--muted);
+}
+
+.author-venue-card-grid{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.author-venue-pro-card{
+  display:grid;
+  grid-template-rows:auto auto 1fr auto;
+  min-width:0;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 5px 18px rgba(28,26,23,.04);
+  overflow:hidden;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.author-venue-pro-card:hover{
+  transform:translateY(-1px);
+  border-color:#d9c8bb;
+  box-shadow:0 10px 26px rgba(28,26,23,.065);
+}
+.author-venue-pro-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:12px 13px 8px;
+}
+.author-venue-pro-identity{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  min-width:0;
+}
+.author-venue-pro-identity>div{
+  min-width:0;
+}
+.author-venue-pro-card .author-venue-type{
+  display:block;
+  margin:0 0 2px;
+  font-size:8.5px;
+}
+.author-venue-pro-card h3{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:20px;
+  font-weight:400;
+  line-height:1.08;
+  margin:0;
+}
+.author-venue-pro-card .author-status-pill{
+  flex-shrink:0;
+  font-size:9.5px;
+  padding:3px 7px;
+}
+.author-venue-pro-summary{
+  margin:0;
+  padding:0 13px 10px;
+  color:#5f5851;
+  font-size:11.25px;
+  line-height:1.42;
+}
+.author-venue-pro-details{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:0 13px 11px;
+}
+.author-venue-pro-details>section{
+  min-width:0;
+  border:1px solid #ebe2da;
+  border-radius:10px;
+  background:#fcfaf8;
+  padding:8px 9px;
+}
+.author-venue-pro-label{
+  display:block;
+  margin-bottom:5px;
+  color:#736a62;
+  text-transform:uppercase;
+  letter-spacing:.075em;
+  font-size:8.5px;
+  font-weight:800;
+}
+.author-venue-pro-scroll{
+  max-height:94px;
+  overflow:auto;
+  padding-right:3px;
+  scrollbar-width:thin;
+}
+.author-venue-pro-scroll ul{
+  margin:0;
+  padding-left:14px;
+  font-size:10.25px;
+  line-height:1.34;
+}
+.author-venue-pro-scroll li{
+  margin:0 0 3px;
+}
+.author-venue-pro-scroll .gaps li::marker{
+  color:#a87720;
+}
+.author-venue-pro-scroll p{
+  margin:0;
+  color:var(--muted);
+  font-size:10.25px;
+  line-height:1.35;
+}
+.author-venue-pro-footer{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  min-height:45px;
+  padding:8px 13px;
+  border-top:1px solid var(--line);
+  background:linear-gradient(180deg,#fff,#fcfaf8);
+}
+.author-venue-pro-footer>span{
+  color:var(--muted);
+  font-size:9.5px;
+}
+.author-venue-pro-footer .author-secondary-button{
+  min-height:31px;
+  padding:6px 10px;
+  font-size:10.5px;
+  white-space:nowrap;
+}
+
+@media(max-width:1080px){
+  .author-venue-card-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .author-venue-pro-details{grid-template-columns:1fr}
+  .author-venue-pro-footer{align-items:stretch;flex-direction:column}
+  .author-venue-pro-footer .author-secondary-button{width:100%}
+}
