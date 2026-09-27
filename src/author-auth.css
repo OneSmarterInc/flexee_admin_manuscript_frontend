@@ -32,3 +32,30 @@
 .author-auth-card .author-error-banner{margin:0 0 2px}
 @media(max-width:900px){.author-auth-shell{grid-template-columns:1fr;gap:22px;min-height:auto}.author-auth-intro{padding-bottom:0}.author-auth-intro h1{font-size:46px}.author-auth-card{max-width:620px;width:100%}}
 @media(max-width:560px){.author-auth-page{padding-left:18px;padding-right:18px}.author-auth-shell{padding-top:12px}.author-auth-intro h1{font-size:38px}.author-auth-lede{font-size:16px}.author-auth-card{padding:25px 20px;border-radius:14px}.author-auth-benefits{margin-top:28px}}
+
+
+/* Author authentication visual consistency */
+.author-auth-page{
+  max-width:1320px;
+  padding-left:22px;
+  padding-right:22px;
+}
+.author-auth-shell{
+  grid-template-columns:minmax(0,1.25fr) minmax(380px,.75fr);
+  gap:46px;
+}
+.author-auth-intro h1{
+  font-size:50px;
+}
+.author-auth-lede{
+  font-size:16px;
+}
+.author-auth-card{
+  padding:30px;
+}
+.author-auth-card-head h2{
+  font-size:32px;
+}
+@media(max-width:900px){
+  .author-auth-page{max-width:100%}
+}
