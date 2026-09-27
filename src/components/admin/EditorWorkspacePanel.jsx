@@ -262,6 +262,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
         <h2>Human editorial review</h2>
         <p>Review the venue-specific brief and evidence, record corrections, and make the final editorial decision.</p>
       </div>
+      <button className="admin-btn secondary editor-refresh-btn" type="button" onClick={loadQueue} disabled={loading}>
+        {loading ? 'Refreshing…' : 'Refresh queue'}
+      </button>
     </div>
 
     {error && <div className="admin-error venue-admin-message">{error}</div>}
@@ -290,6 +293,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
         <option value="">All editorial statuses</option>
         {Object.entries(statusLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}
       </select>
+      <button className="admin-btn secondary editor-apply-btn" type="button" onClick={loadQueue}>Apply</button>
     </div>
 
     <div className="editor-grid">
