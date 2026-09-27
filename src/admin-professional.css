@@ -1024,3 +1024,94 @@
   min-height:44px;
   align-items:center;
 }
+
+
+/* =========================================================
+   Admin typography system
+   Match the approved reference: editorial serif headings +
+   clean sans-serif UI text. Presentation only.
+   ========================================================= */
+.admin-ui-v2{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+
+/* Editorial display typography */
+.admin-ui-v2 .admin-ui-page-head h2,
+.admin-ui-v2 .editor-workspace-head h2,
+.admin-ui-v2 .editor-queue-head h2,
+.admin-ui-v2 .editor-detail-head h2,
+.admin-ui-v2 .venue-admin-list-head h3,
+.admin-ui-v2 .venue-admin-header h2,
+.admin-ui-v2 .venue-admin-card-head h3,
+.admin-ui-v2 .audit-hero h2,
+.admin-ui-v2 .admin-pro-section-head h3,
+.admin-ui-v2 .admin-modal-header h3,
+.admin-ui-v2 .admin-drawer-head h2,
+.admin-ui-v2 .admin-ui-brand h1{
+  font-family:"Instrument Serif",Georgia,"Times New Roman",serif!important;
+  font-weight:400!important;
+  letter-spacing:-.025em!important;
+}
+
+/* Keep operational copy consistently sans-serif */
+.admin-ui-v2 button,
+.admin-ui-v2 input,
+.admin-ui-v2 select,
+.admin-ui-v2 textarea,
+.admin-ui-v2 table,
+.admin-ui-v2 th,
+.admin-ui-v2 td,
+.admin-ui-v2 label,
+.admin-ui-v2 small,
+.admin-ui-v2 .venue-admin-kicker,
+.admin-ui-v2 .admin-ui-nav-label,
+.admin-ui-v2 .admin-side-nav-button,
+.admin-ui-v2 .admin-pro-account-copy,
+.admin-ui-v2 .admin-pro-topbar-title,
+.admin-ui-v2 .admin-pro-topbar-actions,
+.admin-ui-v2 .admin-badge,
+.admin-ui-v2 .venue-admin-pill{
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+}
+
+/* Heading sizes/line-height tuned to the reference */
+.admin-ui-v2 .admin-ui-page-head h2,
+.admin-ui-v2 .editor-workspace-head h2{
+  font-size:40px!important;
+  line-height:.98!important;
+}
+.admin-ui-v2 .editor-detail-head h2{
+  font-size:30px!important;
+  line-height:1.02!important;
+}
+.admin-ui-v2 .editor-queue-head h2{
+  font-size:26px!important;
+  line-height:1.05!important;
+}
+.admin-ui-v2 .venue-admin-header h2{
+  font-size:36px!important;
+  line-height:1!important;
+}
+.admin-ui-v2 .venue-admin-card-head h3,
+.admin-ui-v2 .admin-pro-section-head h3{
+  font-size:24px!important;
+  line-height:1.04!important;
+}
+.admin-ui-v2 .audit-hero h2{
+  font-size:36px!important;
+  line-height:1!important;
+}
+.admin-ui-v2 .admin-ui-brand h1{
+  font-size:28px!important;
+  line-height:1!important;
+}
+
+/* Reference-like body rhythm */
+.admin-ui-v2 .admin-ui-page-head>div>p:last-child,
+.admin-ui-v2 .editor-workspace-head>div>p:last-child,
+.admin-ui-v2 .venue-admin-header>div>p:last-child,
+.admin-ui-v2 .audit-hero>div:first-child>p:last-child{
+  font-size:12px!important;
+  line-height:1.5!important;
+  letter-spacing:0!important;
+}
