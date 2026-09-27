@@ -837,3 +837,21 @@
   .audit-filters{grid-template-columns:1fr}
   .audit-table{min-width:900px}
 }
+
+
+/* Venue Agent field help popovers */
+.venue-admin-field-label-row{display:flex;align-items:center;gap:7px;margin-bottom:2px;position:relative}
+.venue-admin-field-label-row>span{font-size:9.5px;font-weight:700;color:var(--ink)}
+.venue-admin-help{position:relative;display:inline-flex}
+.venue-admin-help summary{list-style:none;width:24px;height:24px;border:1px solid #dfd4ca;border-radius:7px;background:#fff;color:var(--copper);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .18s ease;box-shadow:0 2px 5px rgba(28,26,23,.03)}
+.venue-admin-help summary::-webkit-details-marker{display:none}
+.venue-admin-help summary:hover,.venue-admin-help[open] summary{background:#fff6ef;border-color:#caa88f;color:var(--copper-dk);box-shadow:0 4px 10px rgba(168,92,50,.09)}
+.venue-admin-help summary svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.8}
+.venue-admin-help-popover{position:absolute;z-index:30;top:30px;left:0;width:min(420px,72vw);padding:13px 14px;border:1px solid #dfd4ca;border-radius:12px;background:#fff;box-shadow:0 16px 40px rgba(28,26,23,.14);color:var(--ink)}
+.venue-admin-help-popover b{display:block;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--copper);margin:0 0 4px}
+.venue-admin-help-popover p{font-size:11.5px;line-height:1.5;color:#5f5851;margin:0 0 10px}
+.venue-admin-help-popover pre{white-space:pre-wrap;overflow:auto;max-height:260px;margin:0;padding:10px 11px;border:1px solid var(--line);border-radius:9px;background:#f8f5f1;color:#2f2a26;font:10.5px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+.venue-admin-field.full .venue-admin-help-popover{width:min(520px,72vw)}
+@media(max-width:760px){
+  .venue-admin-help-popover{position:fixed;left:16px;right:16px;top:auto;width:auto;max-width:none}
+}
