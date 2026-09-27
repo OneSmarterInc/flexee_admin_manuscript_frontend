@@ -130,13 +130,25 @@ export default function AuthorManuscriptDetails() {
             <h1 className="publication-title">{manuscript.title}</h1>
             <p className="publication-lede">{manuscript.manuscript_filename}</p>
           </div>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-start', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            {submission?.status && <AuthorStatusPill tone={statusTone(submission.status)}>{pretty(submission.status)}</AuthorStatusPill>}
+          <aside className="manuscript-hero-summary">
+            <div className="manuscript-hero-summary-top">
+              <div>
+                <p className="kicker">At a glance</p>
+                <h2>Current manuscript state</h2>
+              </div>
+              {submission?.status && <AuthorStatusPill tone={statusTone(submission.status)}>{pretty(submission.status)}</AuthorStatusPill>}
+            </div>
+            <div className="manuscript-hero-stats">
+              <div><span>Readiness</span><b>{mechanical?.status ? pretty(mechanical.status) : 'Not run'}</b></div>
+              <div><span>Word count</span><b>{wordCount ? Number(wordCount).toLocaleString() : '—'}</b></div>
+              <div><span>Venue matches</span><b>{matches.length || 0}</b></div>
+              <div><span>Selected venue</span><b>{submission?.venue?.name || 'Not selected'}</b></div>
+            </div>
             <button className="author-secondary-button" type="button" onClick={() => go('/author')}>Back to workspace</button>
-          </div>
+          </aside>
         </div>
 
-        <div className="manuscript-overview-grid">
+        <div className="manuscript-overview-grid manuscript-overview-single">
           <section className="author-panel manuscript-summary-card">
             <div className="manuscript-section-head"><div><p className="kicker">Manuscript</p><h2>Uploaded file and author details</h2></div></div>
             <div className="manuscript-meta-grid">
@@ -157,17 +169,6 @@ export default function AuthorManuscriptDetails() {
             {manuscript.notes && <div style={{ marginTop: '18px' }}><h3>Author notes</h3><p style={{ whiteSpace: 'pre-wrap' }}>{manuscript.notes}</p></div>}
           </section>
 
-          <aside className="manuscript-state-column">
-            <section className="author-panel manuscript-state-card">
-              <p className="kicker">Workflow</p>
-              <h2>Current state</h2>
-              <DetailRow label="Readiness" value={mechanical?.status ? pretty(mechanical.status) : 'Not run'} />
-              <DetailRow label="Venue matches" value={matches.length ? `${matches.length} available` : 'None recorded'} />
-              <DetailRow label="Selected venue" value={submission?.venue?.name || 'Not selected'} />
-              <DetailRow label="Submission status" value={submission?.status ? pretty(submission.status) : 'No venue submission yet'} />
-              <DetailRow label="Retention" value={submission?.retention_purged_at ? `Purged ${formatDate(submission.retention_purged_at)}` : submission?.retention_expires_at ? `Expires ${formatDate(submission.retention_expires_at)}` : 'No expiry recorded'} />
-            </section>
-          </aside>
         </div>
 
         <section className="author-panel manuscript-compact-section">
