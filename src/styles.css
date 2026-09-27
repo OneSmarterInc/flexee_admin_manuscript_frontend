@@ -889,3 +889,443 @@
   width:15px;
   height:15px;
 }
+
+
+/* =========================================================
+   Admin UI v2 — polished editorial workspace
+   Presentation-only. Existing routes, API calls, decisions,
+   venue management, audit actions, downloads, and auth remain.
+   ========================================================= */
+
+.admin-ui-v2{
+  background:#f7f3ef;
+}
+.admin-ui-v2 .admin-ui-main{
+  background:#f7f3ef;
+}
+.admin-ui-v2 .admin-ui-topbar{
+  position:sticky;
+  top:0;
+  z-index:30;
+  height:66px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px;
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.admin-ui-v2 .admin-ui-topbar>div{
+  display:flex;
+  align-items:baseline;
+  gap:10px;
+}
+.admin-ui-v2 .admin-ui-topbar span{
+  color:var(--copper);
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:18px;
+}
+.admin-ui-v2 .admin-ui-topbar strong{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:25px;
+  font-weight:400;
+}
+.admin-ui-v2 .admin-ui-shell{
+  width:100%;
+}
+.admin-ui-v2 aside{
+  background:rgba(255,255,255,.92)!important;
+  backdrop-filter:blur(18px)!important;
+  border-right:1px solid var(--line)!important;
+  box-shadow:4px 0 22px rgba(28,26,23,.035)!important;
+}
+.admin-ui-v2 .admin-ui-sidebar-content{
+  gap:12px!important;
+}
+.admin-ui-v2 .admin-side-nav-button{
+  min-height:40px;
+  padding:9px 12px;
+  border-radius:10px;
+  font-size:13px;
+}
+.admin-ui-v2 .admin-side-nav-button.active{
+  background:#f4e7dd;
+  color:var(--copper-dark);
+}
+
+/* Page hierarchy */
+.admin-ui-v2 .editor-workspace-head{
+  margin:0 0 14px;
+  padding:0;
+}
+.admin-ui-v2 .editor-workspace-head h2{
+  margin:3px 0 5px;
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:36px;
+  font-weight:400;
+  line-height:1.02;
+}
+.admin-ui-v2 .editor-workspace-head p:last-child{
+  margin:0;
+  color:var(--muted);
+  font-size:13px;
+}
+
+/* KPI strip */
+.admin-ui-v2 .editor-stats{
+  grid-template-columns:repeat(6,minmax(0,1fr));
+  gap:9px;
+  margin:15px 0 12px;
+}
+.admin-ui-v2 .editor-stats button{
+  min-height:74px;
+  padding:12px 13px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 4px 14px rgba(28,26,23,.035);
+  text-align:left;
+}
+.admin-ui-v2 .editor-stats button:hover{
+  transform:translateY(-1px);
+  border-color:#d6c7bb;
+  background:#fffaf6;
+}
+.admin-ui-v2 .editor-stats b{
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:27px;
+  font-weight:400;
+  line-height:1;
+}
+.admin-ui-v2 .editor-stats span{
+  display:block;
+  margin-top:6px;
+  color:var(--muted);
+  font-size:10px;
+  text-transform:uppercase;
+  letter-spacing:.065em;
+}
+
+/* Filters */
+.admin-ui-v2 .editor-filterbar{
+  grid-template-columns:1.25fr 1fr 1fr;
+  gap:8px;
+  padding:10px;
+  margin-bottom:12px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  box-shadow:0 4px 14px rgba(28,26,23,.03);
+}
+.admin-ui-v2 .editor-filterbar input,
+.admin-ui-v2 .editor-filterbar select{
+  min-height:38px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:8px 10px;
+  background:#fff;
+  font-size:12px;
+}
+
+/* Queue + detail workspace */
+.admin-ui-v2 .editor-grid{
+  grid-template-columns:360px minmax(0,1fr);
+  gap:12px;
+  align-items:start;
+}
+.admin-ui-v2 .editor-queue,
+.admin-ui-v2 .editor-detail{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 6px 20px rgba(28,26,23,.035);
+}
+.admin-ui-v2 .editor-queue{
+  max-height:680px;
+  overflow:auto;
+}
+.admin-ui-v2 .editor-queue-item{
+  padding:12px 13px;
+  border:0;
+  border-bottom:1px solid var(--line);
+  background:#fff;
+}
+.admin-ui-v2 .editor-queue-item:last-child{
+  border-bottom:0;
+}
+.admin-ui-v2 .editor-queue-item:hover{
+  background:#fcf8f4;
+}
+.admin-ui-v2 .editor-queue-item.active{
+  background:#fff6ef;
+  box-shadow:inset 3px 0 0 var(--copper);
+}
+.admin-ui-v2 .editor-queue-item-top{
+  gap:8px;
+}
+.admin-ui-v2 .editor-venue-name{
+  color:var(--copper);
+  font-size:9px;
+  line-height:1.3;
+  text-transform:uppercase;
+  letter-spacing:.075em;
+  font-weight:800;
+}
+.admin-ui-v2 .editor-queue-item h3{
+  margin:4px 0;
+  font-size:13px;
+  line-height:1.28;
+}
+.admin-ui-v2 .editor-queue-item p{
+  margin:0;
+  color:var(--muted);
+  font-size:10.75px;
+  line-height:1.35;
+}
+.admin-ui-v2 .editor-queue-item small{
+  display:block;
+  margin-top:5px;
+  color:#8c8178;
+  font-size:9.5px;
+}
+
+/* Selected submission */
+.admin-ui-v2 .editor-detail{
+  padding:15px;
+}
+.admin-ui-v2 .editor-detail-head{
+  padding:2px 2px 12px;
+  margin-bottom:10px;
+  border-bottom:1px solid var(--line);
+}
+.admin-ui-v2 .editor-detail-head h2{
+  margin:3px 0 5px;
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:28px;
+  font-weight:400;
+  line-height:1.05;
+}
+.admin-ui-v2 .editor-detail-head p{
+  margin:0;
+  color:var(--muted);
+  font-size:11.5px;
+}
+.admin-ui-v2 .editor-detail-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:7px;
+  margin:0 0 10px;
+}
+.admin-ui-v2 .admin-btn{
+  min-height:34px;
+  padding:7px 11px;
+  border-radius:8px;
+  font-size:11px;
+}
+
+/* Cards */
+.admin-ui-v2 .editor-detail-card{
+  margin-top:9px;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#fff;
+  box-shadow:none;
+}
+.admin-ui-v2 .editor-detail-card>h3{
+  margin:2px 0 8px;
+  font-family:'Instrument Serif',Georgia,serif;
+  font-size:20px;
+  font-weight:400;
+  line-height:1.15;
+}
+.admin-ui-v2 .editor-manuscript-meta{
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:7px;
+}
+.admin-ui-v2 .editor-manuscript-meta>div{
+  padding:8px 9px;
+  border:1px solid var(--line);
+  border-radius:8px;
+  background:#fcfaf8;
+}
+.admin-ui-v2 .editor-manuscript-meta span{
+  font-size:8px;
+}
+.admin-ui-v2 .editor-manuscript-meta b{
+  font-size:10.75px;
+}
+.admin-ui-v2 .editor-long-copy{
+  margin-top:9px;
+  padding-top:9px;
+}
+.admin-ui-v2 .editor-long-copy span{
+  font-size:8.5px;
+}
+.admin-ui-v2 .editor-long-copy p{
+  font-size:11px;
+  line-height:1.45;
+}
+
+/* Editorial brief */
+.admin-ui-v2 .editor-brief-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+  margin-top:9px;
+}
+.admin-ui-v2 .editor-brief-block{
+  padding:9px 10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fcfaf8;
+}
+.admin-ui-v2 .editor-brief-block span{
+  font-size:8.5px;
+}
+.admin-ui-v2 .editor-brief-block p{
+  margin:4px 0 0;
+  font-size:10.75px;
+  line-height:1.4;
+}
+.admin-ui-v2 .editor-decision-authority{
+  font-size:10.75px;
+  line-height:1.4;
+}
+
+/* Evidence */
+.admin-ui-v2 .editor-evidence-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.admin-ui-v2 .editor-evidence-list article{
+  padding:9px 10px;
+  border-radius:9px;
+  background:#fcfaf8;
+}
+.admin-ui-v2 .editor-evidence-list article>div{
+  gap:8px;
+}
+.admin-ui-v2 .editor-evidence-list b{
+  font-size:9.5px;
+}
+.admin-ui-v2 .editor-evidence-list span{
+  font-size:8.5px;
+}
+.admin-ui-v2 .editor-evidence-list p{
+  margin:4px 0 0;
+  font-size:10.5px;
+  line-height:1.4;
+}
+.admin-ui-v2 .editor-evidence-list small,
+.admin-ui-v2 .editor-evidence-list blockquote{
+  font-size:9.5px;
+  line-height:1.35;
+}
+
+/* Venue config snapshot */
+.admin-ui-v2 .editor-config-snapshot{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:7px;
+}
+.admin-ui-v2 .editor-config-snapshot>div{
+  padding:9px 10px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:#fcfaf8;
+}
+.admin-ui-v2 .editor-config-snapshot span{
+  font-size:8.5px;
+}
+.admin-ui-v2 .editor-config-snapshot p,
+.admin-ui-v2 .editor-config-snapshot pre{
+  font-size:10.5px;
+  line-height:1.4;
+}
+
+/* Feedback + human decision */
+.admin-ui-v2 .editor-feedback-form,
+.admin-ui-v2 .editor-decision-form{
+  gap:8px;
+}
+.admin-ui-v2 .editor-feedback-form label>span,
+.admin-ui-v2 .editor-decision-form label>span{
+  font-size:9px;
+}
+.admin-ui-v2 .editor-feedback-form select,
+.admin-ui-v2 .editor-feedback-form textarea,
+.admin-ui-v2 .editor-decision-form select,
+.admin-ui-v2 .editor-decision-form textarea{
+  border-radius:8px;
+  padding:8px 9px;
+  font-size:11px;
+}
+.admin-ui-v2 .editor-decision-card{
+  background:linear-gradient(135deg,#fff 0%,#fbf6f1 100%);
+}
+.admin-ui-v2 .editor-existing-decision{
+  padding:9px 10px;
+  border-radius:9px;
+}
+.admin-ui-v2 .editor-existing-decision p{
+  font-size:10.75px;
+}
+
+/* Venue Agents, Audit and dashboard inherit same shell */
+.admin-ui-v2 .venue-admin-layout,
+.admin-ui-v2 .audit-page{
+  max-width:none;
+}
+.admin-ui-v2 .venue-admin-card,
+.admin-ui-v2 .audit-hero,
+.admin-ui-v2 .audit-table-card,
+.admin-ui-v2 .admin-table-card{
+  border-radius:13px;
+  box-shadow:0 5px 18px rgba(28,26,23,.035);
+}
+.admin-ui-v2 .venue-admin-main{
+  min-width:0;
+}
+
+/* More professional native scrollbars where supported */
+.admin-ui-v2 .editor-queue,
+.admin-ui-v2 .editor-detail,
+.admin-ui-v2 .editor-evidence-list{
+  scrollbar-width:thin;
+  scrollbar-color:#cbbbae transparent;
+}
+
+@media(max-width:1200px){
+  .admin-ui-v2 .editor-stats{
+    grid-template-columns:repeat(3,1fr);
+  }
+  .admin-ui-v2 .editor-grid{
+    grid-template-columns:320px minmax(0,1fr);
+  }
+  .admin-ui-v2 .editor-manuscript-meta{
+    grid-template-columns:repeat(2,1fr);
+  }
+}
+@media(max-width:980px){
+  .admin-ui-v2 .editor-grid{
+    grid-template-columns:1fr;
+  }
+  .admin-ui-v2 .editor-queue{
+    max-height:360px;
+  }
+}
+@media(max-width:760px){
+  .admin-ui-v2 .admin-ui-topbar{
+    padding:0 18px 0 74px;
+  }
+  .admin-ui-v2 .editor-stats{
+    grid-template-columns:repeat(2,1fr);
+  }
+  .admin-ui-v2 .editor-filterbar,
+  .admin-ui-v2 .editor-brief-grid,
+  .admin-ui-v2 .editor-evidence-list,
+  .admin-ui-v2 .editor-config-snapshot{
+    grid-template-columns:1fr;
+  }
+}
