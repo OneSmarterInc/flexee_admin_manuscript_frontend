@@ -837,6 +837,7 @@ function AdminSubmissionSummaryPage({ submissionId, onBack }) {
   const docs = Array.isArray(item.zip_contents) ? item.zip_contents : []
   return (
     <AdminTop>
+      <div className="admin-summary-page">
       <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '28px'}}>
         <div>
           <h2 style={{fontFamily: "'Instrument Serif', Georgia, serif", fontSize: '42px', fontWeight: '400', margin: '0 0 10px', color: 'var(--ink)', lineHeight: 1}}>
@@ -898,6 +899,7 @@ function AdminSubmissionSummaryPage({ submissionId, onBack }) {
           </div>
         </section>
       )}
+      </div>
     </AdminTop>
   )
 }
