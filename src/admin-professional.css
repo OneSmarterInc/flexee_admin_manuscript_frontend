@@ -793,3 +793,36 @@
   .admin-ui-v2 .audit-hero{align-items:flex-start;flex-direction:column}
   .admin-ui-v2 .audit-hero-metric{width:100%;text-align:left}
 }
+
+
+/* Editorial packet tabs */
+.admin-ui-v2 .editor-detail-tabs{
+  display:flex;
+  align-items:center;
+  gap:5px;
+  margin:8px 0 2px;
+  padding:0 1px;
+  overflow:auto;
+  border-bottom:1px solid var(--admin-line);
+  scrollbar-width:thin;
+}
+.admin-ui-v2 .editor-detail-tabs button{
+  flex:0 0 auto;
+  min-height:34px;
+  padding:8px 9px 7px;
+  border:0;
+  border-bottom:2px solid transparent;
+  background:transparent;
+  color:var(--admin-muted);
+  font-size:9.5px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.admin-ui-v2 .editor-detail-tabs button:hover{
+  color:var(--admin-copper-dark);
+  background:#fcf7f3;
+}
+.admin-ui-v2 .editor-detail-tabs button.active{
+  color:var(--admin-copper-dark);
+  border-bottom-color:var(--admin-copper);
+}
