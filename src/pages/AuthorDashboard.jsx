@@ -157,8 +157,8 @@ export default function AuthorDashboard() {
       <div className="author-dashboard-topbar">
         <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace</div>
         <div className="author-compact-actions">
-          <button className="author-secondary-button" type="button" onClick={handleLogout}>Log out</button>
           <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>New submission</button>
+          <button className="author-secondary-button" type="button" onClick={handleLogout}>Log out</button>
         </div>
       </div>
 
