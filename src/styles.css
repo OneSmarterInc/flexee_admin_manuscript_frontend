@@ -678,3 +678,108 @@
 @media(max-width:700px){
   .manuscript-text-grid,.manuscript-overview-status-grid{grid-template-columns:1fr}
 }
+
+
+/* Compact the Editor Workspace and Venue Agents work areas without changing behavior */
+.admin-shell:has(.editor-workspace),
+.admin-shell:has(.venue-admin-layout){
+  padding:30px 24px 44px;
+  max-width:1540px;
+}
+
+/* Editor Workspace: approximately 20% denser */
+.editor-workspace{gap:14px}
+.editor-workspace-head h2{font-size:34px;line-height:1.05;margin:2px 0 6px}
+.editor-workspace-head>div>p:last-child{font-size:12.5px;margin:0}
+.editor-workspace .venue-admin-kicker{font-size:9px}
+.editor-stats{gap:8px}
+.editor-stats button{padding:10px 12px;border-radius:10px}
+.editor-stats b{font-size:23px}
+.editor-stats span{font-size:9.5px;margin-top:4px}
+.editor-filterbar{grid-template-columns:minmax(210px,1.35fr) 1fr 1fr;gap:8px}
+.editor-filterbar input,.editor-filterbar select{min-height:36px;padding:8px 10px;font-size:12px;border-radius:9px}
+.editor-grid{grid-template-columns:minmax(250px,.68fr) minmax(0,1.72fr);gap:12px}
+.editor-queue{max-height:calc(100vh - 220px)}
+.editor-queue-item{padding:12px 14px}
+.editor-queue-item h3{font-size:12.5px;margin:6px 0 3px}
+.editor-queue-item p{font-size:10.5px}
+.editor-queue-item small{font-size:9.5px;margin-top:5px}
+.editor-venue-name{font-size:9px}
+.editor-detail{padding:18px;gap:12px}
+.editor-detail-head{padding-bottom:13px}
+.editor-detail-head h2{font-size:28px;margin-top:4px}
+.editor-detail-head p{font-size:11.5px;margin:4px 0 0}
+.editor-detail-actions{gap:6px}
+.editor-detail-actions .admin-btn{padding:9px 13px;font-size:11.5px}
+.editor-detail-card{padding:15px;border-radius:11px}
+.editor-manuscript-meta{gap:8px;margin-top:10px}
+.editor-manuscript-meta>div{padding:8px}
+.editor-manuscript-meta span,.editor-long-copy span,.editor-chip-section>span,.editor-risk-list>span,.editor-feedback-history>span,.editor-config-snapshot span{font-size:8.5px}
+.editor-manuscript-meta b{font-size:11px}
+.editor-long-copy{margin-top:10px}
+.editor-long-copy p{font-size:11.5px;line-height:1.45}
+.editor-brief-grid{gap:8px;margin-top:10px}
+.editor-brief-block{padding:10px}
+.editor-brief-block span{font-size:9px}
+.editor-brief-block p{font-size:11px;line-height:1.4}
+.editor-chip-section,.editor-risk-list{margin-top:12px}
+.editor-chip-section em{font-size:10px;padding:4px 7px}
+.editor-risk-list ul{font-size:11px}
+.editor-evidence-list{gap:7px;margin-top:10px}
+.editor-evidence-list article{padding:10px}
+.editor-evidence-list article>div b{font-size:11px}
+.editor-evidence-list article>div span{font-size:9.5px}
+.editor-evidence-list p{font-size:11px}
+.editor-evidence-list small{font-size:9.5px}
+.editor-evidence-list blockquote{font-size:10.5px;padding:7px 8px}
+.editor-card-copy{font-size:11px;margin:4px 0 10px}
+.editor-feedback-form,.editor-decision-form{gap:8px}
+.editor-feedback-form input,.editor-feedback-form select,.editor-feedback-form textarea,
+.editor-decision-form input,.editor-decision-form select,.editor-decision-form textarea{font-size:11.5px;padding:8px 10px}
+.editor-feedback-history{margin-top:13px;padding-top:10px}
+.editor-feedback-history article{padding:8px 0}
+.editor-feedback-history b{font-size:11px}
+.editor-feedback-history p{font-size:10.5px}
+.editor-feedback-history small{font-size:9.5px}
+.editor-existing-decision{padding:10px;margin:9px 0}
+.editor-existing-decision p{font-size:11px}
+.editor-existing-decision small{font-size:9.5px}
+
+/* Venue Agents: approximately 20% denser */
+.venue-admin-layout{gap:14px}
+.venue-admin-list{border-radius:14px}
+.venue-admin-list-head{padding:16px}
+.venue-admin-list-head h2{font-size:25px}
+.venue-admin-venue{padding:10px 12px}
+.venue-admin-venue strong{font-size:11.5px}
+.venue-admin-venue small{font-size:9.5px}
+.venue-admin-header{margin-bottom:12px}
+.venue-admin-header h2{font-size:36px;line-height:1.02}
+.venue-admin-header>div>p:last-child{font-size:12px}
+.venue-admin-header-badges{gap:6px}
+.venue-admin-pill{font-size:9px;padding:4px 7px}
+.venue-admin-card{padding:18px}
+.venue-admin-card-head{margin-bottom:14px}
+.venue-admin-card-head h3{font-size:25px;margin:2px 0 0}
+.venue-admin-card-head p{font-size:11.5px}
+.venue-admin-form-grid{gap:0 14px}
+.venue-admin-field{margin-bottom:12px}
+.venue-admin-field>span{font-size:9.5px}
+.venue-admin-field>small{font-size:9.5px}
+.venue-admin-field input,.venue-admin-field select,.venue-admin-field textarea{font-size:11.5px;padding:8px 10px;border-radius:8px}
+.venue-admin-field textarea{min-height:72px}
+.venue-admin-check{font-size:11.5px}
+.venue-admin-history article{gap:14px;padding:12px 0}
+.venue-admin-history p{font-size:11px;margin:4px 0}
+.venue-admin-history small{font-size:9.5px}
+.venue-admin-history-actions{gap:5px}
+.venue-admin-history-actions .admin-btn{padding:8px 11px;font-size:10.5px}
+.venue-admin-empty{padding:15px;font-size:11px}
+.venue-admin-state{padding:28px}
+.venue-admin-state h3{font-size:23px}
+.venue-admin-message,.venue-admin-success{font-size:11.5px;padding:9px 11px}
+
+@media(max-width:1100px){
+  .admin-shell:has(.editor-workspace),
+  .admin-shell:has(.venue-admin-layout){padding:24px 18px 36px}
+}
