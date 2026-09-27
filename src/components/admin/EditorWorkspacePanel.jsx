@@ -292,25 +292,31 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
 
     <div className="editor-grid">
       <section className="editor-queue">
-        {loading ? <div className="venue-admin-state"><h3>Loading editorial queue…</h3></div> :
-          data.items?.length ? data.items.map(item => <button
-            type="button"
-            key={item.id}
-            className={`editor-queue-item ${selectedId === item.id ? 'active' : ''}`}
-            onClick={() => openSubmission(item.id)}
-          >
-            <div className="editor-queue-item-top">
-              <span className="editor-venue-name">{item.venue?.name}</span>
-              <StatusPill value={item.status} />
+        <div className="editor-queue-head">
+          <h2>Submission queue</h2>
+          <span>{data.items?.length || 0} record{data.items?.length === 1 ? '' : 's'}</span>
+        </div>
+        <div className="editor-queue-scroll">
+          {loading ? <div className="venue-admin-state"><h3>Loading editorial queue…</h3></div> :
+            data.items?.length ? data.items.map(item => <button
+              type="button"
+              key={item.id}
+              className={`editor-queue-item ${selectedId === item.id ? 'active' : ''}`}
+              onClick={() => openSubmission(item.id)}
+            >
+              <div className="editor-queue-item-top">
+                <span className="editor-venue-name">{item.venue?.name}</span>
+                <StatusPill value={item.status} />
+              </div>
+              <h3>{item.manuscript?.title}</h3>
+              <p>{item.manuscript?.author_name}{item.manuscript?.author_email ? ` · ${item.manuscript.author_email}` : ''}</p>
+              <small>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : new Date(item.created_at).toLocaleString()}</small>
+            </button>) : <div className="venue-admin-state">
+              <p className="venue-admin-kicker">Queue clear</p>
+              <h3>No venue submissions match these filters.</h3>
             </div>
-            <h3>{item.manuscript?.title}</h3>
-            <p>{item.manuscript?.author_name}{item.manuscript?.author_email ? ` · ${item.manuscript.author_email}` : ''}</p>
-            <small>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : new Date(item.created_at).toLocaleString()}</small>
-          </button>) : <div className="venue-admin-state">
-            <p className="venue-admin-kicker">Queue clear</p>
-            <h3>No venue submissions match these filters.</h3>
-          </div>
-        }
+          }
+        </div>
       </section>
 
       <section className="editor-detail">
@@ -337,6 +343,13 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           <div className="editor-detail-actions">
             <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download' || Boolean(detail.retention_purged_at)}>{detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
             {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
+          </div>
+
+          <div className="editor-summary-grid">
+            <div><span>Venue config</span><b>{detail.venue_config_version ? `v${detail.venue_config_version}` : '—'}</b></div>
+            <div><span>Evidence items</span><b>{detail.evidence?.length || 0}</b></div>
+            <div><span>Editorial brief</span><b>{detail.editorial_brief && Object.keys(detail.editorial_brief).length ? 'Prepared' : 'Pending'}</b></div>
+            <div><span>Status</span><b>{statusLabels[detail.status] || pretty(detail.status)}</b></div>
           </div>
 
           <section className="editor-detail-card">
