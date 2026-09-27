@@ -546,3 +546,81 @@
   .author-match-card-structured .author-match-action{grid-column:1}
   .author-match-card-structured .author-match-action button{width:100%}
 }
+
+
+/* Denser venue match cards: same content and actions, less vertical space */
+.author-flow-page .author-match-list{
+  gap:8px;
+}
+.author-flow-page .author-match-card-structured{
+  grid-template-columns:26px minmax(0,1fr);
+  column-gap:8px;
+  row-gap:7px;
+  padding:10px 11px;
+  border-radius:10px;
+  box-shadow:0 3px 12px rgba(28,26,23,.03);
+}
+.author-match-index{
+  width:24px;
+  height:24px;
+  border-radius:7px;
+  font-size:8px;
+}
+.author-match-card-structured .author-match-heading{
+  gap:8px;
+}
+.author-match-card-structured .author-match-heading h2{
+  font-size:18px!important;
+  line-height:1.05;
+  margin:1px 0 0!important;
+}
+.author-match-card-structured .author-venue-type{
+  font-size:7.5px;
+}
+.author-match-card-structured .author-status-pill{
+  padding:2px 6px;
+  font-size:8px;
+}
+.author-match-card-structured .author-match-summary{
+  margin:4px 0 0;
+  font-size:9.5px;
+  line-height:1.32;
+}
+.author-match-divider{
+  margin:6px 0;
+}
+.author-match-card-structured .author-match-columns{
+  gap:8px;
+}
+.author-match-card-structured .author-match-columns>div{
+  padding:7px 8px;
+  border-radius:8px;
+}
+.author-match-card-structured .author-match-columns h3{
+  margin:0 0 3px;
+  font-size:7.5px;
+}
+.author-match-card-structured .author-match-columns ul{
+  margin:0;
+  padding-left:13px;
+  font-size:9px;
+  line-height:1.28;
+}
+.author-match-card-structured .author-match-columns li{
+  margin:1px 0;
+}
+.author-match-card-structured .author-muted-copy{
+  margin:0;
+  font-size:9px;
+  line-height:1.3;
+}
+.author-match-card-structured .author-match-action{
+  margin-top:0;
+}
+.author-match-card-structured .author-match-action button{
+  min-width:94px;
+  min-height:30px;
+  padding:6px 9px;
+  font-size:9.5px;
+  border-radius:7px;
+}
