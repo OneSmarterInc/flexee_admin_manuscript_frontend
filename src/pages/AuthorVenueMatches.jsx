@@ -119,52 +119,51 @@ export default function AuthorVenueMatches() {
       {agentWarning && <div className="author-prototype-notice author-error-banner" role="note"><b>Matching note.</b> {agentWarning} {!agentBusy && manuscript?.parsed_profile?.semantic && <button className="author-text-link author-inline-action" type="button" onClick={runSemanticMatching}>Retry semantic matching</button>}</div>}
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Venue matching</p><h2>Loading participating venues…</h2></section> :
-        matches.length ? <section className="author-panel author-venue-table-card">
-          <div className="author-venue-table-head">
+        matches.length ? <section className="author-venue-card-section">
+          <div className="author-venue-card-section-head">
             <div>
               <p className="kicker">Participating venues</p>
               <h2>Venue comparison</h2>
             </div>
             <span>{matches.length} venue{matches.length === 1 ? '' : 's'}</span>
           </div>
-          <div className="author-venue-table-wrap">
-            <table className="author-venue-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Venue</th>
-                  <th>Status</th>
-                  <th>Fit summary</th>
-                  <th>Why it may fit</th>
-                  <th>Before submission</th>
-                  <th aria-label="Actions"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {matches.map((match, index) => <tr key={match.id}>
-                  <td><span className="author-venue-row-index">{String(index + 1).padStart(2, '0')}</span></td>
-                  <td>
+
+          <div className="author-venue-card-grid">
+            {matches.map((match, index) => <article className="author-venue-pro-card" key={match.id}>
+              <div className="author-venue-pro-head">
+                <div className="author-venue-pro-identity">
+                  <span className="author-venue-row-index">{String(index + 1).padStart(2, '0')}</span>
+                  <div>
                     <span className="author-venue-type">{match.venue.venue_type}</span>
-                    <b className="author-venue-table-name">{match.venue.name}</b>
-                  </td>
-                  <td>
-                    <AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill>
-                  </td>
-                  <td><p className="author-venue-table-summary">{match.fit_summary || 'Venue configuration is available for review.'}</p></td>
-                  <td>
-                    {match.reasons?.length ? <ul className="author-venue-table-list">{match.reasons.map((reason, reasonIndex) => <li key={`${match.id}-reason-${reasonIndex}`}>{reason}</li>)}</ul> : <span className="author-venue-table-empty">No positive alignment recorded.</span>}
-                  </td>
-                  <td>
-                    {match.gaps?.length ? <ul className="author-venue-table-list gaps">{match.gaps.map((gap, gapIndex) => <li key={`${match.id}-gap-${gapIndex}`}>{gap}</li>)}</ul> : <span className="author-venue-table-empty">No venue-specific gaps.</span>}
-                  </td>
-                  <td>
-                    <button className="author-secondary-button author-venue-table-action" type="button" onClick={() => openVenue(match)}>
-                      Review
-                    </button>
-                  </td>
-                </tr>)}
-              </tbody>
-            </table>
+                    <h3>{match.venue.name}</h3>
+                  </div>
+                </div>
+                <AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill>
+              </div>
+
+              <p className="author-venue-pro-summary">{match.fit_summary || 'Venue configuration is available for review.'}</p>
+
+              <div className="author-venue-pro-details">
+                <section>
+                  <span className="author-venue-pro-label">Why it may fit</span>
+                  <div className="author-venue-pro-scroll">
+                    {match.reasons?.length ? <ul>{match.reasons.map((reason, reasonIndex) => <li key={`${match.id}-reason-${reasonIndex}`}>{reason}</li>)}</ul> : <p>No positive alignment recorded.</p>}
+                  </div>
+                </section>
+
+                <section>
+                  <span className="author-venue-pro-label">Before submission</span>
+                  <div className="author-venue-pro-scroll">
+                    {match.gaps?.length ? <ul className="gaps">{match.gaps.map((gap, gapIndex) => <li key={`${match.id}-gap-${gapIndex}`}>{gap}</li>)}</ul> : <p>No venue-specific gaps.</p>}
+                  </div>
+                </section>
+              </div>
+
+              <div className="author-venue-pro-footer">
+                <span>{match.reasons?.length || 0} fit signal{match.reasons?.length === 1 ? '' : 's'} · {match.gaps?.length || 0} gap{match.gaps?.length === 1 ? '' : 's'}</span>
+                <button className="author-secondary-button" type="button" onClick={() => openVenue(match)}>Review venue</button>
+              </div>
+            </article>)}
           </div>
         </section> : !error && <section className="author-panel author-live-state">
           <p className="kicker">No matches yet</p>
