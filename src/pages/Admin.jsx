@@ -586,7 +586,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
         <h1>Flexee</h1>
       </div>
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
+      <div className="admin-ui-sidebar-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
         <div className="admin-ui-nav-label">Views</div>
         
         {platformSuperuser && <>
