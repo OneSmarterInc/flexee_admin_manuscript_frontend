@@ -20,6 +20,38 @@ function pretty(value) {
   return String(value || '').replaceAll('_', ' ').replace(/\b\w/g, x => x.toUpperCase())
 }
 
+const venueRuleFeedbackFields = new Set([
+  'aims_scope',
+  'article_types',
+  'accepted_methods',
+  'quality_threshold',
+  'reviewer_criteria',
+  'disclosures',
+  'reporting_standards',
+  'desk_rejection_rules',
+])
+const venueRuleListFields = new Set([
+  'article_types',
+  'accepted_methods',
+  'reviewer_criteria',
+  'disclosures',
+  'reporting_standards',
+  'desk_rejection_rules',
+])
+
+function feedbackEditorValue(field, text) {
+  if (!venueRuleFeedbackFields.has(field)) return text ? { note: text } : null
+  if (venueRuleListFields.has(field)) {
+    return String(text || '').split(/\r?\n|,/).map(item => item.trim()).filter(Boolean)
+  }
+  return String(text || '').trim()
+}
+
+function feedbackAgentValue(detail, field) {
+  if (venueRuleFeedbackFields.has(field)) return detail?.venue_config?.[field] ?? null
+  return detail?.editorial_brief?.[field] ?? null
+}
+
 function saveBlob(blob, disposition, fallback) {
   const match = /filename\*?=(?:UTF-8''|")?([^";]+)/i.exec(disposition || '')
   const filename = decodeURIComponent((match?.[1] || fallback || 'manuscript').replace(/"/g, ''))
@@ -163,14 +195,14 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
     setError('')
     setSuccess('')
     try {
-      const agentValue = detail.editorial_brief?.[feedbackField] ?? null
+      const agentValue = feedbackAgentValue(detail, feedbackField)
       await api(`/api/admin/venues/${detail.venue.id}/feedback/`, {
         method: 'POST',
         body: JSON.stringify({
           venue_submission_id: selectedId,
           assessment_field: feedbackField,
           agent_value: agentValue,
-          editor_value: feedbackValue ? { note: feedbackValue } : null,
+          editor_value: feedbackEditorValue(feedbackField, feedbackValue),
           reason: feedbackReason,
         }),
       })
@@ -406,8 +438,18 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                 <option value="citation_integrity">Citation integrity</option>
                 <option value="reviewer_expertise">Reviewer expertise</option>
                 <option value="unresolved_risks">Unresolved risks</option>
+                <optgroup label="Venue Agent rule corrections">
+                  <option value="aims_scope">Aims & scope</option>
+                  <option value="article_types">Accepted article types</option>
+                  <option value="accepted_methods">Accepted methods</option>
+                  <option value="quality_threshold">Quality threshold</option>
+                  <option value="reviewer_criteria">Reviewer criteria</option>
+                  <option value="disclosures">Required disclosures</option>
+                  <option value="reporting_standards">Reporting standards</option>
+                  <option value="desk_rejection_rules">Desk-rejection guidance</option>
+                </optgroup>
               </select></label>
-              <label><span>Editor correction</span><textarea rows="3" value={feedbackValue} onChange={e => setFeedbackValue(e.target.value)} placeholder="What should the venue-specific assessment say instead?" /></label>
+              <label><span>Editor correction</span><textarea rows="3" value={feedbackValue} onChange={e => setFeedbackValue(e.target.value)} placeholder={venueRuleListFields.has(feedbackField) ? 'Enter one value per line.' : venueRuleFeedbackFields.has(feedbackField) ? 'Enter the corrected venue rule.' : 'What should the venue-specific assessment say instead?'} />{venueRuleFeedbackFields.has(feedbackField) && <small>This can be proposed later as an inactive Venue Agent configuration draft; it will never change the live agent automatically.</small>}</label>
               <label><span>Reason / evidence for correction</span><textarea rows="3" required value={feedbackReason} onChange={e => setFeedbackReason(e.target.value)} placeholder="Explain why this correction should inform future assessments for this venue." /></label>
               <button className="admin-btn secondary" type="submit" disabled={busy === 'feedback'}>{busy === 'feedback' ? 'Recording…' : 'Record feedback'}</button>
             </form> : <p className="editor-card-copy">Your role has read-only access to this venue's editorial workspace.</p>}
