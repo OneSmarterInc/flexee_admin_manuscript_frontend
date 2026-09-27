@@ -1613,3 +1613,16 @@
     width:100%;
   }
 }
+
+
+/* Push venue assessment action card to the far right on wide screens */
+@media(min-width:1051px){
+  .author-flow-page .author-heading-row{
+    grid-template-columns:minmax(0,1.65fr) minmax(300px,.58fr);
+  }
+  .author-flow-page .author-assessment-choice{
+    justify-self:end;
+    width:100%;
+    max-width:360px;
+  }
+}
