@@ -23,6 +23,7 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
       
       {sidebar && (
         <button 
+          className="admin-sidebar-toggle"
           onClick={onToggleSidebar}
           style={{ 
             position: 'fixed', top: '24px', left: '24px', zIndex: 60, 
@@ -51,7 +52,7 @@ function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
           zIndex: 10,
           transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
         }}>
-          <div className="admin-ui-sidebar-inner" style={{ width: '250px', height: '100%', paddingTop: '72px' }}>
+          <div className="admin-ui-sidebar-inner" style={{ width: '250px', height: '100%' }}>
             {sidebar}
           </div>
         </aside>
