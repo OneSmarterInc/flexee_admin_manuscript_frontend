@@ -154,18 +154,24 @@ export default function AuthorDashboard() {
 
   return <PublicationShell>
     <div className="wrap author-dashboard author-dashboard-compact">
-      <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace</div>
+      <div className="author-dashboard-topbar">
+        <div className="crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace</div>
+        <div className="author-compact-actions">
+          <button className="author-secondary-button" type="button" onClick={handleLogout}>Log out</button>
+          <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>New submission</button>
+        </div>
+      </div>
 
       <section className="author-hero author-compact-hero">
         <div className="author-compact-hero-row">
-          <div>
+          <div className="author-hero-copy">
             <p className="kicker">Author workspace</p>
             <h1 className="publication-title">{authorUser ? `Welcome, ${authorUser.name}` : 'Your manuscript workspace.'}</h1>
-            <p className="publication-lede">Manage manuscripts, readiness, venue submissions, and editorial decisions.</p>
+            <p className="publication-lede">Manage manuscripts, readiness, venue submissions, and editorial decisions from one workspace.</p>
           </div>
-          <div className="author-compact-actions">
-            <button className="author-secondary-button" type="button" onClick={handleLogout}>Log out</button>
-            <button className="copper-button author-primary-action" type="button" onClick={() => go('/author/new')}>New submission</button>
+          <div className="author-hero-summary-strip" aria-label="Workspace summary">
+            <span><b>{manuscriptsList.length}</b> manuscripts</span>
+            <span><b>{filteredManuscripts.length}</b> visible</span>
           </div>
         </div>
       </section>
