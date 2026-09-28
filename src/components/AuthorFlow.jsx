@@ -1,5 +1,6 @@
 import React from 'react'
 import { go } from './SiteChrome.jsx'
+import { hasAuthorSession } from '../authorApi.js'
 
 const steps = [
   ['details', '1', 'Manuscript', '/author/new'],
@@ -11,14 +12,21 @@ const steps = [
 
 export function AuthorFlowNav({ active }) {
   const activeIndex = steps.findIndex(([key]) => key === active)
+  const manuscriptActive = hasAuthorSession()
   return <nav className="author-flow-nav" aria-label="Author submission progress">
     {steps.map(([key, number, label, path], index) => {
       const state = index < activeIndex ? 'done' : index === activeIndex ? 'active' : 'upcoming'
+      const disabled = key !== 'details' && !manuscriptActive
       return <button
         key={key}
         type="button"
         className={`author-flow-step ${state}`}
-        onClick={() => go(path)}
+        onClick={() => {
+          if (disabled) return
+          go(path)
+        }}
+        disabled={disabled}
+        aria-disabled={disabled}
         aria-current={state === 'active' ? 'step' : undefined}
       >
         <span className="author-flow-number">{state === 'done' ? '✓' : number}</span>
