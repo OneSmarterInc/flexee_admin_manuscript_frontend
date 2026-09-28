@@ -35,6 +35,7 @@ export async function authorLogin(email, password) {
     method: 'POST',
     body: JSON.stringify({ email, password }),
   })
+  clearAuthorSession()
   return user
 }
 
@@ -43,6 +44,7 @@ export async function authorRegister(name, email, password) {
     method: 'POST',
     body: JSON.stringify({ name, email, password }),
   })
+  clearAuthorSession()
   return user
 }
 
@@ -62,7 +64,10 @@ export async function fetchAuthorSession() {
   try {
     return await api('/api/author/session/')
   } catch (err) {
-    if (err.status === 401) return null
+    if (err.status === 401) {
+      clearAuthorSession()
+      return null
+    }
     throw err
   }
 }
