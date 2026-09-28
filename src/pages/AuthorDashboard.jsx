@@ -144,6 +144,7 @@ export default function AuthorDashboard() {
     const latestSubmission = ms.latest_submission || null
     saveAuthorSession({
       manuscriptId: ms.id,
+      accessToken: null,
       manuscriptTitle: ms.title,
       submissionId: latestSubmission?.id || null,
       selectedVenueId: latestSubmission?.venue?.id || null,
