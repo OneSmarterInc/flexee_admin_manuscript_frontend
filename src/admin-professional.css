@@ -2050,3 +2050,44 @@
   margin-top:10px!important;
   padding-bottom:2px!important;
 }
+
+
+/* Visible scrollbar for overlay sidebar */
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-inner{
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-gutter:stable;
+}
+
+/* WebKit scrollbar */
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-inner::-webkit-scrollbar{
+  width:10px;
+}
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-inner::-webkit-scrollbar-track{
+  background:#f6f1ed;
+}
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-inner::-webkit-scrollbar-thumb{
+  background:#c7b6aa;
+  border-radius:999px;
+  border:2px solid #f6f1ed;
+}
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-inner::-webkit-scrollbar-thumb:hover{
+  background:#a99080;
+}
+
+/* Firefox */
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-inner{
+  scrollbar-width:thin;
+  scrollbar-color:#c7b6aa #f6f1ed;
+}
+
+/* Let the sidebar content grow naturally inside the scroll container */
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-content{
+  min-height:100%;
+  height:auto!important;
+  overflow:visible!important;
+}
+
+.admin-ui-v2 .admin-overlay-sidebar .admin-ui-sidebar-nav{
+  overflow:visible!important;
+}
