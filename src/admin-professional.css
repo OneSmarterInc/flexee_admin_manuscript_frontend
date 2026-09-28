@@ -1757,3 +1757,85 @@
     justify-content:space-between;
   }
 }
+
+
+/* Admin readability pass: modest global text-size increase without layout changes */
+.admin-ui-v2{
+  font-size:14px!important;
+}
+
+/* Top bar + sidebar */
+.admin-ui-v2 .admin-pro-topbar-title strong{font-size:13.5px!important}
+.admin-ui-v2 .admin-pro-topbar-title span{font-size:12px!important}
+.admin-ui-v2 .admin-ui-nav-label{font-size:11px!important}
+.admin-ui-v2 .admin-side-nav-button{font-size:14px!important}
+.admin-ui-v2 .admin-pro-account-copy b{font-size:14px!important}
+.admin-ui-v2 .admin-pro-account-copy span{font-size:11.5px!important}
+.admin-ui-v2 .venue-admin-kicker{font-size:10px!important}
+
+/* General controls */
+.admin-ui-v2 .admin-btn{font-size:12px!important}
+.admin-ui-v2 input,
+.admin-ui-v2 select,
+.admin-ui-v2 textarea{font-size:13px!important}
+.admin-ui-v2 label,
+.admin-ui-v2 p,
+.admin-ui-v2 small{font-size:12.5px}
+
+/* Dashboard/table readability */
+.admin-ui-v2 .admin-stat .k{font-size:10px!important}
+.admin-ui-v2 .admin-filters input,
+.admin-ui-v2 .admin-filters select{font-size:12.5px!important}
+.admin-ui-v2 .admin-table-card th{font-size:9.5px!important}
+.admin-ui-v2 .admin-table-card td{font-size:12px!important}
+.admin-ui-v2 .data-title{font-size:12.5px!important}
+.admin-ui-v2 .data-meta{font-size:10.5px!important}
+.admin-ui-v2 .data-summary{font-size:11.5px!important}
+.admin-ui-v2 .admin-badge,
+.admin-ui-v2 .venue-admin-pill{font-size:10px!important}
+
+/* Venue Agents */
+.admin-ui-v2 .venue-admin-venue strong{font-size:12.5px!important}
+.admin-ui-v2 .venue-admin-venue small{font-size:10.5px!important}
+.admin-ui-v2 .venue-admin-header>div>p:last-child{font-size:13px!important}
+.admin-ui-v2 .venue-admin-card,
+.admin-ui-v2 .venue-admin-card p,
+.admin-ui-v2 .venue-admin-card label,
+.admin-ui-v2 .venue-admin-card small{font-size:12.5px!important}
+.admin-ui-v2 .venue-admin-card input,
+.admin-ui-v2 .venue-admin-card select,
+.admin-ui-v2 .venue-admin-card textarea{font-size:13px!important}
+
+/* Editor workspace */
+.admin-ui-v2 .editor-workspace-head>div>p:last-child{font-size:13px!important}
+.admin-ui-v2 .editor-stats span{font-size:9.5px!important}
+.admin-ui-v2 .editor-filterbar input,
+.admin-ui-v2 .editor-filterbar select{font-size:12px!important}
+.admin-ui-v2 .editor-queue-head span{font-size:10px!important}
+.admin-ui-v2 .editor-venue-name{font-size:9px!important}
+.admin-ui-v2 .editor-queue-item h3{font-size:13px!important}
+.admin-ui-v2 .editor-queue-item p{font-size:11px!important}
+.admin-ui-v2 .editor-queue-item small{font-size:10px!important}
+.admin-ui-v2 .editor-detail-head p{font-size:10.5px!important}
+.admin-ui-v2 .editor-summary-grid span{font-size:8px!important}
+.admin-ui-v2 .editor-summary-grid b{font-size:10.5px!important}
+.admin-ui-v2 .editor-detail-tabs button{font-size:10px!important}
+.admin-ui-v2 .editor-card-copy,
+.admin-ui-v2 .editor-detail-card p{font-size:11px!important}
+.admin-ui-v2 .editor-feedback-form select,
+.admin-ui-v2 .editor-feedback-form textarea,
+.admin-ui-v2 .editor-decision-form select,
+.admin-ui-v2 .editor-decision-form textarea{font-size:11px!important}
+
+/* Drawer/modal/login */
+.admin-detail-grid>div{font-size:11.5px!important}
+.admin-detail-grid>div>b{font-size:9px!important}
+.admin-modal-header p{font-size:11.5px!important}
+.admin-login-header p{font-size:13px!important}
+.admin-login-form .admin-field>span{font-size:10.5px!important}
+.admin-login-form input{font-size:13px!important}
+
+/* Preserve compact layout on smaller screens */
+@media(max-width:900px){
+  .admin-ui-v2{font-size:13px!important}
+}
