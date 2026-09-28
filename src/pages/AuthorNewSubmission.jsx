@@ -1,11 +1,17 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPrototypeNotice } from '../components/AuthorFlow.jsx'
-import { authorApi, createAuthorManuscript, currentManuscriptPath, friendlyAuthorError } from '../authorApi.js'
+import { authorApi, clearAuthorSession, createAuthorManuscript, currentManuscriptPath, friendlyAuthorError } from '../authorApi.js'
 
 export default function AuthorNewSubmission() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    // /author/new always represents a fresh workflow. Clear only the active
+    // manuscript pointer; existing manuscripts remain in the author's account.
+    clearAuthorSession()
+  }, [])
 
   async function submit(e) {
     e.preventDefault()
