@@ -1,6 +1,15 @@
 import { api } from './api.js'
 
 const SESSION_KEY = 'flexeeAuthorSessionV1'
+const INVALID_MANUSCRIPT_SESSION_CODES = new Set([
+  'author_token_required',
+  'author_token_invalid',
+  'author_session_missing',
+])
+
+function authorErrorCode(error) {
+  return error?.payload?.code || error?.code || ''
+}
 
 export function getAuthorSession() {
   try {
@@ -70,15 +79,23 @@ export function hasAuthorSession() {
 export async function authorApi(path, options = {}) {
   const session = getAuthorSession()
   const headers = { ...(options.headers || {}) }
-  
+
   if (session.accessToken) {
     headers['X-Manuscript-Token'] = session.accessToken
   }
 
-  return api(path, {
-    ...options,
-    headers,
-  })
+  try {
+    return await api(path, {
+      ...options,
+      headers,
+    })
+  } catch (err) {
+    const code = authorErrorCode(err)
+    if (code === 'author_token_required' || code === 'author_token_invalid') {
+      clearAuthorSession()
+    }
+    throw err
+  }
 }
 
 export async function createAuthorManuscript(formData) {
@@ -122,10 +139,13 @@ export function currentSubmissionPath(suffix = '') {
 
 export function friendlyAuthorError(error) {
   if (!error) return 'Something went wrong.'
-  if (error.status === 401 || error.status === 403 || error.code === 'author_session_missing') {
-    return 'This browser no longer has access to the manuscript. Start a new submission to create a new secure author session.'
+
+  const code = authorErrorCode(error)
+  if (INVALID_MANUSCRIPT_SESSION_CODES.has(code)) {
+    return 'This manuscript session is no longer available. Return to your author workspace to select the manuscript again, or start a new submission.'
   }
-  return error.message || 'Something went wrong.'
+
+  return error?.payload?.detail || error.message || 'Something went wrong.'
 }
 
 export async function fetchAuthorJobStatus(jobId) {
