@@ -17,47 +17,43 @@ const decisions = {
 function Field({ label, children }) { return <label className="admin-field"><span>{label}</span>{children}</label> }
 function StatusPill({ value }) { return <span className={`admin-badge ${value || ''}`}>{decisions[value] || value || '—'}</span> }
 
-function AdminTop({ children, sidebar, sidebarOpen = true, onToggleSidebar }) {
+function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar }) {
   return (
-    <div className="admin-page admin-ui-v2" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
-      
+    <div className="admin-page admin-ui-v2 admin-overlay-shell" style={{ height: '100vh', overflow: 'hidden' }}>
       {sidebar && (
-        <button 
+        <button
           className="admin-sidebar-toggle"
+          type="button"
+          aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
+          aria-expanded={sidebarOpen}
           onClick={onToggleSidebar}
-          style={{ 
-            position: 'fixed', top: '24px', left: '24px', zIndex: 60, 
-            padding: '10px', background: 'var(--copper)', color: '#fff', borderRadius: '10px', 
-            display: 'flex', boxShadow: '0 4px 12px rgba(168,92,50,0.3)', border: 'none', cursor: 'pointer', transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-1px)'}
-          onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
         >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
         </button>
       )}
 
+      {sidebar && sidebarOpen && (
+        <button
+          type="button"
+          className="admin-sidebar-backdrop"
+          aria-label="Close navigation"
+          onClick={onToggleSidebar}
+        />
+      )}
+
       {sidebar && (
-        <aside style={{ 
-          width: sidebarOpen ? '250px' : '0px', 
-          opacity: sidebarOpen ? 1 : 0,
-          overflow: 'hidden',
-          flexShrink: 0, 
-          borderRight: sidebarOpen ? '1px solid rgba(255,255,255,0.8)' : 'none', 
-          background: 'rgba(255,255,255,0.65)', 
-          backdropFilter: 'blur(40px) saturate(150%)', 
-          boxShadow: sidebarOpen ? '4px 0 24px rgba(0,0,0,0.03)' : 'none',
-          display: 'flex', 
-          flexDirection: 'column', 
-          zIndex: 10,
-          transition: 'all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)'
-        }}>
-          <div className="admin-ui-sidebar-inner" style={{ width: '250px', height: '100%' }}>
+        <aside className={`admin-overlay-sidebar ${sidebarOpen ? 'open' : ''}`} aria-hidden={!sidebarOpen}>
+          <div className="admin-ui-sidebar-inner">
             {sidebar}
           </div>
         </aside>
       )}
-      <main className="admin-ui-main" style={{ flex: 1, minWidth: 0, overflowY: 'auto' }}>
+
+      <main className="admin-ui-main admin-overlay-main">
         <div className="admin-ui-topbar">
           <div className="admin-pro-topbar-title"><strong>Flexee Admin</strong><span>Editorial operations</span></div>
           <div className="admin-pro-topbar-actions"><button type="button" className="admin-topbar-help">Help</button></div>
@@ -562,7 +558,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   const [emailActionId, setEmailActionId] = useState(null)
   const [zipViewItem, setZipViewItem] = useState(null)
   const [currentView, setCurrentView] = useState('editor')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const setKindFilter = (k) => { if (!platformSuperuser) return; const nf = {...filters, kind: k}; setFilters(nf); setApplied(nf); setCurrentView('dashboard'); }
   
   const query = useMemo(() => new URLSearchParams(Object.entries(applied).filter(([,v]) => v)).toString(), [applied])
