@@ -12,8 +12,24 @@ const statusLabels = {
 }
 
 function StatusPill({ value }) {
-  const tone = value === 'accepted' ? 'good' : ['rejected', 'revision_requested'].includes(value) ? 'warn' : 'neutral'
-  return <span className={`venue-admin-pill ${tone}`}>{statusLabels[value] || value || '—'}</span>
+  const styles = {
+    accepted: 'border-green-200 bg-green-50 text-green-700',
+    rejected: 'border-red-200 bg-red-50 text-red-700',
+    revision_requested: 'border-amber-200 bg-amber-50 text-amber-700',
+    under_review: 'border-blue-200 bg-blue-50 text-blue-700',
+    submitted: 'border-flexee-100 bg-flexee-50 text-flexee-700',
+  }
+  const dots = {
+    accepted: 'bg-green-500',
+    rejected: 'bg-red-500',
+    revision_requested: 'bg-amber-500',
+    under_review: 'bg-blue-500',
+    submitted: 'bg-flexee-500',
+  }
+  return <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-2 text-[13px] font-extrabold ${styles[value] || 'border-line bg-white text-muted'}`}>
+    <span className={`status-dot ${dots[value] || 'bg-stone-400'}`}></span>
+    {statusLabels[value] || value || '—'}
+  </span>
 }
 
 function pretty(value) {
@@ -255,283 +271,493 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   const canEditSelected = platformSuperuser || ['owner', 'editor'].includes(selectedRole)
   const decisionAllowed = canEditSelected && detail && ['submitted', 'under_review', 'revision_requested'].includes(detail.status)
 
+
+  function exportQueue() {
+    const rows = [
+      ['Venue', 'Manuscript', 'Author', 'Email', 'Status', 'Submitted'],
+      ...(data.items || []).map(item => [
+        item.venue?.name || '',
+        item.manuscript?.title || '',
+        item.manuscript?.author_name || '',
+        item.manuscript?.author_email || '',
+        statusLabels[item.status] || item.status || '',
+        item.submitted_at || item.created_at || '',
+      ]),
+    ]
+    const csv = rows.map(row => row.map(value => `"${String(value ?? '').replaceAll('"', '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'flexee-editorial-queue.csv'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
+
+  const coverage = detail?.editorial_brief?.analysis_coverage || {}
+  const coveragePercent = Number(coverage.coverage_percent || 0)
+  const briefValue = (value, fallback = 'Semantic analysis unavailable') => {
+    if (!value) return fallback
+    if (typeof value === 'string') return value
+    return value.summary || value.detail || fallback
+  }
+
   return <div className="editor-workspace">
     <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
       <div>
-        <div className="mb-1 text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Venue editor workspace</div>
-        <h2 className="serif text-[43px] leading-[.98] md:text-[54px]">Human editorial review</h2>
-        <p className="mt-3 max-w-[880px] text-[16px] leading-7 text-muted">Review the venue-specific brief and evidence, record corrections, and make the final editorial decision.</p>
+        <div className="mb-1 text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
+          Venue editor workspace
+        </div>
+        <h2 className="serif text-[43px] leading-[.98] md:text-[54px]">
+          Human editorial review
+        </h2>
+        <p className="mt-3 max-w-[880px] text-[16px] leading-7 text-muted">
+          Review manuscript context, venue-specific evidence and AI-prepared editorial intelligence before recording a final human decision.
+        </p>
       </div>
-      <button className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={loadQueue} disabled={loading}>
-        {loading ? 'Refreshing…' : 'Refresh queue'}
+
+      <div className="flex flex-wrap gap-3">
+        <button
+          type="button"
+          onClick={exportQueue}
+          disabled={!data.items?.length}
+          className="rounded-2xl border border-line bg-white/90 px-5 py-3 text-[14px] font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Export queue
+        </button>
+        <button
+          type="button"
+          onClick={loadQueue}
+          disabled={loading}
+          className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? 'Refreshing…' : 'Refresh queue'}
+        </button>
+      </div>
+    </div>
+
+    {error && <div className="admin-error venue-admin-message mb-4">{error}</div>}
+    {success && <div className="venue-admin-success venue-admin-message mb-4">{success}</div>}
+
+    <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <button type="button" onClick={() => setFilters({...filters, status:''})} className="metric premium-card rounded-[22px] p-5 text-left">
+        <div className="serif text-[36px] leading-none">{data.counts?.total || 0}</div>
+        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editorial queue</div>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100"><div className="h-full w-[75%] rounded-full bg-flexee-500"></div></div>
+      </button>
+
+      <button type="button" onClick={() => setFilters({...filters, status:'submitted'})} className="metric premium-card rounded-[22px] p-5 text-left">
+        <div className="serif text-[36px] leading-none">{data.counts?.submitted || 0}</div>
+        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Submitted</div>
+        <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>
+      </button>
+
+      <button type="button" onClick={() => setFilters({...filters, status:'under_review'})} className="metric premium-card rounded-[22px] p-5 text-left">
+        <div className="serif text-[36px] leading-none">{data.counts?.under_review || 0}</div>
+        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Under review</div>
+        <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>
+      </button>
+
+      <button type="button" onClick={() => setFilters({...filters, status:'revision_requested'})} className="metric premium-card rounded-[22px] p-5 text-left">
+        <div className="serif text-[36px] leading-none">{data.counts?.revision_requested || 0}</div>
+        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Revision</div>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-amber-100"><div className="h-full w-[66%] rounded-full bg-amber-500"></div></div>
+      </button>
+
+      <button type="button" onClick={() => setFilters({...filters, status:'accepted'})} className="metric premium-card rounded-[22px] p-5 text-left">
+        <div className="serif text-[36px] leading-none">{data.counts?.accepted || 0}</div>
+        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Accepted</div>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-green-100"><div className="h-full w-[42%] rounded-full bg-green-500"></div></div>
+      </button>
+
+      <button type="button" onClick={() => setFilters({...filters, status:'rejected'})} className="metric premium-card rounded-[22px] p-5 text-left">
+        <div className="serif text-[36px] leading-none">{data.counts?.rejected || 0}</div>
+        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Rejected</div>
+        <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>
       </button>
     </div>
 
-    {error && <div className="admin-error venue-admin-message">{error}</div>}
-    {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
+    <div className="premium-card mb-6 grid gap-3 rounded-[24px] p-3 lg:grid-cols-[1.55fr_.75fr_.75fr_auto]">
+      <div className="relative">
+        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.4-3.4"/>
+        </svg>
+        <input
+          className="field pl-11"
+          value={filters.q}
+          onChange={e => setFilters({...filters, q:e.target.value})}
+          placeholder="Search manuscript, author, email, or venue..."
+        />
+      </div>
 
-    <section className="editor-stats mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:''})}><b>{data.counts?.total || 0}</b><span>Editorial queue</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'submitted'})}><b>{data.counts?.submitted || 0}</b><span>Submitted</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'under_review'})}><b>{data.counts?.under_review || 0}</b><span>Under review</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'revision_requested'})}><b>{data.counts?.revision_requested || 0}</b><span>Revision requested</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'accepted'})}><b>{data.counts?.accepted || 0}</b><span>Accepted</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'rejected'})}><b>{data.counts?.rejected || 0}</b><span>Rejected</span></button>
-    </section>
-
-    <div className="editor-filterbar premium-card mb-6 grid gap-3 rounded-[24px] p-3 lg:grid-cols-[1.55fr_.75fr_.75fr_auto]">
-      <input
-        className="field"
-        value={filters.q}
-        onChange={e => setFilters({...filters, q:e.target.value})}
-        placeholder="Search manuscript, author, email, or venue…"
-      />
       <select className="field" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
         <option value="">All venues</option>
         {venues.map(venue => <option value={venue.id} key={venue.id}>{venue.name}</option>)}
       </select>
+
       <select className="field" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
         <option value="">All editorial statuses</option>
         {Object.entries(statusLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}
       </select>
-      <button className="rounded-2xl bg-ink px-6 py-3 text-[14px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>Apply</button>
+
+      <button className="rounded-2xl bg-ink px-6 py-3 text-[14px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>
+        Apply
+      </button>
     </div>
 
-    <div className="editor-grid grid items-start gap-5 2xl:grid-cols-[410px_minmax(0,1fr)]">
-      <section className="editor-queue sidebar-content-card premium-card h-fit self-start overflow-hidden rounded-[28px]">
-        <div className="editor-queue-head flex items-center justify-between border-b border-line px-5 py-5">
-          <h2>Submission queue</h2>
-          <span>{data.items?.length || 0} record{data.items?.length === 1 ? '' : 's'}</span>
+    <div className="grid items-start gap-5 2xl:grid-cols-[410px_minmax(0,1fr)]">
+      <aside className="sidebar-content-card premium-card h-fit self-start overflow-hidden rounded-[28px]">
+        <div className="flex items-center justify-between border-b border-line px-5 py-5">
+          <div>
+            <h3 className="serif text-[30px] leading-none">Submission queue</h3>
+            <div className="mt-1.5 text-[14px] font-medium text-muted">Prioritized editorial workload</div>
+          </div>
+          <div className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-1.5 text-[13px] font-extrabold text-flexee-700">
+            {data.items?.length || 0} record{data.items?.length === 1 ? '' : 's'}
+          </div>
         </div>
-        <div className="editor-queue-scroll thin-scroll max-h-[520px] overflow-y-auto">
-          {loading ? <div className="venue-admin-state"><h3>Loading editorial queue…</h3></div> :
-            data.items?.length ? data.items.map(item => <button
-              type="button"
-              key={item.id}
-              className={`editor-queue-item queue-row w-full border-b border-line px-5 py-5 text-left ${selectedId === item.id ? 'active' : ''}`}
-              onClick={() => openSubmission(item.id)}
-            >
-              <div className="editor-queue-item-top">
-                <span className="editor-venue-name">{item.venue?.name}</span>
-                <StatusPill value={item.status} />
-              </div>
-              <h3>{item.manuscript?.title}</h3>
-              <p>{item.manuscript?.author_name}{item.manuscript?.author_email ? ` · ${item.manuscript.author_email}` : ''}</p>
-              <small>{item.submitted_at ? new Date(item.submitted_at).toLocaleString() : new Date(item.created_at).toLocaleString()}</small>
-            </button>) : <div className="venue-admin-state">
-              <p className="venue-admin-kicker">Queue clear</p>
-              <h3>No venue submissions match these filters.</h3>
+
+        <div className="thin-scroll max-h-[520px] overflow-y-auto">
+          {loading ? <div className="p-5 text-[14px] font-semibold text-muted">Loading editorial queue…</div> :
+            data.items?.length ? data.items.map(item => {
+              const submitted = new Date(item.submitted_at || item.created_at)
+              return <button
+                type="button"
+                key={item.id}
+                className={`queue-row w-full border-b border-line px-5 py-5 text-left ${selectedId === item.id ? 'active' : ''}`}
+                onClick={() => openSubmission(item.id)}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <span className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">{item.venue?.name}</span>
+                  <StatusPill value={item.status} />
+                </div>
+                <div className="mt-2 text-[17px] font-extrabold">{item.manuscript?.title}</div>
+                <div className="mt-1 text-[14px] leading-5 text-muted">
+                  {item.manuscript?.author_name}{item.manuscript?.author_email ? ` · ${item.manuscript.author_email}` : ''}
+                </div>
+                <div className="mt-3 flex items-center justify-between text-[13px] font-semibold text-[#91857d]">
+                  <span>{submitted.toLocaleDateString()}</span>
+                  <span>{submitted.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+                </div>
+              </button>
+            }) : <div className="p-5">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Queue clear</div>
+              <div className="mt-2 text-[16px] font-extrabold">No venue submissions match these filters.</div>
             </div>
           }
         </div>
-      </section>
+      </aside>
 
-      <section className="editor-detail premium-card overflow-hidden rounded-[28px]">
-        {!selectedId ? <div className="venue-admin-state">
-          <p className="venue-admin-kicker">Select a submission</p>
-          <h3>The editorial brief, evidence, and decision tools will appear here.</h3>
-        </div> : detailLoading || !detail ? <div className="venue-admin-state"><h3>Loading editorial packet…</h3></div> : <>
-          <div className="editor-detail-head border-b border-line bg-gradient-to-r from-white via-white to-flexee-50/75 px-6 py-6">
-            <div className="editor-detail-head-copy">
-              <span className="editor-venue-name">{detail.venue?.name} · config v{detail.venue_config_version || '—'}</span>
-              <h2>{detail.manuscript?.title}</h2>
-              <p>{detail.manuscript?.author_name} · {pretty(detail.manuscript?.manuscript_type)}</p>
-            </div>
-            <div className="editor-detail-head-controls">
-              <StatusPill value={detail.status} />
-              <div className="editor-detail-actions">
-                <button className="admin-btn secondary" type="button" onClick={downloadManuscript} disabled={busy === 'download' || Boolean(detail.retention_purged_at)}>{detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}</button>
-                {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button className="admin-btn" type="button" onClick={startReview} disabled={busy === 'review'}>{busy === 'review' ? 'Starting…' : 'Start review'}</button>}
+      <article className="premium-card overflow-hidden rounded-[28px]">
+        {!selectedId ? <div className="p-8 text-center">
+          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Select a submission</div>
+          <h3 className="serif mt-2 text-[30px]">The editorial brief, evidence, and decision tools will appear here.</h3>
+        </div> : detailLoading || !detail ? <div className="p-8 text-center text-[15px] font-semibold text-muted">Loading editorial packet…</div> : <>
+          <div className="border-b border-line bg-gradient-to-r from-white via-white to-flexee-50/75 px-6 py-6">
+            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
+              <div>
+                <div className="text-[13px] font-extrabold uppercase tracking-[.09em] text-flexee-600">
+                  {detail.venue?.name} · Configuration v{detail.venue_config_version || '—'}
+                </div>
+                <h3 className="serif mt-1 text-[40px] leading-none">{detail.manuscript?.title}</h3>
+                <div className="mt-3 flex flex-wrap items-center gap-2 text-[14px] font-medium text-muted">
+                  <span>{detail.manuscript?.author_name}</span>
+                  <span className="text-[#cbb8ad]">•</span>
+                  <span>{pretty(detail.manuscript?.manuscript_type)}</span>
+                  {detail.manuscript?.author_email && <>
+                    <span className="text-[#cbb8ad]">•</span>
+                    <span>{detail.manuscript.author_email}</span>
+                  </>}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                <StatusPill value={detail.status} />
+                <button
+                  className="rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
+                  type="button"
+                  onClick={downloadManuscript}
+                  disabled={busy === 'download' || Boolean(detail.retention_purged_at)}
+                >
+                  {detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}
+                </button>
+                {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button
+                  className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  type="button"
+                  onClick={startReview}
+                  disabled={busy === 'review'}
+                >
+                  {busy === 'review' ? 'Starting…' : 'Start review'}
+                </button>}
               </div>
             </div>
           </div>
 
-          {detail.retention_purged_at && <div className="venue-admin-success venue-admin-message">
+          {detail.retention_purged_at && <div className="mx-6 mt-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-[13px] font-bold text-green-700">
             Venue-retained manuscript content expired on {new Date(detail.retention_purged_at).toLocaleString()}. Editorial status and human decision metadata remain available.
           </div>}
-          {!detail.retention_purged_at && detail.retention_expires_at && <div className="venue-admin-message">
+          {!detail.retention_purged_at && detail.retention_expires_at && <div className="mx-6 mt-5 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[13px] font-semibold text-muted">
             Retention expiry: {new Date(detail.retention_expires_at).toLocaleString()}
           </div>}
 
-          <div className="editor-summary-grid grid gap-3 px-6 py-5 sm:grid-cols-2 xl:grid-cols-4">
-            <div><span>Venue config</span><b>{detail.venue_config_version ? `v${detail.venue_config_version}` : '—'}</b></div>
-            <div><span>Evidence items</span><b>{detail.evidence?.length || 0}</b></div>
-            <div><span>Editorial brief</span><b>{detail.editorial_brief && Object.keys(detail.editorial_brief).length ? 'Prepared' : 'Pending'}</b></div>
-            <div><span>Status</span><b>{statusLabels[detail.status] || pretty(detail.status)}</b></div>
+          <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Venue config</div>
+              <div className="mt-1.5 text-[16px] font-extrabold">{detail.venue_config_version ? `v${detail.venue_config_version}` : '—'}</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Evidence items</div>
+              <div className="mt-1.5 text-[16px] font-extrabold">{detail.evidence?.length || 0}</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Editorial brief</div>
+              <div className="mt-1.5 text-[16px] font-extrabold">{detail.editorial_brief && Object.keys(detail.editorial_brief).length ? 'Prepared' : 'Pending'}</div>
+            </div>
+            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Coverage</div>
+              <div className="mt-1.5 flex items-center gap-2 text-[16px] font-extrabold">
+                {coveragePercent}%
+                <span className={`status-dot ${coveragePercent >= 100 ? 'bg-green-500' : 'bg-amber-500'}`}></span>
+              </div>
+            </div>
           </div>
 
-          <nav className="editor-detail-tabs flex gap-1 overflow-x-auto border-b border-line px-6" aria-label="Editorial packet sections">
-            {[
-              ['brief','Editorial brief'],
-              ['evidence','Evidence'],
-              ['rules','Venue rules'],
-              ['feedback','Agent feedback'],
-              ['decision','Decision'],
-            ].map(([value,label]) => <button
-              type="button"
-              key={value}
-              className={`workspace-tab whitespace-nowrap px-4 py-3.5 text-[14px] font-extrabold ${detailTab === value ? 'active' : 'text-muted'}`}
-              onClick={() => setDetailTab(value)}
-            >{label}</button>)}
-          </nav>
-
-          <div className="p-6">{detailTab === 'brief' && <>
-          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
-            <p className="venue-admin-kicker">Manuscript</p>
-            <div className="editor-manuscript-meta">
-              <div><span>Author</span><b>{detail.manuscript?.author_name}</b></div>
-              <div><span>Email</span><b>{detail.manuscript?.author_email || '—'}</b></div>
-              <div><span>Co-authors</span><b>{detail.manuscript?.coauthors || '—'}</b></div>
-              <div><span>File</span><b>{detail.retention_purged_at ? 'Expired under retention policy' : detail.manuscript?.manuscript_filename || '—'}</b></div>
+          <div className="px-6">
+            <div className="flex gap-1 overflow-x-auto border-b border-line">
+              {[
+                ['brief','Editorial brief'],
+                ['evidence','Evidence'],
+                ['rules','Venue rules'],
+                ['feedback','Agent feedback'],
+                ['decision','Decision'],
+              ].map(([value,label]) => <button
+                type="button"
+                key={value}
+                className={`workspace-tab whitespace-nowrap px-4 py-3.5 text-[14px] font-extrabold ${detailTab === value ? 'active' : 'text-muted'}`}
+                onClick={() => setDetailTab(value)}
+              >{label}</button>)}
             </div>
-            {detail.manuscript?.abstract && <div className="editor-long-copy"><span>Abstract</span><p>{detail.manuscript.abstract}</p></div>}
-            {detail.manuscript?.disclosure && <div className="editor-long-copy"><span>AI-use disclosure</span><p>{detail.manuscript.disclosure}</p></div>}
-          </section>
+          </div>
 
-          {detail.requirements?.configured && <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
-            <p className="venue-admin-kicker">Venue submission requirements</p>
-            <h3>{detail.requirements.complete ? 'All required venue items were completed.' : 'Some venue requirements are incomplete.'}</h3>
-            <div className="editor-requirement-list">
-              {(detail.requirements.items || []).map(item => <article className="editor-brief-block" key={item.key}>
-                <span>{item.label}{item.required ? ' · Required' : ' · Optional'}</span>
-                {item.type === 'file' ? <>
-                  <p>{item.file?.name || 'No file supplied.'}</p>
-                  {item.file && <button className="admin-btn secondary" type="button" onClick={() => downloadRequirementFile(item)} disabled={busy === `requirement-${item.key}`}>
-                    {busy === `requirement-${item.key}` ? 'Downloading…' : 'Download file'}
-                  </button>}
-                </> : item.type === 'checkbox' ? <p>{item.value ? 'Confirmed' : 'Not confirmed'}</p> : <p>{item.value || 'No response supplied.'}</p>}
-              </article>)}
-            </div>
-          </section>}
+          <div className="p-6">
+            {detailTab === 'brief' && <div className="space-y-5">
+              <div className="rounded-[22px] border border-line bg-[#fffdfb] p-5">
+                <div className="mb-4 text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Manuscript</div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="rounded-2xl bg-canvas p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Author</div>
+                    <div className="mt-1.5 text-[14px] font-extrabold">{detail.manuscript?.author_name}</div>
+                  </div>
+                  <div className="rounded-2xl bg-canvas p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Email</div>
+                    <div className="mt-1.5 break-all text-[14px] font-extrabold">{detail.manuscript?.author_email || '—'}</div>
+                  </div>
+                  <div className="rounded-2xl bg-canvas p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Co-authors</div>
+                    <div className="mt-1.5 text-[14px] font-extrabold">{detail.manuscript?.coauthors || '—'}</div>
+                  </div>
+                  <div className="rounded-2xl bg-canvas p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">File</div>
+                    <div className="mt-1.5 text-[14px] font-extrabold">{detail.retention_purged_at ? 'Expired under retention policy' : detail.manuscript?.manuscript_filename || '—'}</div>
+                  </div>
+                </div>
 
-          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
-            <p className="venue-admin-kicker">AI-prepared editorial brief</p>
-            <h3>{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h3>
-            {detail.editorial_brief?.decision_authority && <p className="editor-decision-authority">{detail.editorial_brief.decision_authority}</p>}
-            
-            {detail.editorial_brief?.analysis_coverage && typeof detail.editorial_brief.analysis_coverage.coverage_percent !== 'undefined' && (
-              <article className="editor-brief-block">
-                <span>Analysis Coverage</span>
-                <p>
-                  Chunks analyzed: {detail.editorial_brief.analysis_coverage.chunks_analyzed} / {detail.editorial_brief.analysis_coverage.chunks_total}
-                  <br />
-                  Coverage: {detail.editorial_brief.analysis_coverage.coverage_percent}%
-                </p>
-              </article>
-            )}
+                {detail.manuscript?.abstract && <div className="mt-5">
+                  <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Abstract</div>
+                  <p className="mt-2 text-[16px] leading-7">{detail.manuscript.abstract}</p>
+                </div>}
+                {detail.manuscript?.disclosure && <div className="mt-4">
+                  <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">AI-use disclosure</div>
+                  <p className="mt-2 text-[16px] leading-7">{detail.manuscript.disclosure}</p>
+                </div>}
+              </div>
 
-            <div className="editor-brief-grid">
-              <BriefBlock label="Outlet fit" value={detail.editorial_brief?.outlet_fit} />
-              <BriefBlock label="Policy compliance" value={detail.editorial_brief?.policy_compliance} />
-              <BriefBlock label="Contribution" value={detail.editorial_brief?.contribution} />
-              <BriefBlock label="Methods" value={detail.editorial_brief?.methods} />
-              <BriefBlock label="Citation integrity" value={detail.editorial_brief?.citation_integrity} />
-            </div>
+              {detail.requirements?.configured && <div className="rounded-[22px] border border-line bg-[#fffdfb] p-5">
+                <div className="mb-4 text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Venue submission requirements</div>
+                <div className="text-[18px] font-extrabold">{detail.requirements.complete ? 'All required venue items were completed.' : 'Some venue requirements are incomplete.'}</div>
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  {(detail.requirements.items || []).map(item => <div className="rounded-2xl border border-line bg-white p-4" key={item.key}>
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">{item.label}{item.required ? ' · Required' : ' · Optional'}</div>
+                    {item.type === 'file' ? <>
+                      <div className="mt-2 text-[14px] font-semibold">{item.file?.name || 'No file supplied.'}</div>
+                      {item.file && <button className="mt-3 rounded-xl border border-line bg-white px-3 py-2 text-[13px] font-extrabold" type="button" onClick={() => downloadRequirementFile(item)} disabled={busy === `requirement-${item.key}`}>
+                        {busy === `requirement-${item.key}` ? 'Downloading…' : 'Download file'}
+                      </button>}
+                    </> : <div className="mt-2 text-[14px] leading-6 text-muted">{item.type === 'checkbox' ? (item.value ? 'Confirmed' : 'Not confirmed') : (item.value || 'No response supplied.')}</div>}
+                  </div>)}
+                </div>
+              </div>}
 
-            {detail.editorial_brief?.reviewer_expertise?.length > 0 && <div className="editor-chip-section">
-              <span>Suggested reviewer expertise</span>
-              <div>{detail.editorial_brief.reviewer_expertise.map(item => <em key={item}>{item}</em>)}</div>
-            </div>}
-            {detail.editorial_brief?.unresolved_risks?.length > 0 && <div className="editor-risk-list">
-              <span>Unresolved risks</span>
-              <ul>{detail.editorial_brief.unresolved_risks.map((item,index) => <li key={index}>{typeof item === 'string' ? item : item.risk || JSON.stringify(item)}</li>)}</ul>
-            </div>}
-          </section>
+              <div className="rounded-[24px] border border-flexee-100 bg-gradient-to-br from-[#fff9f4] via-white to-white p-6">
+                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+                  <div>
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">AI-prepared editorial brief</div>
+                    <h4 className="serif mt-1 text-[30px] leading-tight">{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h4>
+                    <p className="mt-2 max-w-5xl text-[15px] leading-7 text-muted">
+                      {detail.editorial_brief?.decision_authority || 'This brief is advisory. The system never makes the final editorial decision. Acceptance, revision and rejection remain human decisions.'}
+                    </p>
+                  </div>
+                  {coveragePercent < 100 && <span className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-[13px] font-extrabold text-amber-700">Limited analysis</span>}
+                </div>
 
-          </>}
+                <div className="mt-5 grid gap-3 xl:grid-cols-2">
+                  <div className="rounded-2xl border border-line bg-white p-4">
+                    <div className="mb-2 flex items-center justify-between text-[13px] font-extrabold">
+                      <span className="uppercase tracking-[.06em] text-muted">Analysis coverage</span>
+                      <span>{coverage.chunks_analyzed || 0} / {coverage.chunks_total || 0} chunks</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-stone-100">
+                      <div className="h-full rounded-full bg-flexee-500" style={{ width: `${Math.max(0, Math.min(100, coveragePercent))}%` }}></div>
+                    </div>
+                  </div>
 
-          {detailTab === 'evidence' && <>
-          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
-            <p className="venue-admin-kicker">Evidence trail</p>
-            <h3>Findings linked to manuscript, venue policy, or verified sources</h3>
-            <div className="editor-evidence-list">
-              {detail.evidence?.length ? detail.evidence.map(item => <article key={item.id}>
-                <div><b>{pretty(item.finding_type)}</b><span>{pretty(item.source_type)}</span></div>
-                <p>{item.claim}</p>
-                <small>{item.source_locator || 'No locator'}{item.source_url ? ` · ${item.source_url}` : ''}</small>
-                {item.excerpt && <blockquote>{item.excerpt}</blockquote>}
-              </article>) : <p className="venue-admin-empty">No evidence findings are attached.</p>}
-            </div>
-          </section>
-          </>}
+                  <div className="rounded-2xl border border-line bg-white p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">Outlet fit</div>
+                    <div className="mt-1.5 text-[15px] font-semibold">{briefValue(detail.editorial_brief?.outlet_fit)}</div>
+                  </div>
 
-          {detailTab === 'rules' && <>
-          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
-            <p className="venue-admin-kicker">Venue rule snapshot</p>
-            <h3>Configuration used for this submission</h3>
-            {detail.venue_config ? <div className="editor-config-snapshot">
-              <div><span>Aims & scope</span><p>{detail.venue_config.aims_scope || '—'}</p></div>
-              <div><span>Article types</span><p>{detail.venue_config.article_types?.join(', ') || '—'}</p></div>
-              <div><span>Quality threshold</span><p>{detail.venue_config.quality_threshold || '—'}</p></div>
-              <div><span>Current demand</span><pre>{JSON.stringify(detail.venue_config.current_demand || {}, null, 2)}</pre></div>
-            </div> : <p className="venue-admin-empty">No venue configuration snapshot is attached.</p>}
-          </section>
-          </>}
+                  <div className="rounded-2xl border border-line bg-white p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">Contribution</div>
+                    <div className="mt-1.5 text-[15px] font-semibold">{briefValue(detail.editorial_brief?.contribution)}</div>
+                  </div>
 
-          {detailTab === 'feedback' && <>
-          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
-            <p className="venue-admin-kicker">Correct the agent</p>
-            <h3>Record venue-specific editor feedback</h3>
-            <p className="editor-card-copy">Corrections stay scoped to this venue. They do not rewrite another outlet's configuration or assessment history.</p>
-            {canEditSelected ? <form className="editor-feedback-form" onSubmit={recordFeedback}>
-              <label><span>Assessment field</span><select value={feedbackField} onChange={e => setFeedbackField(e.target.value)}>
-                <option value="outlet_fit">Outlet fit</option>
-                <option value="policy_compliance">Policy compliance</option>
-                <option value="contribution">Contribution</option>
-                <option value="methods">Methods</option>
-                <option value="citation_integrity">Citation integrity</option>
-                <option value="reviewer_expertise">Reviewer expertise</option>
-                <option value="unresolved_risks">Unresolved risks</option>
-                <optgroup label="Venue Agent rule corrections">
-                  <option value="aims_scope">Aims & scope</option>
-                  <option value="article_types">Accepted article types</option>
-                  <option value="accepted_methods">Accepted methods</option>
-                  <option value="quality_threshold">Quality threshold</option>
-                  <option value="reviewer_criteria">Reviewer criteria</option>
-                  <option value="disclosures">Required disclosures</option>
-                  <option value="reporting_standards">Reporting standards</option>
-                  <option value="desk_rejection_rules">Desk-rejection guidance</option>
-                </optgroup>
-              </select></label>
-              <label><span>Editor correction</span><textarea rows="3" value={feedbackValue} onChange={e => setFeedbackValue(e.target.value)} placeholder={venueRuleListFields.has(feedbackField) ? 'Enter one value per line.' : venueRuleFeedbackFields.has(feedbackField) ? 'Enter the corrected venue rule.' : 'What should the venue-specific assessment say instead?'} />{venueRuleFeedbackFields.has(feedbackField) && <small>This can be proposed later as an inactive Venue Agent configuration draft; it will never change the live agent automatically.</small>}</label>
-              <label><span>Reason / evidence for correction</span><textarea rows="3" required value={feedbackReason} onChange={e => setFeedbackReason(e.target.value)} placeholder="Explain why this correction should inform future assessments for this venue." /></label>
-              <button className="admin-btn secondary" type="submit" disabled={busy === 'feedback'}>{busy === 'feedback' ? 'Recording…' : 'Record feedback'}</button>
-            </form> : <p className="editor-card-copy">Your role has read-only access to this venue's editorial workspace.</p>}
+                  <div className="rounded-2xl border border-line bg-white p-4">
+                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">Methods</div>
+                    <div className="mt-1.5 text-[15px] font-semibold">{briefValue(detail.editorial_brief?.methods)}</div>
+                  </div>
+                </div>
 
-            {detail.feedback?.length > 0 && <div className="editor-feedback-history">
-              <span>Recorded feedback</span>
-              {detail.feedback.map(item => <article key={item.id}>
-                <b>{pretty(item.assessment_field)}</b>
-                <p>{item.reason || 'No reason recorded.'}</p>
-                <small>{new Date(item.created_at).toLocaleString()}</small>
-              </article>)}
-            </div>}
-          </section>
-          </>}
+                {detail.editorial_brief?.reviewer_expertise?.length > 0 && <div className="mt-5">
+                  <div className="mb-2 text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Suggested reviewer expertise</div>
+                  <div className="flex flex-wrap gap-2">
+                    {detail.editorial_brief.reviewer_expertise.map(item => <span key={item} className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-2 text-[13px] font-bold text-flexee-800">{item}</span>)}
+                  </div>
+                </div>}
 
-          {detailTab === 'decision' && <>
-          <section className="editor-detail-card editor-decision-card rounded-[22px] border border-line bg-white p-6">
-            <p className="venue-admin-kicker">Human decision</p>
-            <h3>Final editorial authority stays here.</h3>
-            {detail.decision && Object.keys(detail.decision).length > 0 && <div className="editor-existing-decision">
-              <StatusPill value={detail.decision.decision || detail.status} />
-              <p>{detail.decision.note || 'No editor note.'}</p>
-              <small>{detail.decision.decided_by ? `Decided by ${detail.decision.decided_by}` : ''}{detail.decision.decided_at ? ` · ${new Date(detail.decision.decided_at).toLocaleString()}` : ''}</small>
+                {detail.editorial_brief?.unresolved_risks?.length > 0 && <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+                  <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-amber-700">Unresolved risks</div>
+                  <ul className="mt-2 list-disc space-y-1 pl-5 text-[14px] leading-6 text-amber-900">
+                    {detail.editorial_brief.unresolved_risks.map((item,index) => <li key={index}>{typeof item === 'string' ? item : item.risk || JSON.stringify(item)}</li>)}
+                  </ul>
+                </div>}
+              </div>
             </div>}
 
-            {decisionAllowed ? <form className="editor-decision-form" onSubmit={recordDecision}>
-              <label><span>Decision</span><select value={decision} onChange={e => setDecision(e.target.value)}>
-                <option value="revision_requested">Request revision</option>
-                <option value="accepted">Accept</option>
-                <option value="rejected">Reject</option>
-              </select></label>
-              <label><span>Editor note {decision === 'accepted' ? '(optional)' : '(required)'}</span><textarea rows="4" required={decision !== 'accepted'} value={decisionNote} onChange={e => setDecisionNote(e.target.value)} placeholder="Record the rationale or instructions for the author." /></label>
-              <button className={`admin-btn ${decision === 'rejected' ? 'danger' : ''}`} type="submit" disabled={busy === 'decision'}>{busy === 'decision' ? 'Recording…' : `Record: ${statusLabels[decision]}`}</button>
-            </form> : <p className="editor-card-copy">This submission is currently {statusLabels[detail.status] || detail.status}; no new decision action is available from this state.</p>}
-          </section>
-          </>}</div>
+            {detailTab === 'evidence' && <div className="rounded-[22px] border border-line bg-white p-5">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Evidence trail</div>
+              <h3 className="serif mt-1 text-[28px]">Findings linked to manuscript, venue policy, or verified sources</h3>
+              <div className="mt-4 grid gap-3">
+                {detail.evidence?.length ? detail.evidence.map(item => <article key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <b className="text-[15px]">{pretty(item.finding_type)}</b>
+                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[12px] font-extrabold text-muted">{pretty(item.source_type)}</span>
+                  </div>
+                  <p className="mt-2 text-[15px] leading-7 text-muted">{item.claim}</p>
+                  <small className="text-[13px] text-muted">{item.source_locator || 'No locator'}{item.source_url ? ` · ${item.source_url}` : ''}</small>
+                  {item.excerpt && <blockquote className="mt-3 border-l-2 border-flexee-500 pl-3 text-[14px] leading-6 text-muted">{item.excerpt}</blockquote>}
+                </article>) : <div className="rounded-[22px] border border-line bg-white p-8 text-center">
+                  <h4 className="text-[19px] font-extrabold">No evidence items available</h4>
+                  <p className="mx-auto mt-2 max-w-lg text-[15px] leading-7 text-muted">This submission currently contains deterministic review output only.</p>
+                </div>}
+              </div>
+            </div>}
+
+            {detailTab === 'rules' && <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-[22px] border border-line bg-white p-5">
+                <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Accepted article types</div>
+                <div className="mt-2 text-[16px] font-extrabold">{detail.venue_config?.article_types?.join(', ') || '—'}</div>
+              </div>
+              <div className="rounded-[22px] border border-line bg-white p-5">
+                <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Quality threshold</div>
+                <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config?.quality_threshold || '—'}</div>
+              </div>
+              <div className="rounded-[22px] border border-line bg-white p-5 lg:col-span-2">
+                <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Aims & scope</div>
+                <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config?.aims_scope || '—'}</div>
+              </div>
+            </div>}
+
+            {detailTab === 'feedback' && <div className="rounded-[22px] border border-line bg-white p-5">
+              <div className="flex items-center gap-2">
+                <span className="text-[17px] font-extrabold">Correct the agent</span>
+                <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">Venue scoped</span>
+              </div>
+              <p className="mt-2 text-[15px] leading-7 text-muted">Corrections stay scoped to this venue and do not rewrite another outlet's configuration or assessment history.</p>
+
+              {canEditSelected ? <form className="mt-5 grid gap-4" onSubmit={recordFeedback}>
+                <label>
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Assessment field</span>
+                  <select className="field" value={feedbackField} onChange={e => setFeedbackField(e.target.value)}>
+                    <option value="outlet_fit">Outlet fit</option>
+                    <option value="policy_compliance">Policy compliance</option>
+                    <option value="contribution">Contribution</option>
+                    <option value="methods">Methods</option>
+                    <option value="citation_integrity">Citation integrity</option>
+                    <option value="reviewer_expertise">Reviewer expertise</option>
+                    <option value="unresolved_risks">Unresolved risks</option>
+                    <optgroup label="Venue Agent rule corrections">
+                      <option value="aims_scope">Aims & scope</option>
+                      <option value="article_types">Accepted article types</option>
+                      <option value="accepted_methods">Accepted methods</option>
+                      <option value="quality_threshold">Quality threshold</option>
+                      <option value="reviewer_criteria">Reviewer criteria</option>
+                      <option value="disclosures">Required disclosures</option>
+                      <option value="reporting_standards">Reporting standards</option>
+                      <option value="desk_rejection_rules">Desk-rejection guidance</option>
+                    </optgroup>
+                  </select>
+                </label>
+                <label>
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Editor correction</span>
+                  <textarea className="field min-h-[100px]" value={feedbackValue} onChange={e => setFeedbackValue(e.target.value)} placeholder={venueRuleListFields.has(feedbackField) ? 'Enter one value per line.' : venueRuleFeedbackFields.has(feedbackField) ? 'Enter the corrected venue rule.' : 'What should the venue-specific assessment say instead?'} />
+                </label>
+                <label>
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Reason / evidence for correction</span>
+                  <textarea className="field min-h-[100px]" required value={feedbackReason} onChange={e => setFeedbackReason(e.target.value)} placeholder="Explain why this correction should inform future assessments for this venue." />
+                </label>
+                <button className="w-fit rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm" type="submit" disabled={busy === 'feedback'}>{busy === 'feedback' ? 'Recording…' : 'Record feedback'}</button>
+              </form> : <p className="mt-4 text-[14px] text-muted">Your role has read-only access to this venue's editorial workspace.</p>}
+
+              {detail.feedback?.length > 0 && <div className="mt-5 space-y-3">
+                {detail.feedback.map(item => <article key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[16px] font-extrabold">{pretty(item.assessment_field)}</span>
+                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">Assessment only</span>
+                  </div>
+                  <p className="mt-2 text-[14px] leading-6 text-muted">{item.reason || 'No reason recorded.'}</p>
+                  <div className="mt-2 text-[13px] font-semibold text-[#8d8179]">{new Date(item.created_at).toLocaleString()}</div>
+                </article>)}
+              </div>}
+            </div>}
+
+            {detailTab === 'decision' && <div className="rounded-[22px] border border-line bg-white p-6">
+              <h4 className="serif text-[32px]">Final editorial decision</h4>
+              <p className="mt-2 text-[15px] leading-7 text-muted">Record a human editorial decision after reviewing venue rules, evidence and manuscript context.</p>
+
+              {detail.decision && Object.keys(detail.decision).length > 0 && <div className="mt-4 rounded-2xl border border-line bg-[#fcfaf8] p-4">
+                <StatusPill value={detail.decision.decision || detail.status} />
+                <p className="mt-2 text-[14px] leading-6 text-muted">{detail.decision.note || 'No editor note.'}</p>
+                <div className="mt-2 text-[13px] text-muted">{detail.decision.decided_by ? `Decided by ${detail.decision.decided_by}` : ''}{detail.decision.decided_at ? ` · ${new Date(detail.decision.decided_at).toLocaleString()}` : ''}</div>
+              </div>}
+
+              {decisionAllowed ? <form className="mt-5 grid gap-3">
+                <div className="grid gap-3 md:grid-cols-3">
+                  <button type="button" onClick={() => setDecision('accepted')} className={`rounded-2xl border border-green-200 bg-green-50 px-4 py-4 text-[14px] font-extrabold text-green-800 hover:bg-green-100 ${decision === 'accepted' ? 'ring-2 ring-green-300' : ''}`}>Accept manuscript</button>
+                  <button type="button" onClick={() => setDecision('revision_requested')} className={`rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-[14px] font-extrabold text-amber-800 hover:bg-amber-100 ${decision === 'revision_requested' ? 'ring-2 ring-amber-300' : ''}`}>Request revision</button>
+                  <button type="button" onClick={() => setDecision('rejected')} className={`rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-[14px] font-extrabold text-red-700 hover:bg-red-100 ${decision === 'rejected' ? 'ring-2 ring-red-300' : ''}`}>Reject manuscript</button>
+                </div>
+                <textarea className="field mt-1 min-h-[120px]" required={decision !== 'accepted'} value={decisionNote} onChange={e => setDecisionNote(e.target.value)} placeholder="Editorial note..." />
+                <button className="shine w-fit rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={recordDecision} disabled={busy === 'decision'}>
+                  {busy === 'decision' ? 'Recording…' : `Record: ${statusLabels[decision]}`}
+                </button>
+              </form> : <p className="mt-4 text-[14px] text-muted">This submission is currently {statusLabels[detail.status] || detail.status}; no new decision action is available from this state.</p>}
+            </div>}
+          </div>
         </>}
-      </section>
+      </article>
     </div>
   </div>
 }
