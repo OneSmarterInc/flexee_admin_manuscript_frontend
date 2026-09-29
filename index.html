@@ -12,6 +12,42 @@
     href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
 
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      corePlugins: { preflight: false },
+      theme: {
+        extend: {
+          colors: {
+            flexee: {
+              50: "#FFF9F5",
+              100: "#FCEFE7",
+              200: "#F3DACB",
+              300: "#EABEA2",
+              400: "#D98B59",
+              500: "#C7662D",
+              600: "#AE4E20",
+              700: "#8C3B19",
+              800: "#652B18",
+              900: "#3C2118"
+            },
+            canvas: "#F8F3EF",
+            surface: "#FFFDFC",
+            ink: "#211D1A",
+            muted: "#746C66",
+            line: "#E8DCD3"
+          },
+          boxShadow: {
+            card: "0 8px 30px rgba(66,38,23,.07)",
+            soft: "0 18px 55px rgba(66,38,23,.09)",
+            float: "0 30px 90px rgba(42,24,15,.23)",
+            orange: "0 12px 28px rgba(199,102,45,.27)"
+          }
+        }
+      }
+    };
+  </script>
+
   <title>Flexee | Manuscript submissions</title>
 </head>
 
