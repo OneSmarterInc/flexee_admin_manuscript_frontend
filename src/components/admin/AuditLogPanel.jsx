@@ -166,6 +166,13 @@ function getCoverageContext(event) {
   )
 }
 
+function StatusBadge({ status }) {
+  return <span className={`inline-flex h-[40px] items-center gap-2 rounded-full border px-[15px] text-[15px] font-extrabold leading-none ${status.wrap}`}>
+    <span className={`status-dot !h-[10px] !w-[10px] ${status.dot}`}></span>
+    {status.label}
+  </span>
+}
+
 export default function AuditLogPanel() {
   const [events, setEvents] = useState([])
   const [total, setTotal] = useState(0)
@@ -462,20 +469,20 @@ export default function AuditLogPanel() {
       </div>
     </div>
 
-    <div className="premium-card overflow-hidden rounded-[28px]">
-      <div className="flex items-center justify-between border-b border-line px-5 py-5">
+    <div className="premium-card overflow-hidden rounded-[32px]">
+      <div className="flex min-h-[138px] items-start justify-between border-b border-line px-[26px] pb-[31px] pt-[29px]">
         <div>
-          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">
+          <div className="text-[16px] font-extrabold uppercase leading-none tracking-[.13em] text-flexee-600">
             Event history
           </div>
 
-          <h3 className="serif mt-1 text-[31px]">
+          <h3 className="serif mt-[19px] text-[40px] leading-none">
             Recent activity
           </h3>
         </div>
 
         <button
-          className="rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-50"
+          className="mt-[13px] h-[52px] rounded-[17px] border border-line bg-white px-[22px] text-[16px] font-extrabold shadow-sm transition hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
           type="button"
           onClick={exportCsv}
           disabled={!visibleEvents.length}
@@ -485,34 +492,43 @@ export default function AuditLogPanel() {
       </div>
 
       <div className="thin-scroll overflow-x-auto">
-        <table className="audit-table min-w-[1220px] w-full border-collapse">
+        <table className="audit-table min-w-[1450px] w-full table-fixed border-collapse">
+          <colgroup>
+            <col className="w-[12%]" />
+            <col className="w-[15%]" />
+            <col className="w-[22%]" />
+            <col className="w-[13%]" />
+            <col className="w-[15%]" />
+            <col className="w-[20%]" />
+            <col className="w-[3%]" />
+          </colgroup>
           <thead className="bg-[#faf7f4]">
-            <tr className="border-b border-line">
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+            <tr className="h-[66px] border-b border-line">
+              <th className="px-[26px] text-left text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Timestamp
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-[26px] text-left text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Actor
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-[26px] text-left text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Action
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-[26px] text-left text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Status
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-[26px] text-left text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Resource
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-[26px] text-left text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Context
               </th>
-              <th className="px-5 py-4 text-right text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-[26px] text-right text-[16px] font-extrabold uppercase tracking-[.085em] text-muted">
                 Details
               </th>
             </tr>
           </thead>
 
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-line bg-white/40">
             {!loading && pageEvents.map(event => {
               const status = visualStatus(event.action)
               const venue = getVenueContext(event)
@@ -522,85 +538,82 @@ export default function AuditLogPanel() {
               const coverage = getCoverageContext(event)
               const semanticUnavailable = String(event.action || '').toLowerCase().includes('semantic_unavailable')
 
-              return <tr key={event.id}>
-                <td className="px-5 py-5 align-top">
-                  <div className="text-[15px] font-extrabold">
+              return <tr key={event.id} className="h-[111px]">
+                <td className="px-[26px] py-[27px] align-top">
+                  <div className="text-[18px] font-extrabold leading-[1.15] text-ink">
                     {formatDate(event.occurred_at)}
                   </div>
-                  <div className="mt-1 text-[14px] font-medium text-muted">
+                  <div className="mt-[11px] text-[17px] font-medium leading-none text-muted">
                     {formatTime(event.occurred_at)}
                   </div>
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <div className="text-[15px] font-extrabold">
+                <td className="px-[26px] py-[27px] align-top">
+                  <div className="break-words text-[18px] font-extrabold leading-[1.15] text-ink">
                     {event.actor_email || event.actor || 'System/unknown'}
                   </div>
-                  <div className="mt-1 text-[14px] font-medium text-muted">
+                  <div className="mt-[11px] break-words text-[17px] font-medium leading-none text-muted">
                     {event.actor_role || '—'}
                   </div>
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <div className="text-[15px] font-bold">
+                <td className="px-[26px] py-[27px] align-top">
+                  <div className="text-[18px] font-extrabold leading-[1.15] text-ink">
                     {labelAction(event.action)}
                   </div>
-                  <div className="mt-1 text-[13px] font-medium text-muted">
+                  <div className="mt-[11px] break-words text-[15px] font-semibold leading-none text-muted">
                     {event.action}
                   </div>
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-extrabold ${status.wrap}`}>
-                    <span className={`status-dot ${status.dot}`}></span>
-                    {status.label}
-                  </span>
+                <td className="px-[26px] py-[26px] align-top">
+                  <StatusBadge status={status} />
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <div className="text-[14px] font-bold">
+                <td className="px-[26px] py-[27px] align-top">
+                  <div className="break-words text-[17px] font-extrabold leading-[1.15] text-ink">
                     {event.resource_type || '—'}
                   </div>
-                  <div className="mt-1 text-[13px] font-medium text-muted" title={event.resource_id || ''}>
+                  <div className="mt-[11px] break-words text-[15px] font-medium leading-none text-muted" title={event.resource_id || ''}>
                     {getResourceSecondary(event)}
                   </div>
                 </td>
 
-                <td className="px-5 py-5 align-top text-[14px] leading-6 text-muted">
+                <td className="px-[26px] py-[27px] align-top text-[17px] leading-[1.6] text-muted">
                   {semanticUnavailable ? <>
                     <div>
-                      <span className="font-bold text-ink">Fallback:</span>{' '}
+                      <span className="font-extrabold text-ink">Fallback:</span>{' '}
                       {fallback || 'deterministic checks'}
                     </div>
                     <div>
-                      <span className="font-bold text-ink">Coverage:</span>{' '}
+                      <span className="font-extrabold text-ink">Coverage:</span>{' '}
                       {coverage === '' ? '0%' : String(coverage).includes('%') ? coverage : `${coverage}%`}
                     </div>
                   </> : event.resource_type === 'venue_config' && version !== '' ? <>
                     <div>
-                      <span className="font-bold text-ink">Venue:</span>{' '}
+                      <span className="font-extrabold text-ink">Venue:</span>{' '}
                       {venue || shortId(event.venue_id)}
                     </div>
                     <div>
-                      <span className="font-bold text-ink">Version:</span>{' '}
+                      <span className="font-extrabold text-ink">Version:</span>{' '}
                       {version}
                     </div>
                   </> : <>
                     {venue && <div>
-                      <span className="font-bold text-ink">Venue:</span>{' '}
+                      <span className="font-extrabold text-ink">Venue:</span>{' '}
                       {venue === event.venue_id ? shortId(venue) : venue}
                     </div>}
                     {organization && <div>
-                      <span className="font-bold text-ink">Organization:</span>{' '}
+                      <span className="font-extrabold text-ink">Organization:</span>{' '}
                       {organization === event.organization_id ? shortId(organization) : organization}
                     </div>}
                     {!venue && !organization && <span>—</span>}
                   </>}
                 </td>
 
-                <td className="px-5 py-5 text-right align-top">
+                <td className="px-[26px] py-[26px] text-right align-top">
                   <details className="audit-details inline-block text-left">
-                    <summary className="list-none rounded-xl border border-line bg-white px-3.5 py-2 text-[13px] font-extrabold text-flexee-700">
+                    <summary className="grid h-[46px] min-w-[76px] cursor-pointer list-none place-items-center rounded-[16px] border border-line bg-white px-[18px] text-[16px] font-extrabold text-flexee-700 shadow-sm">
                       View
                     </summary>
                     <pre>{JSON.stringify(event.detail || {}, null, 2)}</pre>
@@ -610,13 +623,13 @@ export default function AuditLogPanel() {
             })}
 
             {!loading && !pageEvents.length && <tr>
-              <td colSpan="7" className="px-5 py-10 text-center text-[14px] font-medium text-muted">
+              <td colSpan="7" className="px-[26px] py-10 text-center text-[16px] font-medium text-muted">
                 No audit events match these filters.
               </td>
             </tr>}
 
             {loading && <tr>
-              <td colSpan="7" className="px-5 py-10 text-center text-[14px] font-medium text-muted">
+              <td colSpan="7" className="px-[26px] py-10 text-center text-[16px] font-medium text-muted">
                 Loading audit events…
               </td>
             </tr>}
@@ -624,14 +637,14 @@ export default function AuditLogPanel() {
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-[14px] font-medium text-muted">
+      <div className="flex min-h-[86px] flex-col gap-3 border-t border-line px-[26px] py-[21px] sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-[17px] font-medium text-muted">
           Showing {shownStart.toLocaleString()}–{shownEnd.toLocaleString()} of {displayTotal.toLocaleString()} events
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-[10px]">
           <button
-            className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold text-muted disabled:cursor-not-allowed disabled:opacity-45"
+            className="h-[46px] rounded-[16px] border border-line bg-white px-[21px] text-[15px] font-extrabold text-muted disabled:cursor-not-allowed disabled:opacity-45"
             type="button"
             onClick={() => setPage(value => Math.max(1, value - 1))}
             disabled={currentPage <= 1}
@@ -642,8 +655,8 @@ export default function AuditLogPanel() {
           {pageButtons.map(pageNumber => <button
             key={pageNumber}
             className={pageNumber === currentPage
-              ? 'rounded-xl bg-ink px-4 py-2 text-[13px] font-extrabold text-white'
-              : 'rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold'}
+              ? 'h-[46px] min-w-[46px] rounded-[16px] bg-ink px-[17px] text-[15px] font-extrabold text-white'
+              : 'h-[46px] min-w-[46px] rounded-[16px] border border-line bg-white px-[17px] text-[15px] font-extrabold'}
             type="button"
             onClick={() => setPage(pageNumber)}
           >
@@ -651,7 +664,7 @@ export default function AuditLogPanel() {
           </button>)}
 
           <button
-            className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
+            className="h-[46px] rounded-[16px] border border-line bg-white px-[21px] text-[15px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
             type="button"
             onClick={() => setPage(value => Math.min(pageCount, value + 1))}
             disabled={currentPage >= pageCount}
