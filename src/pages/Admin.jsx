@@ -17,50 +17,75 @@ const decisions = {
 function Field({ label, children }) { return <label className="admin-field"><span>{label}</span>{children}</label> }
 function StatusPill({ value }) { return <span className={`admin-badge ${value || ''}`}>{decisions[value] || value || '—'}</span> }
 
-function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar }) {
+function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = 'admin' }) {
   return (
-    <div className="admin-page admin-ui-v2 admin-overlay-shell" style={{ height: '100vh', overflow: 'hidden' }}>
+    <div className="admin-demo-root h-screen overflow-hidden">
+      <header className="fixed inset-x-0 top-0 z-40 h-[78px] border-b border-white/80 glass shadow-[0_5px_22px_rgba(62,37,23,.04)]">
+        <div className="flex h-full items-center justify-between px-4 md:px-7">
+          <div className="flex items-center gap-4">
+            {sidebar && (
+              <button
+                type="button"
+                aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
+                aria-expanded={sidebarOpen}
+                onClick={onToggleSidebar}
+                className={`admin-demo-hamburger shine grid h-[52px] w-[52px] place-items-center rounded-[17px] bg-flexee-500 text-white shadow-orange ${sidebarOpen ? 'active' : ''}`}
+              >
+                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
+                  <path d="M4 6h16" />
+                  <path d="M4 12h16" />
+                  <path d="M4 18h16" />
+                </svg>
+              </button>
+            )}
+            <div className="flex items-baseline gap-3">
+              <div className="text-[20px] font-black tracking-[-.025em]">Flexee Admin</div>
+              <div className="desktop-only text-[15px] font-semibold text-muted">Editorial operations</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="desktop-only flex items-center gap-2 rounded-full border border-green-200 bg-green-50/90 px-4 py-2 text-[13px] font-extrabold text-green-700">
+              <span className="status-dot bg-green-500"></span>
+              Systems operational
+            </div>
+            <button type="button" className="rounded-xl px-4 py-2.5 text-[14px] font-bold text-muted transition hover:bg-white hover:text-ink">Help</button>
+            <div className="desktop-only flex items-center gap-3 rounded-2xl border border-line bg-white/90 px-3 py-2 shadow-sm">
+              <div className="grid h-9 w-9 place-items-center rounded-xl bg-flexee-500 text-[13px] font-black text-white">
+                {(username || 'A').charAt(0).toUpperCase()}
+              </div>
+              <div className="pr-1 text-left">
+                <div className="text-[13px] font-extrabold">{username || 'admin'}</div>
+                <div className="text-[12px] font-medium text-muted">Administrator</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
       {sidebar && (
         <button
-          className="admin-sidebar-toggle"
           type="button"
-          aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
-          aria-expanded={sidebarOpen}
-          onClick={onToggleSidebar}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-      )}
-
-      {sidebar && sidebarOpen && (
-        <button
-          type="button"
-          className="admin-sidebar-backdrop"
           aria-label="Close navigation"
           onClick={onToggleSidebar}
+          className={`admin-demo-backdrop fixed inset-0 z-50 bg-[#21170f]/35 backdrop-blur-[7px] ${sidebarOpen ? 'open' : ''}`}
         />
       )}
 
       {sidebar && (
-        <aside className={`admin-overlay-sidebar ${sidebarOpen ? 'open' : ''}`} aria-hidden={!sidebarOpen}>
-          <div className="admin-ui-sidebar-inner">
-            {sidebar}
-          </div>
+        <aside
+          className={`admin-demo-drawer fixed bottom-4 left-4 top-4 z-[60] w-[330px] max-w-[calc(100vw-32px)] overflow-hidden rounded-[30px] border border-white/80 bg-[#fffdfb]/96 backdrop-blur-2xl ${sidebarOpen ? 'open' : ''}`}
+          aria-hidden={!sidebarOpen}
+        >
+          {sidebar}
         </aside>
       )}
 
-      <main className="admin-ui-main admin-overlay-main">
-        <div className="admin-ui-topbar">
-          <div className="admin-pro-topbar-title"><strong>Flexee Admin</strong><span>Editorial operations</span></div>
-          <div className="admin-pro-topbar-actions"><button type="button" className="admin-topbar-help">Help</button></div>
-        </div>
-        <div className="admin-shell admin-ui-shell" style={{ maxWidth: '1500px', margin: '0 auto', padding: '24px 28px 40px' }}>
+      <main className="page-scroll soft-grid h-screen overflow-y-auto pt-[78px]">
+        <div className="mx-auto max-w-[1750px] px-4 py-6 md:px-7 md:py-8">
           {children}
         </div>
+        <div className="h-10"></div>
       </main>
     </div>
   )
@@ -236,9 +261,9 @@ function ActionModal({ id, action, onClose, onRefresh }) {
 }
 
 function SMTPSettingsPage({ onSave }) {
-  const [form, setForm] = useState({ 
-    sender_name: '', sender_email: '', reply_to_email: '', 
-    host: '', port: 587, username: '', password: '', 
+  const [form, setForm] = useState({
+    sender_name: '', sender_email: '', reply_to_email: '',
+    host: '', port: 587, username: '', password: '',
     use_tls: true, use_ssl: false, test_email: '',
     admin_notification_emails: ''
   });
@@ -285,11 +310,11 @@ function SMTPSettingsPage({ onSave }) {
     try {
       const res = await api('/api/admin/smtp/test/', { method: 'POST', body: JSON.stringify(form) });
       setSuccess(res.message || 'Test email sent successfully!');
-    } catch (err) { setError(err.message); }
+      setTestSuccess(true);
+    } catch (err) { setError(err.message); setTestSuccess(false); }
     finally { setTesting(false); }
   }
 
-  // Clear test success if they change fields
   const updateForm = (updates) => {
     setForm({ ...form, ...updates });
     setTestSuccess(false);
@@ -297,115 +322,165 @@ function SMTPSettingsPage({ onSave }) {
     setError('');
   };
 
-  if (loading) return <p>Loading current settings…</p>;
+  if (loading) {
+    return <div className="premium-card rounded-[28px] p-6 text-[15px] font-semibold text-muted">Loading current settings…</div>;
+  }
 
   return (
-    <div className="admin-smtp-card">
-      <form onSubmit={handleSave}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px 32px' }}>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sender Name</label>
-            <input type="text" value={form.sender_name} onChange={e => updateForm({ sender_name: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
+    <div className="mx-auto max-w-[1500px]">
+      <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">System settings</div>
+          <h2 className="serif mt-1 text-[41px] leading-none md:text-[48px]">Email delivery</h2>
+          <p className="mt-2 text-[15px] leading-6 text-muted">
+            Configure sender identity, SMTP credentials, administrator copies and delivery verification from one compact screen.
+          </p>
+        </div>
+        <div className="flex items-center gap-2 rounded-2xl border border-green-200 bg-green-50 px-4 py-2.5 text-[13px] font-extrabold text-green-700">
+          <span className="status-dot bg-green-500"></span>
+          SMTP configuration detected
+        </div>
+      </div>
+
+      <form onSubmit={handleSave} className="grid items-start gap-4 xl:grid-cols-[1.12fr_.88fr]">
+        <div className="premium-card rounded-[28px] p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Connection</div>
+              <h3 className="serif mt-1 text-[29px]">SMTP server</h3>
+            </div>
+            <span className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-1.5 text-[13px] font-extrabold text-flexee-700">
+              {getSecurityProtocol()} · Port {form.port || 587}
+            </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sender Email</label>
-            <input type="email" value={form.sender_email} onChange={e => updateForm({ sender_email: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
+          <div className="grid gap-3 md:grid-cols-2">
+            <label>
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">SMTP host</span>
+              <input className="field" type="text" value={form.host || ''} onChange={e => updateForm({ host: e.target.value })} required />
+            </label>
+            <label>
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">SMTP port</span>
+              <input className="field" type="number" value={form.port || 587} onChange={e => updateForm({ port: parseInt(e.target.value) || 587 })} required />
+            </label>
+            <label>
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">SMTP username</span>
+              <input className="field" type="text" value={form.username || ''} onChange={e => updateForm({ username: e.target.value })} required />
+            </label>
+            <label>
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Security protocol</span>
+              <select className="field" value={getSecurityProtocol()} onChange={e => handleSecurityChange(e.target.value)}>
+                <option value="TLS">TLS</option>
+                <option value="SSL">SSL</option>
+                <option value="None">None</option>
+              </select>
+            </label>
+            <label className="md:col-span-2">
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">SMTP password</span>
+              <div className="relative">
+                <input
+                  className="field pr-36"
+                  type="password"
+                  value={form.password || ''}
+                  onChange={e => updateForm({ password: e.target.value })}
+                  placeholder="Leave blank to keep existing password"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 rounded-lg bg-stone-100 px-2.5 py-1 text-[12px] font-extrabold text-muted">
+                  Stored securely
+                </span>
+              </div>
+            </label>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Reply-To Email (Optional)</label>
-            <input type="email" value={form.reply_to_email} onChange={e => updateForm({ reply_to_email: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
+          <div className="my-4 border-t border-line"></div>
+
+          <div className="mb-3 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Sender identity</div>
+          <div className="grid gap-3 md:grid-cols-2">
+            <label>
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Sender name</span>
+              <input className="field" type="text" value={form.sender_name || ''} onChange={e => updateForm({ sender_name: e.target.value })} />
+            </label>
+            <label>
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Sender email</span>
+              <input className="field" type="email" value={form.sender_email || ''} onChange={e => updateForm({ sender_email: e.target.value })} />
+            </label>
+            <label className="md:col-span-2">
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Reply-to email</span>
+              <input className="field" type="email" value={form.reply_to_email || ''} onChange={e => updateForm({ reply_to_email: e.target.value })} placeholder="Optional reply-to address" />
+            </label>
+          </div>
+        </div>
+
+        <div className="grid content-start gap-4">
+          <div className="premium-card rounded-[28px] p-5">
+            <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Notifications</div>
+            <h3 className="serif mt-1 text-[29px]">Administrator copies</h3>
+            <label className="mt-4 block">
+              <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Admin notification emails</span>
+              <textarea
+                className="field min-h-[88px]"
+                value={form.admin_notification_emails || ''}
+                onChange={e => updateForm({ admin_notification_emails: e.target.value })}
+                placeholder="editor1@flexee.org, editor2@flexee.org"
+              />
+              <span className="mt-1.5 block text-[13px] leading-5 text-muted">
+                BCC recipients for submission, acceptance, rejection and custom author emails.
+              </span>
+            </label>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Security Protocol</label>
-            <select value={getSecurityProtocol()} onChange={e => handleSecurityChange(e.target.value)}
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px', background: '#fff' }}>
-              <option value="TLS">TLS</option>
-              <option value="SSL">SSL</option>
-              <option value="None">None</option>
-            </select>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Host</label>
-            <input type="text" value={form.host} onChange={e => updateForm({ host: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} required />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Port</label>
-            <input type="number" value={form.port} onChange={e => updateForm({ port: parseInt(e.target.value) || 587 })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} required />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Username</label>
-            <input type="text" value={form.username} onChange={e => updateForm({ username: e.target.value })} 
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} required />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>SMTP Password</label>
-            <input type="password" value={form.password} onChange={e => updateForm({ password: e.target.value })} 
-              placeholder="Leave blank to keep existing"
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: '1 / -1', marginTop: '16px', borderTop: '1px solid #e5e5e5', paddingTop: '24px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Admin Notification Emails (Optional)</label>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>Comma-separated emails that will receive a BCC copy of all emails sent to authors (submissions, accepts, rejects, and custom emails).</p>
-            <input type="text" value={form.admin_notification_emails || ''} onChange={e => updateForm({ admin_notification_emails: e.target.value })} 
-              placeholder="e.g. editor1@flexee.org, editor2@flexee.org"
-              style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px' }} />
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', gridColumn: '1 / -1', marginTop: '8px', borderTop: '1px dashed #e5e5e5', paddingTop: '24px' }}>
-            <label style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Test Email Recipient (Optional)</label>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--muted)' }}>Where should the test email be sent? If blank, it sends to the Sender Email.</p>
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
-              <input type="email" value={form.test_email || ''} onChange={e => updateForm({ test_email: e.target.value })} 
-                placeholder="e.g. test@example.com"
-                style={{ border: '1px solid #ccc', padding: '10px 12px', fontSize: '15px', width: '400px', maxWidth: '100%' }} />
-              
-              <button type="button" onClick={handleTest} disabled={testing}
-                style={{ 
-                  background: '#f59e0b', color: '#fff', border: 'none', padding: '10px 20px', 
-                  fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.05em', 
-                  cursor: testing ? 'wait' : 'pointer', textTransform: 'uppercase',
-                  whiteSpace: 'nowrap'
-                }}>
-                {testing ? 'TESTING...' : 'TEST CONNECTION'}
+          <div className="premium-card rounded-[28px] p-5">
+            <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Verification</div>
+            <h3 className="serif mt-1 text-[29px]">Test delivery</h3>
+            <div className="mt-4 flex flex-col gap-3 md:flex-row">
+              <input
+                className="field flex-1"
+                type="email"
+                value={form.test_email || ''}
+                onChange={e => updateForm({ test_email: e.target.value })}
+                placeholder="test@example.com"
+              />
+              <button
+                type="button"
+                onClick={handleTest}
+                disabled={testing}
+                className="shine whitespace-nowrap rounded-2xl bg-[#B97807] px-5 py-3 text-[13px] font-extrabold text-white shadow-sm transition hover:bg-[#9b6203] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {testing ? 'Testing…' : 'Test connection'}
               </button>
+            </div>
+            {testSuccess && success && <div className="mt-3 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-[13px] font-bold text-green-700">✓ {success}</div>}
+          </div>
+
+          <div className="rounded-[24px] border border-flexee-100 bg-gradient-to-br from-flexee-50 via-white to-white p-5 shadow-card">
+            <div className="flex gap-4">
+              <div className="grid h-11 w-11 shrink-0 place-items-center rounded-2xl bg-flexee-100 text-flexee-700">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                  <path d="M12 3 4 6v5c0 5 3.4 8.8 8 10 4.6-1.2 8-5 8-10V6l-8-3Z"/>
+                  <path d="m9.5 12 1.7 1.7 3.5-4"/>
+                </svg>
+              </div>
+              <div>
+                <div className="text-[15px] font-extrabold">Credential protection</div>
+                <p className="mt-1 text-[13px] leading-6 text-muted">
+                  Existing passwords are never displayed. Leave the field blank to preserve the stored credential.
+                </p>
+              </div>
             </div>
           </div>
 
-        </div>
+          {error && <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-bold text-red-700">{error}</div>}
+          {!testSuccess && success && <div className="rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-[13px] font-bold text-green-700">{success}</div>}
 
-        <div style={{ height: '1px', background: '#e5e5e5', margin: '32px 0 24px 0' }}></div>
-
-        {error && <div style={{ color: '#ef4444', marginBottom: '16px', fontSize: '14px' }}>{error}</div>}
-        {success && <div style={{ color: '#10b981', marginBottom: '16px', fontSize: '14px' }}>{success}</div>}
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button type="submit" disabled={busy}
-            style={{ 
-              background: '#121212', 
-              color: '#fff', border: 'none', padding: '14px 24px', 
-              fontSize: '13px', fontWeight: 'bold', letterSpacing: '0.05em', 
-              cursor: busy ? 'wait' : 'pointer', textTransform: 'uppercase'
-            }}>
-            {busy ? 'SAVING...' : 'SAVE CONFIGURATION'}
-          </button>
+          <div className="flex justify-end">
+            <button type="submit" disabled={busy} className="shine rounded-2xl bg-flexee-500 px-6 py-3 text-[14px] font-extrabold text-white shadow-orange hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60">
+              {busy ? 'Saving…' : 'Save configuration'}
+            </button>
+          </div>
         </div>
       </form>
     </div>
-  )
+  );
 }
 
 function SendEmailModal({ id, onClose, onRefresh }) {
@@ -567,83 +642,127 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   useEffect(() => { load() }, [query, currentView])
   async function logout() { await api('/api/admin/logout/', { method: 'POST', body: '{}' }); onLogout() }
   const sidebarContent = (
-    <div className="admin-ui-sidebar-content" style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '0 16px 20px' }}>
-      <div className="admin-ui-brand">
-        <div className="admin-ui-brand-mark">F</div>
-        <h1>Flexee</h1>
-      </div>
-
-      <div className="admin-ui-sidebar-nav" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <div className="admin-ui-nav-label">Scholarly network</div>
-
-        <button
-          className={`admin-side-nav-button ${currentView === 'editor' ? 'active' : ''}`}
-          type="button"
-          onClick={() => setCurrentView('editor')}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="m9 10 2 2 4-4"/></svg>
-          Editor Workspace
-        </button>
-
-        <button
-          className={`admin-side-nav-button ${currentView === 'venues' ? 'active' : ''}`}
-          type="button"
-          onClick={() => setCurrentView('venues')}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21h-4v-.2a1.7 1.7 0 0 0-1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1-2.8-2.8.1-.1A1.7 1.7 0 0 0 4.8 15a1.7 1.7 0 0 0-1.5-1H3v-4h.3a1.7 1.7 0 0 0 1.5-1 1.7 1.7 0 0 0-.3-1.8l-.1-.1 2.8-2.8.1.1a1.7 1.7 0 0 0 1.8.3 1.7 1.7 0 0 0 1-1.5V3h4v.2a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1 2.8 2.8-.1.1a1.7 1.7 0 0 0-.3 1.8 1.7 1.7 0 0 0 1.5 1h.2v4h-.2a1.7 1.7 0 0 0-1.5 1z"/></svg>
-          Venue Agents
-        </button>
-
-        <button
-          className={`admin-side-nav-button ${currentView === 'audit' ? 'active' : ''}`}
-          type="button"
-          onClick={() => setCurrentView('audit')}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16v16H4z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
-          Audit Log
-        </button>
-
-        <div style={{ height: '1px', background: 'rgba(28,26,23,0.08)', margin: '16px 0' }}></div>
-        
-        <div className="admin-ui-nav-label">Settings</div>
-        
-        {platformSuperuser && <button 
-          className={`admin-side-nav-button ${currentView === 'smtp' ? 'active' : ''}`}
-          onClick={() => setCurrentView('smtp')}
-        >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          Configure SMTP
-        </button>}
-      </div>
-
-      <div className="admin-ui-sidebar-user">
-        <div className="admin-pro-account">
-          <div className="admin-pro-avatar">{username.charAt(0).toUpperCase()}</div>
-          <div className="admin-pro-account-copy">
-            <b>{username}</b>
-            <span>Administrator</span>
+    <div className="flex h-full flex-col">
+      <div className="flex items-center justify-between border-b border-line px-5 py-5">
+        <div className="flex items-center gap-3">
+          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-gradient-to-br from-flexee-400 via-flexee-500 to-flexee-700 text-[24px] text-white shadow-orange serif">F</div>
+          <div>
+            <div className="serif text-[30px] leading-none">Flexee</div>
+            <div className="mt-1.5 text-[12px] font-extrabold uppercase tracking-[.14em] text-muted">Scholarly Network</div>
           </div>
         </div>
-        <button className="admin-pro-logout" type="button" onClick={logout} title="Log out" aria-label="Log out">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(false)}
+          className="grid h-10 w-10 place-items-center rounded-xl border border-line bg-white text-muted transition hover:bg-flexee-50 hover:text-flexee-700"
+          aria-label="Close navigation"
+        >
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+            <path d="m6 6 12 12"/>
+            <path d="m18 6-12 12"/>
+          </svg>
         </button>
+      </div>
+
+      <div className="thin-scroll flex-1 overflow-y-auto p-4">
+        <div className="mb-2 px-3 text-[13px] font-extrabold uppercase tracking-[.12em] text-[#978a81]">Workspace</div>
+        <nav className="space-y-1.5">
+          <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'editor' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('editor'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                <rect x="4" y="3" width="16" height="18" rx="2"/>
+                <path d="M8 8h8M8 12h8M8 16h5"/>
+              </svg>
+            </span>
+            Editor Workspace
+          </button>
+
+          <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'venues' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('venues'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M12 2v3M12 19v3M4.9 4.9 7 7M17 17l2.1 2.1M2 12h3M19 12h3M4.9 19.1 7 17M17 7l2.1-2.1"/>
+              </svg>
+            </span>
+            Venue Agents
+          </button>
+
+          <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'audit' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('audit'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                <path d="M5 4h14v16H5z"/>
+                <path d="M8 8h8M8 12h8M8 16h5"/>
+              </svg>
+            </span>
+            Audit Log
+          </button>
+        </nav>
+
+        {platformSuperuser && <>
+          <div className="my-5 border-t border-line"></div>
+          <div className="mb-2 px-3 text-[13px] font-extrabold uppercase tracking-[.12em] text-[#978a81]">Settings</div>
+          <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'smtp' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('smtp'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+                <path d="M3 6h18v12H3z"/>
+                <path d="m3 7 9 6 9-6"/>
+              </svg>
+            </span>
+            Configure SMTP
+          </button>
+        </>}
+
+        <div className="mt-6 rounded-[22px] border border-flexee-100 bg-gradient-to-br from-flexee-50 to-white p-4">
+          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Editorial system</div>
+          <div className="mt-3 flex items-center gap-2 text-[14px] font-extrabold">
+            <span className="status-dot bg-green-500"></span>
+            API & queue healthy
+          </div>
+          <div className="mt-2 text-[13px] leading-5 text-muted">Production services and editorial queues are available.</div>
+        </div>
+      </div>
+
+      <div className="border-t border-line p-4">
+        <div className="flex items-center gap-3 rounded-2xl bg-[#faf6f2] p-3">
+          <div className="grid h-11 w-11 place-items-center rounded-full bg-flexee-500 text-[14px] font-black text-white">
+            {(username || 'A').charAt(0).toUpperCase()}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="truncate text-[15px] font-extrabold">{username}</div>
+            <div className="text-[13px] font-medium text-muted">Platform administrator</div>
+          </div>
+          <button type="button" onClick={logout} className="grid h-9 w-9 place-items-center rounded-xl border border-line bg-white text-muted" title="Log out" aria-label="Log out">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9">
+              <path d="M10 17l5-5-5-5"/>
+              <path d="M15 12H3"/>
+              <path d="M14 4h5a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-5"/>
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
   )
 
-  return <AdminTop sidebar={sidebarContent} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)}>
+  return <AdminTop sidebar={sidebarContent} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} username={username}>
     
     {currentView === 'smtp' ? (
-      <>
-        <div className="admin-ui-page-head">
-          <div>
-            <p className="venue-admin-kicker">Settings</p>
-            <h2>Setup SMTP</h2>
-            <p>Configure email delivery settings for notifications.</p>
-          </div>
-        </div>
-        <SMTPSettingsPage />
-      </>
+      <SMTPSettingsPage />
     ) : currentView === 'venues' ? (
       <VenueAgentsPanel platformSuperuser={platformSuperuser} memberships={memberships} />
     ) : currentView === 'editor' ? (
