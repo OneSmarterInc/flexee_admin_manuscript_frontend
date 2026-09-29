@@ -249,6 +249,32 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
     }
   }
 
+  function exportQueue() {
+    const rows = [
+      ['Venue', 'Manuscript', 'Author', 'Email', 'Status', 'Submitted'],
+      ...(data.items || []).map(item => [
+        item.venue?.name || '',
+        item.manuscript?.title || '',
+        item.manuscript?.author_name || '',
+        item.manuscript?.author_email || '',
+        statusLabels[item.status] || item.status || '',
+        item.submitted_at || item.created_at || '',
+      ]),
+    ]
+    const csv = rows
+      .map(row => row.map(value => `"${String(value ?? '').replaceAll('"', '""')}"`).join(','))
+      .join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = 'flexee-editorial-queue.csv'
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+  }
+
   const selectedRole = memberships.find(
     item => String(item.organization_id) === String(detail?.venue?.organization?.id || ''),
   )?.role
@@ -256,45 +282,93 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   const decisionAllowed = canEditSelected && detail && ['submitted', 'under_review', 'revision_requested'].includes(detail.status)
 
   return <div className="editor-workspace">
-    <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+    <div className="mb-[36px] flex flex-col justify-between gap-6 xl:flex-row xl:items-end">
       <div>
-        <div className="mb-1 text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Venue editor workspace</div>
-        <h2 className="serif text-[43px] leading-[.98] md:text-[54px]">Human editorial review</h2>
-        <p className="mt-3 max-w-[880px] text-[16px] leading-7 text-muted">Review the venue-specific brief and evidence, record corrections, and make the final editorial decision.</p>
+        <div className="mb-[8px] text-[15px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Venue editor workspace</div>
+        <h2 className="serif text-[52px] leading-[.98] md:text-[64px]">Human editorial review</h2>
+        <p className="mt-[22px] max-w-[1120px] text-[18px] leading-[1.9] text-muted">
+          Review manuscript context, venue-specific evidence and AI-prepared editorial intelligence before recording a final human decision.
+        </p>
       </div>
-      <button className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={loadQueue} disabled={loading}>
-        {loading ? 'Refreshing…' : 'Refresh queue'}
-      </button>
+
+      <div className="flex shrink-0 flex-wrap gap-[14px] pb-[1px]">
+        <button
+          className="rounded-[20px] border border-line bg-white px-[25px] py-[16px] text-[16px] font-extrabold text-ink shadow-card transition hover:-translate-y-0.5 hover:shadow-soft"
+          type="button"
+          onClick={exportQueue}
+          disabled={!data.items?.length}
+        >
+          Export queue
+        </button>
+        <button
+          className="shine rounded-[20px] bg-flexee-500 px-[27px] py-[16px] text-[16px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
+          type="button"
+          onClick={loadQueue}
+          disabled={loading}
+        >
+          {loading ? 'Refreshing…' : 'Refresh queue'}
+        </button>
+      </div>
     </div>
 
     {error && <div className="admin-error venue-admin-message">{error}</div>}
     {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
 
-    <section className="editor-stats mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:''})}><b>{data.counts?.total || 0}</b><span>Editorial queue</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'submitted'})}><b>{data.counts?.submitted || 0}</b><span>Submitted</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'under_review'})}><b>{data.counts?.under_review || 0}</b><span>Under review</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'revision_requested'})}><b>{data.counts?.revision_requested || 0}</b><span>Revision requested</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'accepted'})}><b>{data.counts?.accepted || 0}</b><span>Accepted</span></button>
-      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'rejected'})}><b>{data.counts?.rejected || 0}</b><span>Rejected</span></button>
+    <section className="editor-stats mb-[30px] grid grid-cols-2 gap-[14px] md:grid-cols-3 xl:grid-cols-6">
+      <button className="metric premium-card flex h-[158px] flex-col rounded-[26px] p-[25px] text-left" type="button" onClick={() => setFilters({...filters, status:''})}>
+        <b>{data.counts?.total || 0}</b>
+        <span>Editorial queue</span>
+        <div className="mt-auto h-[9px] overflow-hidden rounded-full bg-[#F3F3F3]"><div className="h-full w-[75%] rounded-full bg-flexee-500"></div></div>
+      </button>
+      <button className="metric premium-card flex h-[158px] flex-col rounded-[26px] p-[25px] text-left" type="button" onClick={() => setFilters({...filters, status:'submitted'})}>
+        <b>{data.counts?.submitted || 0}</b>
+        <span>Submitted</span>
+        <div className="mt-auto h-[9px] overflow-hidden rounded-full bg-[#F3F3F3]"><div className="h-full w-0 rounded-full bg-flexee-500"></div></div>
+      </button>
+      <button className="metric premium-card flex h-[158px] flex-col rounded-[26px] p-[25px] text-left" type="button" onClick={() => setFilters({...filters, status:'under_review'})}>
+        <b>{data.counts?.under_review || 0}</b>
+        <span>Under review</span>
+        <div className="mt-auto h-[9px] overflow-hidden rounded-full bg-[#F3F3F3]"><div className="h-full w-0 rounded-full bg-blue-500"></div></div>
+      </button>
+      <button className="metric premium-card flex h-[158px] flex-col rounded-[26px] p-[25px] text-left" type="button" onClick={() => setFilters({...filters, status:'revision_requested'})}>
+        <b>{data.counts?.revision_requested || 0}</b>
+        <span>Revision</span>
+        <div className="mt-auto h-[9px] overflow-hidden rounded-full bg-amber-100"><div className="h-full w-[66%] rounded-full bg-amber-500"></div></div>
+      </button>
+      <button className="metric premium-card flex h-[158px] flex-col rounded-[26px] p-[25px] text-left" type="button" onClick={() => setFilters({...filters, status:'accepted'})}>
+        <b>{data.counts?.accepted || 0}</b>
+        <span>Accepted</span>
+        <div className="mt-auto h-[9px] overflow-hidden rounded-full bg-green-100"><div className="h-full w-[42%] rounded-full bg-green-500"></div></div>
+      </button>
+      <button className="metric premium-card flex h-[158px] flex-col rounded-[26px] p-[25px] text-left" type="button" onClick={() => setFilters({...filters, status:'rejected'})}>
+        <b>{data.counts?.rejected || 0}</b>
+        <span>Rejected</span>
+        <div className="mt-auto h-[9px] overflow-hidden rounded-full bg-[#F3F3F3]"><div className="h-full w-0 rounded-full bg-red-500"></div></div>
+      </button>
     </section>
 
-    <div className="editor-filterbar premium-card mb-6 grid gap-3 rounded-[24px] p-3 lg:grid-cols-[1.55fr_.75fr_.75fr_auto]">
-      <input
-        className="field"
-        value={filters.q}
-        onChange={e => setFilters({...filters, q:e.target.value})}
-        placeholder="Search manuscript, author, email, or venue…"
-      />
-      <select className="field" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
+    <div className="editor-filterbar premium-card mb-6 grid gap-[14px] rounded-[27px] p-[14px] lg:grid-cols-[1.9fr_.92fr_.92fr_112px]">
+      <div className="relative">
+        <svg className="pointer-events-none absolute left-[22px] top-1/2 -translate-y-1/2 text-muted" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <circle cx="11" cy="11" r="7"/>
+          <path d="m20 20-3.4-3.4"/>
+        </svg>
+        <input
+          className="field h-[60px] rounded-[15px] pl-[55px] text-[16px]"
+          value={filters.q}
+          onChange={e => setFilters({...filters, q:e.target.value})}
+          placeholder="Search manuscript, author, email, or venue..."
+        />
+      </div>
+      <select className="field h-[60px] rounded-[15px] text-[16px] font-semibold" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
         <option value="">All venues</option>
         {venues.map(venue => <option value={venue.id} key={venue.id}>{venue.name}</option>)}
       </select>
-      <select className="field" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
+      <select className="field h-[60px] rounded-[15px] text-[16px] font-semibold" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
         <option value="">All editorial statuses</option>
         {Object.entries(statusLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}
       </select>
-      <button className="rounded-2xl bg-ink px-6 py-3 text-[14px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>Apply</button>
+      <button className="h-[60px] rounded-[18px] bg-ink px-5 text-[16px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>Apply</button>
     </div>
 
     <div className="editor-grid grid items-start gap-5 2xl:grid-cols-[410px_minmax(0,1fr)]">
