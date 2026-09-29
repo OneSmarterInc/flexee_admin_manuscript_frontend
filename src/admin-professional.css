@@ -2123,3 +2123,55 @@
   font-size:12.5px!important;
   line-height:1.5!important;
 }
+
+
+/* Compact editor workspace header and queue controls */
+.admin-ui-v2 .editor-workspace{
+  gap:8px!important;
+}
+
+.admin-ui-v2 .editor-workspace-head{
+  margin-bottom:8px!important;
+  align-items:center!important;
+}
+
+.admin-ui-v2 .editor-workspace-head h2{
+  margin:1px 0 4px!important;
+  font-size:32px!important;
+  line-height:1!important;
+}
+
+.admin-ui-v2 .editor-workspace-head>div>p:last-child{
+  font-size:12px!important;
+  line-height:1.35!important;
+}
+
+.admin-ui-v2 .editor-stats{
+  gap:7px!important;
+  margin-bottom:8px!important;
+}
+
+.admin-ui-v2 .editor-stats button{
+  min-height:58px!important;
+  padding:8px 10px!important;
+}
+
+.admin-ui-v2 .editor-stats b{
+  font-size:23px!important;
+}
+
+.admin-ui-v2 .editor-stats span{
+  margin-top:3px!important;
+  font-size:9px!important;
+}
+
+.admin-ui-v2 .editor-filterbar{
+  padding:7px!important;
+  margin-bottom:8px!important;
+}
+
+.admin-ui-v2 .editor-filterbar input,
+.admin-ui-v2 .editor-filterbar select{
+  min-height:34px!important;
+  padding:6px 9px!important;
+}
