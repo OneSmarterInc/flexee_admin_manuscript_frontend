@@ -823,18 +823,19 @@
 .admin-demo-root .editor-stats button b {
   display: block;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 36px;
+  font-size: 46px;
   font-weight: 400;
-  line-height: 1;
+  line-height: .95;
   letter-spacing: -.045em;
 }
 
 .admin-demo-root .editor-stats button span {
   display: block;
-  margin-top: 8px;
+  margin-top: 9px;
   color: #746c66;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 800;
+  line-height: 1.15;
   letter-spacing: .07em;
   text-transform: uppercase;
 }
@@ -1130,5 +1131,35 @@
 
   .admin-demo-root .venue-admin-two {
     grid-template-columns: 1fr;
+  }
+}
+
+
+/* Pixel alignment for the finalized editor-workspace reference. */
+.admin-demo-root .editor-workspace > .editor-stats .premium-card {
+  border-color: rgba(229, 216, 207, .92);
+  box-shadow: 0 10px 30px rgba(66,38,23,.055);
+}
+
+.admin-demo-root .editor-workspace .editor-filterbar {
+  min-height: 91px;
+  background: rgba(255,255,255,.92);
+  box-shadow: 0 10px 28px rgba(66,38,23,.055);
+}
+
+.admin-demo-root .editor-workspace .editor-filterbar .field {
+  border-color: #e7d8ce;
+  background: rgba(255,255,255,.98);
+}
+
+.admin-demo-root .editor-workspace .editor-filterbar input::placeholder {
+  color: #9ca3af;
+  opacity: 1;
+  font-weight: 600;
+}
+
+@media (max-width: 1279px) {
+  .admin-demo-root .editor-workspace > .mb-\[36px\] {
+    margin-bottom: 28px;
   }
 }
