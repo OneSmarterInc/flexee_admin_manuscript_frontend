@@ -1,0 +1,682 @@
+/* Flexee admin demo design integration.
+   Mirrors the finalized demo.html visual system while remaining scoped to /admin. */
+
+.admin-demo-root {
+  color: #211d1a;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 16px;
+  background:
+    radial-gradient(circle at 7% 5%, rgba(199,102,45,.11), transparent 28%),
+    radial-gradient(circle at 93% 10%, rgba(224,157,112,.08), transparent 28%),
+    linear-gradient(180deg, #fbf8f5 0%, #f6f0eb 100%);
+}
+
+.admin-demo-root *,
+.admin-demo-root *::before,
+.admin-demo-root *::after {
+  box-sizing: border-box;
+}
+
+.admin-demo-root button,
+.admin-demo-root input,
+.admin-demo-root select,
+.admin-demo-root textarea {
+  font: inherit;
+}
+
+.admin-demo-root button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.admin-demo-root .serif {
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: -.045em;
+}
+
+.admin-demo-root .glass {
+  background: rgba(255,255,255,.78);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+}
+
+.admin-demo-root .premium-card {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.97),
+      rgba(255,252,249,.91)
+    );
+  border: 1px solid rgba(232,220,211,.94);
+  box-shadow:
+    0 10px 32px rgba(66,38,23,.065),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.admin-demo-root .warm-panel {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,249,245,.93),
+      rgba(255,255,255,.97)
+    );
+}
+
+.admin-demo-root .soft-grid {
+  background-image:
+    linear-gradient(rgba(101,70,49,.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(101,70,49,.024) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.admin-demo-root .page-scroll::-webkit-scrollbar,
+.admin-demo-root .thin-scroll::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+.admin-demo-root .page-scroll::-webkit-scrollbar-thumb,
+.admin-demo-root .thin-scroll::-webkit-scrollbar-thumb {
+  background: #d6c4b7;
+  border-radius: 999px;
+}
+
+.admin-demo-root .page-scroll::-webkit-scrollbar-track,
+.admin-demo-root .thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-demo-root .field {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 14px;
+  color: #211d1a;
+  font-size: 15px;
+  font-weight: 500;
+  background: rgba(255,255,255,.96);
+  border: 1px solid #e4d6cc;
+  border-radius: 14px;
+  outline: none;
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
+.admin-demo-root .field:hover {
+  background: #fff;
+  border-color: #d9bead;
+}
+
+.admin-demo-root .field:focus {
+  background: #fff;
+  border-color: #c7662d;
+  box-shadow: 0 0 0 4px rgba(199,102,45,.09);
+}
+
+.admin-demo-root textarea.field {
+  resize: vertical;
+}
+
+.admin-demo-root .status-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 999px;
+  flex: 0 0 auto;
+}
+
+.admin-demo-root .nav-item {
+  position: relative;
+  transition:
+    background .18s ease,
+    color .18s ease,
+    transform .18s ease;
+}
+
+.admin-demo-root .nav-item::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 7px;
+  width: 3px;
+  height: 0;
+  background: #c7662d;
+  border-radius: 999px;
+  transform: translateY(-50%);
+  transition: height .18s ease;
+}
+
+.admin-demo-root .nav-item:hover {
+  transform: translateX(2px);
+}
+
+.admin-demo-root .nav-item.active {
+  color: #984219;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(199,102,45,.13),
+      rgba(199,102,45,.035)
+    );
+  box-shadow: inset 0 0 0 1px rgba(199,102,45,.07);
+}
+
+.admin-demo-root .nav-item.active::before {
+  height: 25px;
+}
+
+.admin-demo-root .admin-demo-backdrop {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .28s ease;
+}
+
+.admin-demo-root .admin-demo-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.admin-demo-root .admin-demo-drawer {
+  transform: translateX(-112%);
+  transition:
+    transform .32s cubic-bezier(.2,.85,.28,1),
+    box-shadow .32s ease;
+}
+
+.admin-demo-root .admin-demo-drawer.open {
+  transform: translateX(0);
+  box-shadow: 35px 0 100px rgba(40,22,13,.27);
+}
+
+.admin-demo-root .admin-demo-hamburger {
+  transition:
+    transform .18s ease,
+    background .18s ease,
+    box-shadow .18s ease;
+}
+
+.admin-demo-root .admin-demo-hamburger:hover {
+  transform: translateY(-2px);
+}
+
+.admin-demo-root .admin-demo-hamburger.active {
+  background: #8c3b19;
+  box-shadow: 0 14px 30px rgba(140,59,25,.31);
+}
+
+.admin-demo-root .shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-demo-root .shine::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -90%;
+  width: 48%;
+  height: 200%;
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      rgba(255,255,255,.27),
+      transparent
+    );
+  transform: rotate(22deg);
+  transition: left .55s ease;
+}
+
+.admin-demo-root .shine:hover::before {
+  left: 140%;
+}
+
+.admin-demo-root .metric {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.admin-demo-root .metric::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: -42px;
+  right: -35px;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background:
+    radial-gradient(
+      circle,
+      rgba(199,102,45,.12),
+      rgba(199,102,45,0) 68%
+    );
+}
+
+.admin-demo-root .queue-row {
+  border-left: 4px solid transparent;
+  transition:
+    background .18s ease,
+    border-color .18s ease;
+}
+
+.admin-demo-root .queue-row:hover {
+  background: #fff9f5;
+}
+
+.admin-demo-root .queue-row.active {
+  border-left-color: #c7662d;
+  background:
+    linear-gradient(
+      90deg,
+      rgba(199,102,45,.11),
+      rgba(255,255,255,.94)
+    );
+}
+
+.admin-demo-root .workspace-tab {
+  position: relative;
+  transition: color .18s ease;
+}
+
+.admin-demo-root .workspace-tab::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  right: 15px;
+  bottom: -1px;
+  height: 2px;
+  border-radius: 999px;
+  background: #c7662d;
+  transform: scaleX(0);
+  transition: transform .18s ease;
+}
+
+.admin-demo-root .workspace-tab.active {
+  color: #9d461d;
+}
+
+.admin-demo-root .workspace-tab.active::after {
+  transform: scaleX(1);
+}
+
+.admin-demo-root .venue-item {
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+.admin-demo-root .venue-item:hover {
+  transform: translateY(-1px);
+}
+
+.admin-demo-root .venue-item.active {
+  border-color: #efc7ae;
+  background:
+    linear-gradient(
+      135deg,
+      #fff7f1,
+      #fceee4
+    );
+  box-shadow: 0 10px 24px rgba(90,49,27,.075);
+}
+
+.admin-demo-root .audit-table tbody tr {
+  transition: background .16s ease;
+}
+
+.admin-demo-root .audit-table tbody tr:hover {
+  background: #fff9f5;
+}
+
+.admin-demo-root .sidebar-content-card {
+  height: fit-content !important;
+  align-self: start !important;
+}
+
+/* Bridge existing functional controls into the finalized demo visual language. */
+.admin-demo-root .admin-error,
+.admin-demo-root .venue-admin-message {
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 14px;
+}
+
+.admin-demo-root .venue-admin-success {
+  border: 1px solid #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.admin-demo-root .venue-admin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #e8dcd3;
+  border-radius: 999px;
+  background: #fff;
+  padding: 6px 10px;
+  color: #746c66;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.admin-demo-root .venue-admin-pill.good {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.admin-demo-root .venue-admin-pill.warn {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #a16207;
+}
+
+.admin-demo-root .admin-demo-control,
+.admin-demo-root .venue-admin-field input,
+.admin-demo-root .venue-admin-field select,
+.admin-demo-root .venue-admin-field textarea,
+.admin-demo-root .editor-feedback-form input,
+.admin-demo-root .editor-feedback-form select,
+.admin-demo-root .editor-feedback-form textarea,
+.admin-demo-root .editor-decision-form input,
+.admin-demo-root .editor-decision-form select,
+.admin-demo-root .editor-decision-form textarea {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #e4d6cc;
+  border-radius: 14px;
+  background: rgba(255,255,255,.96);
+  color: #211d1a;
+  padding: 11px 14px;
+  font-size: 15px;
+  font-weight: 500;
+  outline: none;
+}
+
+.admin-demo-root .venue-admin-field textarea,
+.admin-demo-root .editor-feedback-form textarea,
+.admin-demo-root .editor-decision-form textarea {
+  min-height: 96px;
+  resize: vertical;
+}
+
+.admin-demo-root .venue-admin-field input:focus,
+.admin-demo-root .venue-admin-field select:focus,
+.admin-demo-root .venue-admin-field textarea:focus,
+.admin-demo-root .editor-feedback-form input:focus,
+.admin-demo-root .editor-feedback-form select:focus,
+.admin-demo-root .editor-feedback-form textarea:focus,
+.admin-demo-root .editor-decision-form input:focus,
+.admin-demo-root .editor-decision-form select:focus,
+.admin-demo-root .editor-decision-form textarea:focus {
+  border-color: #c7662d;
+  box-shadow: 0 0 0 4px rgba(199,102,45,.09);
+}
+
+.admin-demo-root .venue-admin-field > span,
+.admin-demo-root .editor-feedback-form label > span,
+.admin-demo-root .editor-decision-form label > span {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 800;
+  color: #211d1a;
+}
+
+.admin-demo-root .venue-admin-field small,
+.admin-demo-root .editor-feedback-form label small {
+  display: block;
+  margin-top: 5px;
+  color: #746c66;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.admin-demo-root .venue-admin-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px !important;
+}
+
+.admin-demo-root .demo-form-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-demo-root .venue-admin-field.full {
+  grid-column: 1 / -1;
+}
+
+.admin-demo-root .venue-admin-check.full {
+  grid-column: 1 / -1;
+}
+
+.admin-demo-root .venue-admin-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #bbf7d0;
+  border-radius: 14px;
+  background: rgba(240,253,244,.8);
+  padding: 12px 14px;
+  color: #166534;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.admin-demo-root .editor-feedback-form,
+.admin-demo-root .editor-decision-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.admin-demo-root .editor-feedback-history {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.admin-demo-root .editor-feedback-history > span,
+.admin-demo-root .editor-risk-list > span {
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: #746c66;
+}
+
+.admin-demo-root .editor-feedback-history article,
+.admin-demo-root .editor-existing-decision {
+  border: 1px solid #e8dcd3;
+  border-radius: 16px;
+  background: #fcfaf8;
+  padding: 14px;
+}
+
+.admin-demo-root .editor-feedback-history article p,
+.admin-demo-root .editor-existing-decision p {
+  margin: 7px 0;
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-demo-root .editor-feedback-history article small,
+.admin-demo-root .editor-existing-decision small {
+  color: #8d8179;
+  font-size: 12px;
+}
+
+.admin-demo-root .editor-evidence-list,
+.admin-demo-root .editor-requirement-list,
+.admin-demo-root .editor-config-snapshot {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.admin-demo-root .editor-evidence-list article,
+.admin-demo-root .editor-requirement-list article,
+.admin-demo-root .editor-config-snapshot > div {
+  border: 1px solid #e8dcd3;
+  border-radius: 16px;
+  background: #fff;
+  padding: 15px;
+}
+
+.admin-demo-root .editor-evidence-list article > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-demo-root .editor-evidence-list article p,
+.admin-demo-root .editor-config-snapshot p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-demo-root .editor-evidence-list article small {
+  color: #746c66;
+  font-size: 12px;
+}
+
+.admin-demo-root .editor-evidence-list blockquote {
+  margin: 12px 0 0;
+  border-left: 3px solid #c7662d;
+  padding-left: 12px;
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-demo-root .editor-config-snapshot pre {
+  max-width: 100%;
+  overflow: auto;
+  border-radius: 12px;
+  background: #faf7f4;
+  padding: 12px;
+  font-size: 12px;
+}
+
+.admin-demo-root .editor-card-copy,
+.admin-demo-root .venue-admin-empty {
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.admin-demo-root .editor-risk-list {
+  margin-top: 18px;
+}
+
+.admin-demo-root .editor-risk-list ul {
+  margin: 8px 0 0;
+  padding-left: 20px;
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.admin-demo-root .editor-chip-section {
+  margin-top: 18px;
+}
+
+.admin-demo-root .editor-chip-section > span {
+  display: block;
+  margin-bottom: 8px;
+  color: #746c66;
+  font-size: 13px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.admin-demo-root .editor-chip-section > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-demo-root .editor-chip-section em {
+  border: 1px solid #f3dacb;
+  border-radius: 999px;
+  background: #fff9f5;
+  padding: 8px 11px;
+  color: #652b18;
+  font-size: 13px;
+  font-style: normal;
+  font-weight: 700;
+}
+
+.admin-demo-root .admin-btn {
+  border: 0;
+  border-radius: 16px;
+  background: #c7662d;
+  color: #fff;
+  padding: 11px 16px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(199,102,45,.18);
+}
+
+.admin-demo-root .admin-btn.secondary {
+  border: 1px solid #e8dcd3;
+  background: #fff;
+  color: #211d1a;
+  box-shadow: 0 2px 8px rgba(66,38,23,.04);
+}
+
+.admin-demo-root .admin-btn.danger {
+  background: #b91c1c;
+}
+
+.admin-demo-root .admin-btn:disabled {
+  cursor: not-allowed;
+  opacity: .6;
+}
+
+.admin-demo-root .audit-details summary {
+  cursor: pointer;
+  color: #c7662d;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-demo-root .audit-details pre {
+  margin-top: 8px;
+  max-width: 420px;
+  overflow: auto;
+  border-radius: 12px;
+  background: #faf7f4;
+  padding: 12px;
+  font-size: 12px;
+  text-align: left;
+}
+
+@media (max-width: 900px) {
+  .admin-demo-root .demo-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-demo-root .venue-admin-field.full,
+  .admin-demo-root .venue-admin-check.full {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 767px) {
+  .admin-demo-root .desktop-only {
+    display: none !important;
+  }
+}
