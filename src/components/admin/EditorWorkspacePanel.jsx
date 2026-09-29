@@ -256,13 +256,13 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   const decisionAllowed = canEditSelected && detail && ['submitted', 'under_review', 'revision_requested'].includes(detail.status)
 
   return <div className="editor-workspace">
-    <div className="editor-workspace-head">
+    <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
       <div>
-        <p className="venue-admin-kicker">Venue editor workspace</p>
-        <h2>Human editorial review</h2>
-        <p>Review the venue-specific brief and evidence, record corrections, and make the final editorial decision.</p>
+        <div className="mb-1 text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Venue editor workspace</div>
+        <h2 className="serif text-[43px] leading-[.98] md:text-[54px]">Human editorial review</h2>
+        <p className="mt-3 max-w-[880px] text-[16px] leading-7 text-muted">Review the venue-specific brief and evidence, record corrections, and make the final editorial decision.</p>
       </div>
-      <button className="admin-btn secondary editor-refresh-btn" type="button" onClick={loadQueue} disabled={loading}>
+      <button className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={loadQueue} disabled={loading}>
         {loading ? 'Refreshing…' : 'Refresh queue'}
       </button>
     </div>
@@ -270,44 +270,45 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
     {error && <div className="admin-error venue-admin-message">{error}</div>}
     {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
 
-    <section className="editor-stats">
-      <button type="button" onClick={() => setFilters({...filters, status:''})}><b>{data.counts?.total || 0}</b><span>Editorial queue</span></button>
-      <button type="button" onClick={() => setFilters({...filters, status:'submitted'})}><b>{data.counts?.submitted || 0}</b><span>Submitted</span></button>
-      <button type="button" onClick={() => setFilters({...filters, status:'under_review'})}><b>{data.counts?.under_review || 0}</b><span>Under review</span></button>
-      <button type="button" onClick={() => setFilters({...filters, status:'revision_requested'})}><b>{data.counts?.revision_requested || 0}</b><span>Revision requested</span></button>
-      <button type="button" onClick={() => setFilters({...filters, status:'accepted'})}><b>{data.counts?.accepted || 0}</b><span>Accepted</span></button>
-      <button type="button" onClick={() => setFilters({...filters, status:'rejected'})}><b>{data.counts?.rejected || 0}</b><span>Rejected</span></button>
+    <section className="editor-stats mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:''})}><b>{data.counts?.total || 0}</b><span>Editorial queue</span></button>
+      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'submitted'})}><b>{data.counts?.submitted || 0}</b><span>Submitted</span></button>
+      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'under_review'})}><b>{data.counts?.under_review || 0}</b><span>Under review</span></button>
+      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'revision_requested'})}><b>{data.counts?.revision_requested || 0}</b><span>Revision requested</span></button>
+      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'accepted'})}><b>{data.counts?.accepted || 0}</b><span>Accepted</span></button>
+      <button className="metric premium-card rounded-[22px] p-5 text-left" type="button" onClick={() => setFilters({...filters, status:'rejected'})}><b>{data.counts?.rejected || 0}</b><span>Rejected</span></button>
     </section>
 
-    <div className="editor-filterbar">
+    <div className="editor-filterbar premium-card mb-6 grid gap-3 rounded-[24px] p-3 lg:grid-cols-[1.55fr_.75fr_.75fr_auto]">
       <input
+        className="field"
         value={filters.q}
         onChange={e => setFilters({...filters, q:e.target.value})}
         placeholder="Search manuscript, author, email, or venue…"
       />
-      <select value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
+      <select className="field" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
         <option value="">All venues</option>
         {venues.map(venue => <option value={venue.id} key={venue.id}>{venue.name}</option>)}
       </select>
-      <select value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
+      <select className="field" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
         <option value="">All editorial statuses</option>
         {Object.entries(statusLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}
       </select>
-      <button className="admin-btn secondary editor-apply-btn" type="button" onClick={loadQueue}>Apply</button>
+      <button className="rounded-2xl bg-ink px-6 py-3 text-[14px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>Apply</button>
     </div>
 
-    <div className="editor-grid">
-      <section className="editor-queue">
-        <div className="editor-queue-head">
+    <div className="editor-grid grid items-start gap-5 2xl:grid-cols-[410px_minmax(0,1fr)]">
+      <section className="editor-queue sidebar-content-card premium-card h-fit self-start overflow-hidden rounded-[28px]">
+        <div className="editor-queue-head flex items-center justify-between border-b border-line px-5 py-5">
           <h2>Submission queue</h2>
           <span>{data.items?.length || 0} record{data.items?.length === 1 ? '' : 's'}</span>
         </div>
-        <div className="editor-queue-scroll">
+        <div className="editor-queue-scroll thin-scroll max-h-[520px] overflow-y-auto">
           {loading ? <div className="venue-admin-state"><h3>Loading editorial queue…</h3></div> :
             data.items?.length ? data.items.map(item => <button
               type="button"
               key={item.id}
-              className={`editor-queue-item ${selectedId === item.id ? 'active' : ''}`}
+              className={`editor-queue-item queue-row w-full border-b border-line px-5 py-5 text-left ${selectedId === item.id ? 'active' : ''}`}
               onClick={() => openSubmission(item.id)}
             >
               <div className="editor-queue-item-top">
@@ -325,12 +326,12 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
         </div>
       </section>
 
-      <section className="editor-detail">
+      <section className="editor-detail premium-card overflow-hidden rounded-[28px]">
         {!selectedId ? <div className="venue-admin-state">
           <p className="venue-admin-kicker">Select a submission</p>
           <h3>The editorial brief, evidence, and decision tools will appear here.</h3>
         </div> : detailLoading || !detail ? <div className="venue-admin-state"><h3>Loading editorial packet…</h3></div> : <>
-          <div className="editor-detail-head">
+          <div className="editor-detail-head border-b border-line bg-gradient-to-r from-white via-white to-flexee-50/75 px-6 py-6">
             <div className="editor-detail-head-copy">
               <span className="editor-venue-name">{detail.venue?.name} · config v{detail.venue_config_version || '—'}</span>
               <h2>{detail.manuscript?.title}</h2>
@@ -352,14 +353,14 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             Retention expiry: {new Date(detail.retention_expires_at).toLocaleString()}
           </div>}
 
-          <div className="editor-summary-grid">
+          <div className="editor-summary-grid grid gap-3 px-6 py-5 sm:grid-cols-2 xl:grid-cols-4">
             <div><span>Venue config</span><b>{detail.venue_config_version ? `v${detail.venue_config_version}` : '—'}</b></div>
             <div><span>Evidence items</span><b>{detail.evidence?.length || 0}</b></div>
             <div><span>Editorial brief</span><b>{detail.editorial_brief && Object.keys(detail.editorial_brief).length ? 'Prepared' : 'Pending'}</b></div>
             <div><span>Status</span><b>{statusLabels[detail.status] || pretty(detail.status)}</b></div>
           </div>
 
-          <nav className="editor-detail-tabs" aria-label="Editorial packet sections">
+          <nav className="editor-detail-tabs flex gap-1 overflow-x-auto border-b border-line px-6" aria-label="Editorial packet sections">
             {[
               ['brief','Editorial brief'],
               ['evidence','Evidence'],
@@ -369,13 +370,13 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             ].map(([value,label]) => <button
               type="button"
               key={value}
-              className={detailTab === value ? 'active' : ''}
+              className={`workspace-tab whitespace-nowrap px-4 py-3.5 text-[14px] font-extrabold ${detailTab === value ? 'active' : 'text-muted'}`}
               onClick={() => setDetailTab(value)}
             >{label}</button>)}
           </nav>
 
-          {detailTab === 'brief' && <>
-          <section className="editor-detail-card">
+          <div className="p-6">{detailTab === 'brief' && <>
+          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
             <p className="venue-admin-kicker">Manuscript</p>
             <div className="editor-manuscript-meta">
               <div><span>Author</span><b>{detail.manuscript?.author_name}</b></div>
@@ -387,7 +388,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             {detail.manuscript?.disclosure && <div className="editor-long-copy"><span>AI-use disclosure</span><p>{detail.manuscript.disclosure}</p></div>}
           </section>
 
-          {detail.requirements?.configured && <section className="editor-detail-card">
+          {detail.requirements?.configured && <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
             <p className="venue-admin-kicker">Venue submission requirements</p>
             <h3>{detail.requirements.complete ? 'All required venue items were completed.' : 'Some venue requirements are incomplete.'}</h3>
             <div className="editor-requirement-list">
@@ -403,7 +404,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             </div>
           </section>}
 
-          <section className="editor-detail-card">
+          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
             <p className="venue-admin-kicker">AI-prepared editorial brief</p>
             <h3>{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h3>
             {detail.editorial_brief?.decision_authority && <p className="editor-decision-authority">{detail.editorial_brief.decision_authority}</p>}
@@ -440,7 +441,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           </>}
 
           {detailTab === 'evidence' && <>
-          <section className="editor-detail-card">
+          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
             <p className="venue-admin-kicker">Evidence trail</p>
             <h3>Findings linked to manuscript, venue policy, or verified sources</h3>
             <div className="editor-evidence-list">
@@ -455,7 +456,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           </>}
 
           {detailTab === 'rules' && <>
-          <section className="editor-detail-card">
+          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
             <p className="venue-admin-kicker">Venue rule snapshot</p>
             <h3>Configuration used for this submission</h3>
             {detail.venue_config ? <div className="editor-config-snapshot">
@@ -468,7 +469,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           </>}
 
           {detailTab === 'feedback' && <>
-          <section className="editor-detail-card">
+          <section className="editor-detail-card rounded-[22px] border border-line bg-white p-5">
             <p className="venue-admin-kicker">Correct the agent</p>
             <h3>Record venue-specific editor feedback</h3>
             <p className="editor-card-copy">Corrections stay scoped to this venue. They do not rewrite another outlet's configuration or assessment history.</p>
@@ -509,7 +510,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           </>}
 
           {detailTab === 'decision' && <>
-          <section className="editor-detail-card editor-decision-card">
+          <section className="editor-detail-card editor-decision-card rounded-[22px] border border-line bg-white p-6">
             <p className="venue-admin-kicker">Human decision</p>
             <h3>Final editorial authority stays here.</h3>
             {detail.decision && Object.keys(detail.decision).length > 0 && <div className="editor-existing-decision">
@@ -528,7 +529,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               <button className={`admin-btn ${decision === 'rejected' ? 'danger' : ''}`} type="submit" disabled={busy === 'decision'}>{busy === 'decision' ? 'Recording…' : `Record: ${statusLabels[decision]}`}</button>
             </form> : <p className="editor-card-copy">This submission is currently {statusLabels[detail.status] || detail.status}; no new decision action is available from this state.</p>}
           </section>
-          </>}
+          </>}</div>
         </>}
       </section>
     </div>
