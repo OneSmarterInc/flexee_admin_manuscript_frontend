@@ -407,13 +407,27 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   }
 
   return <div className="venue-admin-layout">
-    <aside className="venue-admin-list">
-      <div className="venue-admin-list-head">
+    <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
+      <div>
+        <div className="text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
+        <h2 className="serif mt-1 text-[43px] leading-none md:text-[54px]">Venue Agents</h2>
+        <p className="mt-3 max-w-[850px] text-[16px] leading-7 text-muted">
+          Configure venue identity, editorial scope, reviewer criteria, disclosure requirements and immutable configuration versions.
+        </p>
+      </div>
+      {canCreateVenue && <button className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange hover:bg-flexee-600" type="button" onClick={() => setShowCreate(value => !value)}>
+        {showCreate ? 'Close create form' : '+ Create venue'}
+      </button>}
+    </div>
+
+    <div className="grid items-start gap-5 xl:grid-cols-[355px_minmax(0,1fr)]">
+    <aside className="venue-admin-list sidebar-content-card premium-card h-fit self-start rounded-[28px] p-4">
+      <div className="venue-admin-list-head mb-4 flex items-center justify-between px-2">
         <div>
-          <p className="venue-admin-kicker">Subscriber venues</p>
-          <h3>Venue Agents</h3>
+          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Subscriber venues</div>
+          <h3 className="serif mt-1 text-[30px]">{venues.filter(venue => venue.active).length} active</h3>
         </div>
-        {canCreateVenue && <button className="admin-btn" type="button" onClick={() => setShowCreate(value => !value)}>+ Venue</button>}
+        <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1.5 text-[13px] font-extrabold text-green-700">Healthy</span>
       </div>
 
       {showCreate && <form className="venue-admin-create" onSubmit={createVenue}>
@@ -431,17 +445,17 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
         </div>
       </form>}
 
-      <div className="venue-admin-venue-list">
+      <div className="venue-admin-venue-list space-y-2">
         {venues.map(venue => <button
           type="button"
           key={venue.id}
-          className={`venue-admin-venue ${selectedId === venue.id ? 'active' : ''}`}
+          className={`venue-admin-venue venue-item flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left ${selectedId === venue.id ? 'active border-line' : 'border-transparent hover:bg-flexee-50'}`}
           onClick={() => {
             setSelectedId(venue.id)
             loadVenue(venue.id).catch(err => setError(err.message))
           }}
         >
-          <span className="venue-admin-venue-icon">{venue.venue_type === 'journal' ? 'J' : venue.venue_type === 'conference' ? 'C' : 'P'}</span>
+          <span className="venue-admin-venue-icon grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-canvas text-flexee-600 serif">{venue.venue_type === 'journal' ? 'J' : venue.venue_type === 'conference' ? 'C' : 'P'}</span>
           <span>
             <b>{venue.name}</b>
             <small>{venue.venue_type} · {venue.active ? 'Active' : 'Inactive'}</small>
@@ -452,7 +466,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
       </div>
     </aside>
 
-    <section className="venue-admin-main">
+    <section className="venue-admin-main space-y-5">
       {error && <div className="admin-error venue-admin-message">{error}</div>}
       {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
 
@@ -460,11 +474,11 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
         <p className="venue-admin-kicker">No venue selected</p>
         <h3>Create or select a venue to configure its editorial agent.</h3>
       </div> : <>
-        <div className="venue-admin-header">
+        <div className="venue-admin-header premium-card rounded-[28px] bg-gradient-to-r from-white via-white to-flexee-50/65 p-6">
           <div>
-            <p className="venue-admin-kicker">Venue Agent</p>
-            <h2>{selectedVenue.name}</h2>
-            <p>{selectedVenue.description || 'No description yet.'}</p>
+            <div className="text-[13px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Venue Agent</div>
+            <h2 className="serif mt-1 text-[41px] leading-none">{selectedVenue.name}</h2>
+            <p className="mt-3 max-w-3xl text-[15px] leading-7 text-muted">{selectedVenue.description || 'No description yet.'}</p>
           </div>
           <div className="venue-admin-header-badges">
             <SmallPill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</SmallPill>
@@ -473,12 +487,12 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           </div>
         </div>
 
-        <form className="venue-admin-card" onSubmit={saveVenue}>
-          <div className="venue-admin-card-head">
-            <div><p className="venue-admin-kicker">Identity</p><h3>Venue metadata</h3></div>
+        <form className="venue-admin-card premium-card rounded-[28px] p-5" onSubmit={saveVenue}>
+          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div><div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Identity</div><h3 className="serif mt-1 text-[31px]">Venue metadata</h3></div>
             {canManageSelected && <button className="admin-btn secondary" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
           </div>
-          <div className="venue-admin-form-grid">
+          <div className="venue-admin-form-grid demo-form-grid">
             <Field label="Venue name"><input value={venueForm?.name || ''} onChange={e => setVenueForm({...venueForm, name:e.target.value})} required /></Field>
             <Field label="Venue type"><select value={venueForm?.venue_type || 'journal'} onChange={e => setVenueForm({...venueForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select></Field>
             <Field label="Description" full><textarea rows="3" value={venueForm?.description || ''} onChange={e => setVenueForm({...venueForm, description:e.target.value})} /></Field>
@@ -486,17 +500,17 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           </div>
         </form>
 
-        <form className="venue-admin-card" onSubmit={createConfig}>
-          <div className="venue-admin-card-head">
+        <form className="venue-admin-card premium-card rounded-[28px] p-5" onSubmit={createConfig}>
+          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="venue-admin-kicker">Editorial intelligence</p>
-              <h3>Create the next configuration version</h3>
+              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Editorial intelligence</div>
+              <h3 className="serif mt-1 text-[31px]">Create the next configuration version</h3>
               <p>Saving creates a new immutable version and makes it active. Existing submissions remain pinned to the version they used.</p>
             </div>
             {canManageSelected && <button className="admin-btn" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
           </div>
 
-          <div className="venue-admin-form-grid">
+          <div className="venue-admin-form-grid demo-form-grid">
             <Field label="Aims & scope" hint="What this venue publishes and the boundaries of its subject matter." help={configFieldHelp.aims_scope} full><textarea rows="6" value={configForm.aims_scope} onChange={e => setConfigForm({...configForm, aims_scope:e.target.value})} /></Field>
             <Field label="Accepted article types" hint="One per line. Example: Research article" help={configFieldHelp.article_types}><textarea rows="5" value={configForm.article_types} onChange={e => setConfigForm({...configForm, article_types:e.target.value})} /></Field>
             <Field label="Accepted methods" hint="One per line. Leave blank if method-neutral." help={configFieldHelp.accepted_methods}><textarea rows="5" value={configForm.accepted_methods} onChange={e => setConfigForm({...configForm, accepted_methods:e.target.value})} /></Field>
@@ -516,22 +530,22 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           </div>
         </form>
 
-        <section className="venue-admin-card">
-          <div className="venue-admin-card-head">
+        <section className="venue-admin-card premium-card rounded-[28px] p-5">
+          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
             <div>
-              <p className="venue-admin-kicker">Editor feedback</p>
-              <h3>Venue-specific learning queue</h3>
+              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editor feedback</div>
+              <h3 className="serif mt-1 text-[30px]">Venue-specific learning queue</h3>
               <p>Assessment corrections remain evidence only. Venue-rule corrections can be turned into an inactive draft configuration for owner review; the live Venue Agent is never changed automatically.</p>
             </div>
             {canManageSelected && selectedFeedbackIds.length > 0 && <button className="admin-btn" type="button" onClick={createFeedbackDraft} disabled={busy === 'feedback-draft'}>{busy === 'feedback-draft' ? 'Creating draft…' : `Create draft from ${selectedFeedbackIds.length} selected`}</button>}
           </div>
-          <div className="venue-admin-history">
+          <div className="venue-admin-history mt-4 space-y-3">
             {feedback.length ? feedback.map(item => {
               const selectable = item.draftable && !item.applied_to_config_version && canManageSelected
               const selected = selectedFeedbackIds.includes(item.id)
               return <article key={item.id}>
                 <div>
-                  <div className="venue-admin-history-title">
+                  <div className="venue-admin-history-title flex flex-wrap items-center gap-2">
                     {selectable && <input
                       type="checkbox"
                       checked={selected}
@@ -550,14 +564,14 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
           </div>
         </section>
 
-        <section className="venue-admin-card">
-          <div className="venue-admin-card-head">
-            <div><p className="venue-admin-kicker">Audit trail</p><h3>Configuration history</h3><p>Older versions can be reactivated without changing the historical version attached to past submissions.</p></div>
+        <section className="venue-admin-card premium-card rounded-[28px] p-5">
+          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div><div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Audit trail</div><h3 className="serif mt-1 text-[30px]">Configuration history</h3><p>Older versions can be reactivated without changing the historical version attached to past submissions.</p></div>
           </div>
-          <div className="venue-admin-history">
+          <div className="venue-admin-history mt-4 space-y-3">
             {configs.map(config => <article key={config.id}>
               <div>
-                <div className="venue-admin-history-title">
+                <div className="venue-admin-history-title flex flex-wrap items-center gap-2">
                   <b>Version {config.version}</b>
                   {config.active && <SmallPill tone="good">Active</SmallPill>}
                 </div>
@@ -574,5 +588,6 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
         </section>
       </>}
     </section>
+    </div>
   </div>
 }
