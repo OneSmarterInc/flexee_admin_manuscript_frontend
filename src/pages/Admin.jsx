@@ -20,8 +20,8 @@ function StatusPill({ value }) { return <span className={`admin-badge ${value ||
 function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = 'admin' }) {
   return (
     <div className="admin-demo-root h-screen overflow-hidden">
-      <header className="fixed inset-x-0 top-0 z-40 h-[78px] border-b border-white/80 glass shadow-[0_5px_22px_rgba(62,37,23,.04)]">
-        <div className="flex h-full items-center justify-between px-4 md:px-7">
+      <header className="fixed inset-x-0 top-0 z-40 h-[96px] border-b border-white/80 glass shadow-[0_5px_22px_rgba(62,37,23,.04)]">
+        <div className="flex h-full items-center justify-between px-4 md:px-[34px]">
           <div className="flex items-center gap-4">
             {sidebar && (
               <button
@@ -29,9 +29,9 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
                 aria-label={sidebarOpen ? 'Close navigation' : 'Open navigation'}
                 aria-expanded={sidebarOpen}
                 onClick={onToggleSidebar}
-                className={`admin-demo-hamburger shine grid h-[52px] w-[52px] place-items-center rounded-[17px] bg-flexee-500 text-white shadow-orange ${sidebarOpen ? 'active' : ''}`}
+                className={`admin-demo-hamburger shine grid h-[64px] w-[64px] place-items-center rounded-[21px] bg-flexee-500 text-white shadow-orange ${sidebarOpen ? 'active' : ''}`}
               >
-                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round">
                   <path d="M4 6h16" />
                   <path d="M4 12h16" />
                   <path d="M4 18h16" />
@@ -39,24 +39,24 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
               </button>
             )}
             <div className="flex items-baseline gap-3">
-              <div className="text-[20px] font-black tracking-[-.025em]">Flexee Admin</div>
-              <div className="desktop-only text-[15px] font-semibold text-muted">Editorial operations</div>
+              <div className="text-[23px] font-black tracking-[-.025em]">Flexee Admin</div>
+              <div className="desktop-only text-[16px] font-semibold text-muted">Editorial operations</div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="desktop-only flex items-center gap-2 rounded-full border border-green-200 bg-green-50/90 px-4 py-2 text-[13px] font-extrabold text-green-700">
+            <div className="desktop-only flex items-center gap-2 rounded-full border border-green-200 bg-green-50/90 px-5 py-2.5 text-[14px] font-extrabold text-green-700">
               <span className="status-dot bg-green-500"></span>
               Systems operational
             </div>
-            <button type="button" className="rounded-xl px-4 py-2.5 text-[14px] font-bold text-muted transition hover:bg-white hover:text-ink">Help</button>
-            <div className="desktop-only flex items-center gap-3 rounded-2xl border border-line bg-white/90 px-3 py-2 shadow-sm">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-flexee-500 text-[13px] font-black text-white">
+            <button type="button" className="rounded-xl px-4 py-2.5 text-[16px] font-bold text-muted transition hover:bg-white hover:text-ink">Help</button>
+            <div className="desktop-only flex items-center gap-3 rounded-[20px] border border-line bg-white/90 px-4 py-2.5 shadow-sm">
+              <div className="grid h-[46px] w-[46px] place-items-center rounded-[15px] bg-flexee-500 text-[15px] font-black text-white">
                 {(username || 'A').charAt(0).toUpperCase()}
               </div>
               <div className="pr-1 text-left">
-                <div className="text-[13px] font-extrabold">{username || 'admin'}</div>
-                <div className="text-[12px] font-medium text-muted">Administrator</div>
+                <div className="text-[14px] font-extrabold">{username || 'admin'}</div>
+                <div className="text-[13px] font-medium text-muted">Administrator</div>
               </div>
             </div>
           </div>
@@ -81,8 +81,8 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
         </aside>
       )}
 
-      <main className="page-scroll soft-grid h-screen overflow-y-auto pt-[78px]">
-        <div className="mx-auto max-w-[1750px] px-4 py-6 md:px-7 md:py-8">
+      <main className="page-scroll soft-grid h-screen overflow-y-auto pt-[96px]">
+        <div className="w-full px-4 py-6 md:px-[35px] md:py-[42px]">
           {children}
         </div>
         <div className="h-10"></div>
