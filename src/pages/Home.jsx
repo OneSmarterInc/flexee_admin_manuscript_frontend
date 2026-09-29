@@ -9,12 +9,22 @@ export default function Home() {
       <h1 className="publication-title">Share your manuscript.</h1>
       <p className="publication-lede">Log in as an author to upload manuscripts, check semantic readiness, and find matching venues and publications across our network.</p>
 
-      <div className="publication-choices">
-        <article className="choice-card">
-          <p className="choice-type">Authors</p>
-          <h2>Manage your submissions in one place.</h2>
-          <p>Sign up to upload your manuscripts, receive AI-driven readiness reports, and match with appropriate journals, conferences, and publishers.</p>
-          <button className="copper-button" onClick={() => go('/author')}>Go to Author Dashboard</button>
+      <div className="publication-choices publication-choices-single">
+        <article className="choice-card author-entry-card">
+          <div className="author-entry-card-head">
+            <p className="choice-type">Authors</p>
+            <span className="author-entry-eyebrow">Unified submission workspace</span>
+          </div>
+          <h2>Submit articles, papers, and book manuscripts.</h2>
+          <p className="author-entry-copy">Use one author dashboard to upload your work, run readiness checks, compare matching journals, conferences, and publishers, and track each submission through the editorial process.</p>
+          <div className="author-entry-types" aria-label="Supported submission types">
+            <span>Research articles</span>
+            <span>Review articles</span>
+            <span>Conference papers</span>
+            <span>Case studies</span>
+            <span>Book manuscripts</span>
+          </div>
+          <button className="copper-button author-entry-button" onClick={() => go('/author')}>Go to Author Dashboard</button>
         </article>
       </div>
 
