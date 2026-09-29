@@ -1329,3 +1329,111 @@
     grid-template-columns:1fr;
   }
 }
+
+
+/* Professional unified author submission card */
+.publication-choices-single{
+  grid-template-columns:minmax(0,1fr)!important;
+  max-width:760px;
+}
+
+.author-entry-card{
+  position:relative;
+  overflow:hidden;
+  padding:34px 36px!important;
+  border-color:#ded4ca!important;
+  box-shadow:0 10px 32px rgba(28,26,23,.055)!important;
+  background:linear-gradient(180deg,#fff 0%,#fdfbf8 100%)!important;
+}
+
+.author-entry-card::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:4px;
+  background:var(--copper);
+}
+
+.author-entry-card-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:8px;
+}
+
+.author-entry-card .choice-type{
+  margin:0;
+}
+
+.author-entry-eyebrow{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  padding:4px 10px;
+  border:1px solid #e3d4c8;
+  border-radius:999px;
+  background:#fbf4ee;
+  color:var(--copper-dk);
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.03em;
+  white-space:nowrap;
+}
+
+.author-entry-card h2{
+  max-width:660px;
+  margin:8px 0 12px!important;
+  font-size:36px!important;
+}
+
+.author-entry-copy{
+  max-width:680px;
+  margin:0!important;
+  font-size:16px;
+  line-height:1.65;
+}
+
+.author-entry-types{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:22px 0 24px;
+}
+
+.author-entry-types span{
+  display:inline-flex;
+  align-items:center;
+  min-height:30px;
+  padding:5px 10px;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:#fff;
+  color:#5f5851;
+  font-size:12px;
+  font-weight:600;
+}
+
+.author-entry-button{
+  min-width:230px;
+}
+
+@media(max-width:720px){
+  .author-entry-card{
+    padding:26px 24px!important;
+  }
+  .author-entry-card-head{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .author-entry-card h2{
+    font-size:31px!important;
+  }
+  .author-entry-eyebrow{
+    white-space:normal;
+  }
+  .author-entry-button{
+    width:100%;
+    min-width:0;
+  }
+}
