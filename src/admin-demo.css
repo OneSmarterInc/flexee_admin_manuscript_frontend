@@ -680,3 +680,455 @@
     display: none !important;
   }
 }
+
+
+/* Exact demo layout bridges for the live React components. */
+.admin-demo-root .venue-admin-layout {
+  display: block !important;
+  width: 100%;
+}
+
+.admin-demo-root .venue-admin-list {
+  position: static !important;
+  top: auto !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.admin-demo-root .venue-admin-main {
+  min-width: 0;
+}
+
+.admin-demo-root .venue-admin-list-head,
+.admin-demo-root .venue-admin-header,
+.admin-demo-root .venue-admin-card-head {
+  border: 0;
+}
+
+.admin-demo-root .venue-admin-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.admin-demo-root .venue-admin-header-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-demo-root .venue-admin-create {
+  display: grid;
+  gap: 12px;
+  margin: 0 0 14px;
+  border: 1px solid #f3dacb;
+  border-radius: 18px;
+  background: #fff9f5;
+  padding: 14px;
+}
+
+.admin-demo-root .venue-admin-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.admin-demo-root .venue-admin-actions,
+.admin-demo-root .venue-admin-history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.admin-demo-root .venue-admin-venue {
+  color: #211d1a;
+}
+
+.admin-demo-root .venue-admin-venue > span:nth-child(2) {
+  min-width: 0;
+  flex: 1;
+}
+
+.admin-demo-root .venue-admin-venue b {
+  display: block;
+  color: #211d1a;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.admin-demo-root .venue-admin-venue small {
+  display: block;
+  margin-top: 3px;
+  color: #746c66;
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.admin-demo-root .venue-admin-card-head > div > p {
+  margin: 5px 0 0;
+  max-width: 860px;
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-demo-root .venue-admin-history article {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #e8dcd3;
+  border-radius: 16px;
+  background: #fcfaf8;
+  padding: 15px;
+}
+
+.admin-demo-root .venue-admin-history article p {
+  margin: 7px 0;
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.admin-demo-root .venue-admin-history article small {
+  color: #8d8179;
+  font-size: 12px;
+}
+
+.admin-demo-root .editor-workspace {
+  width: 100%;
+}
+
+.admin-demo-root .editor-stats button {
+  min-width: 0;
+  border: 1px solid rgba(232,220,211,.94);
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.97),
+      rgba(255,252,249,.91)
+    );
+  color: #211d1a;
+  cursor: pointer;
+  box-shadow:
+    0 10px 32px rgba(66,38,23,.065),
+    inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+.admin-demo-root .editor-stats button b {
+  display: block;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+
+.admin-demo-root .editor-stats button span {
+  display: block;
+  margin-top: 8px;
+  color: #746c66;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.admin-demo-root .editor-filterbar {
+  align-items: center;
+}
+
+.admin-demo-root .editor-grid {
+  display: grid !important;
+  align-items: start !important;
+  min-width: 0;
+}
+
+.admin-demo-root .editor-queue {
+  position: static !important;
+  height: fit-content !important;
+  min-height: 0 !important;
+}
+
+.admin-demo-root .editor-queue-head h2 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 30px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+
+.admin-demo-root .editor-queue-head > span {
+  border: 1px solid #f3dacb;
+  border-radius: 999px;
+  background: #fff9f5;
+  padding: 6px 10px;
+  color: #8c3b19;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.admin-demo-root .editor-queue-scroll {
+  min-height: 0 !important;
+}
+
+.admin-demo-root .editor-queue-item {
+  display: block;
+  background: transparent;
+  color: #211d1a;
+  cursor: pointer;
+}
+
+.admin-demo-root .editor-queue-item-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-demo-root .editor-venue-name {
+  color: #ae4e20;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.admin-demo-root .editor-queue-item h3 {
+  margin: 8px 0 0;
+  color: #211d1a;
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.admin-demo-root .editor-queue-item p {
+  margin: 4px 0 0;
+  color: #746c66;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.admin-demo-root .editor-queue-item small {
+  display: block;
+  margin-top: 10px;
+  color: #91857d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.admin-demo-root .editor-detail {
+  min-width: 0;
+  padding: 0 !important;
+}
+
+.admin-demo-root .editor-detail-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.admin-demo-root .editor-detail-head-copy h2 {
+  margin: 5px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 40px;
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -.045em;
+}
+
+.admin-demo-root .editor-detail-head-copy p {
+  margin: 10px 0 0;
+  color: #746c66;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.admin-demo-root .editor-detail-head-controls,
+.admin-demo-root .editor-detail-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-demo-root .editor-detail-head-controls {
+  justify-content: flex-end;
+}
+
+.admin-demo-root .editor-summary-grid > div {
+  border: 1px solid #e8dcd3;
+  border-radius: 16px;
+  background: #fcfaf8;
+  padding: 16px;
+}
+
+.admin-demo-root .editor-summary-grid span,
+.admin-demo-root .editor-manuscript-meta span,
+.admin-demo-root .editor-long-copy > span,
+.admin-demo-root .editor-brief-block > span,
+.admin-demo-root .editor-config-snapshot > div > span {
+  display: block;
+  color: #746c66;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.admin-demo-root .editor-summary-grid b {
+  display: block;
+  margin-top: 6px;
+  color: #211d1a;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.admin-demo-root .editor-detail-tabs button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.admin-demo-root .editor-detail-card {
+  margin-bottom: 20px;
+}
+
+.admin-demo-root .editor-detail-card:last-child {
+  margin-bottom: 0;
+}
+
+.admin-demo-root .editor-detail-card > .venue-admin-kicker {
+  margin: 0 0 12px;
+  color: #ae4e20;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.admin-demo-root .editor-detail-card > h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.035em;
+}
+
+.admin-demo-root .editor-manuscript-meta {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.admin-demo-root .editor-manuscript-meta > div {
+  border-radius: 16px;
+  background: #f8f3ef;
+  padding: 16px;
+  min-width: 0;
+}
+
+.admin-demo-root .editor-manuscript-meta b {
+  display: block;
+  margin-top: 6px;
+  overflow-wrap: anywhere;
+  color: #211d1a;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.admin-demo-root .editor-long-copy {
+  margin-top: 18px;
+}
+
+.admin-demo-root .editor-long-copy p {
+  margin: 7px 0 0;
+  color: #211d1a;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+.admin-demo-root .editor-decision-authority {
+  margin: 8px 0 0;
+  color: #746c66;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+.admin-demo-root .editor-brief-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.admin-demo-root .editor-brief-block {
+  border: 1px solid #e8dcd3;
+  border-radius: 16px;
+  background: #fff;
+  padding: 15px;
+}
+
+.admin-demo-root .editor-brief-block p {
+  margin: 7px 0 0;
+  color: #211d1a;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.admin-demo-root .venue-admin-state {
+  border: 1px dashed #e8dcd3;
+  border-radius: 20px;
+  background: rgba(255,255,255,.72);
+  padding: 28px;
+  text-align: center;
+}
+
+.admin-demo-root .venue-admin-state h3 {
+  margin: 6px 0 0;
+  color: #211d1a;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.admin-demo-root .venue-admin-state p {
+  margin: 0;
+}
+
+@media (max-width: 1279px) {
+  .admin-demo-root .editor-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .admin-demo-root .editor-queue {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .admin-demo-root .venue-admin-header,
+  .admin-demo-root .editor-detail-head {
+    flex-direction: column;
+  }
+
+  .admin-demo-root .editor-detail-head-controls {
+    justify-content: flex-start;
+  }
+
+  .admin-demo-root .editor-manuscript-meta,
+  .admin-demo-root .editor-brief-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-demo-root .venue-admin-two {
+    grid-template-columns: 1fr;
+  }
+}
