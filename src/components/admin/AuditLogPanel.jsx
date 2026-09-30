@@ -23,6 +23,20 @@ const actionLabels = {
   'legacy_submission.email_sent': 'Legacy email sent',
   'legacy_submission.deleted': 'Legacy submission deleted',
   'smtp.updated': 'SMTP configuration updated',
+  'admin.login_succeeded': 'Admin signed in',
+  'admin.logout': 'Admin signed out',
+  'admin.login_failed': 'Sign-in failed: invalid credentials',
+  'admin.totp_failed': 'Sign-in failed: invalid authenticator code',
+  'admin.totp_not_configured': 'Sign-in blocked: authenticator not set up',
+  'admin.login_rate_limited': 'Sign-in blocked: too many attempts',
+}
+
+const authReasonLabels = {
+  invalid_credentials: 'Wrong password',
+  unknown_account: 'Unknown account',
+  invalid_totp: 'Wrong authenticator code',
+  totp_required: 'Authenticator not set up',
+  rate_limited: 'Too many attempts',
 }
 
 function shortId(value) {
@@ -50,7 +64,9 @@ function visualStatus(action) {
     value.includes('deleted') ||
     value.includes('purged') ||
     value.includes('incomplete') ||
-    value.includes('unavailable')
+    value.includes('unavailable') ||
+    value.includes('rate_limited') ||
+    value.includes('not_configured')
   ) {
     return {
       key: 'warning',
@@ -64,6 +80,7 @@ function visualStatus(action) {
     value.includes('created') ||
     value.includes('activated') ||
     value.includes('decision_recorded') ||
+    value.includes('login_succeeded') ||
     value === 'smtp.updated'
   ) {
     return {
@@ -468,7 +485,14 @@ export default function AuditLogPanel() {
               const coverage = getCoverageContext(event)
               const semanticUnavailable = String(event.action || '').toLowerCase().includes('semantic_unavailable')
 
-              const contextParts = semanticUnavailable
+              const authDetail = event.detail || {}
+              const contextParts = event.resource_type === 'admin_session'
+                ? [
+                    authDetail.reason && authDetail.reason !== 'ok' ? ['Reason', authReasonLabels[authDetail.reason] || authDetail.reason] : null,
+                    authDetail.stage ? ['Step', authDetail.stage === 'password' ? 'Password' : 'Authenticator'] : null,
+                    ['Account', authDetail.username || event.actor_email || 'unknown'],
+                  ].filter(Boolean)
+                : semanticUnavailable
                 ? [
                     ['Fallback', fallback || 'deterministic checks'],
                     ['Coverage', coverage === '' ? '0%' : String(coverage).includes('%') ? coverage : `${coverage}%`],
@@ -487,8 +511,8 @@ export default function AuditLogPanel() {
                 </td>
 
                 <td className="whitespace-nowrap px-3 py-2 align-middle text-[14px]">
-                  <span className="font-extrabold">{event.actor_email || event.actor || 'System/unknown'}</span>{' '}
-                  <span className="text-muted">· {event.actor_role || '—'}</span>
+                  <span className="font-extrabold">{event.actor_email || event.actor || (event.resource_type === 'admin_session' && event.detail?.username) || 'System/unknown'}</span>{' '}
+                  <span className="text-muted">· {event.actor_role || (event.resource_type === 'admin_session' ? 'unverified' : '—')}</span>
                 </td>
 
                 <td className="whitespace-nowrap px-3 py-2 align-middle leading-tight">
