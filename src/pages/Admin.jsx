@@ -686,7 +686,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
       </div>
 
       <div className="thin-scroll flex-1 overflow-y-auto p-4">
-        <div className="mb-2 px-3 text-[13px] font-extrabold uppercase tracking-[.12em] text-[#978a81]">Workspace</div>
+        <div className="mb-2 px-3 text-[13px] font-extrabold uppercase tracking-[.12em] text-ink">Workspace</div>
         <nav className="space-y-1.5">
           <button
             className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'editor' ? 'active' : ''}`}
@@ -733,7 +733,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
 
         {platformSuperuser && <>
           <div className="my-5 border-t border-line"></div>
-          <div className="mb-2 px-3 text-[13px] font-extrabold uppercase tracking-[.12em] text-[#978a81]">Settings</div>
+          <div className="mb-2 px-3 text-[13px] font-extrabold uppercase tracking-[.12em] text-ink">Settings</div>
           <button
             className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'smtp' ? 'active' : ''}`}
             type="button"
