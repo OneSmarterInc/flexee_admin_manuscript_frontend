@@ -67,6 +67,7 @@ export default function App() {
   if (path === '/author/signup') return <AuthorTheme><AuthorSignup /></AuthorTheme>
   if (path === '/author') return <AuthorTheme><RequireAuthor><AuthorDashboard /></RequireAuthor></AuthorTheme>
   if (path === '/author/new') return <AuthorTheme><RequireAuthor><AuthorNewSubmission /></RequireAuthor></AuthorTheme>
+  if (path === '/author/manuscript') return <AuthorTheme><RequireAuthor><AuthorNewSubmission mode="edit" /></RequireAuthor></AuthorTheme>
   if (path === '/author/manuscript-details') return <AuthorTheme><RequireAuthor><AuthorManuscriptDetails /></RequireAuthor></AuthorTheme>
   if (path === '/author/readiness') return <AuthorTheme><RequireAuthor><AuthorReadiness /></RequireAuthor></AuthorTheme>
   if (path === '/author/venues') return <AuthorTheme><RequireAuthor><AuthorVenueMatches /></RequireAuthor></AuthorTheme>
