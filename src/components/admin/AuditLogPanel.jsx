@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../../api.js'
 
-const PAGE_SIZE = 4
+const PAGE_SIZE = 10
 
 const actionLabels = {
   'venue.created': 'Venue created',
@@ -167,8 +167,8 @@ function getCoverageContext(event) {
 }
 
 function StatusBadge({ status }) {
-  return <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[13px] font-extrabold ${status.wrap}`}>
-    <span className={`status-dot ${status.dot}`}></span>
+  return <span className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[12px] font-extrabold ${status.wrap}`}>
+    <span className={`status-dot !h-[7px] !w-[7px] ${status.dot}`}></span>
     {status.label}
   </span>
 }
@@ -409,13 +409,13 @@ export default function AuditLogPanel() {
       </div>)}
     </div>
     <div className="premium-card overflow-hidden rounded-[28px]">
-      <div className="flex items-center justify-between border-b border-line px-5 py-5">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3">
         <div>
           <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">
             Event history
           </div>
 
-          <h3 className="serif mt-1 text-[31px]">
+          <h3 className="serif mt-0.5 text-[24px] leading-none">
             Recent activity
           </h3>
         </div>
@@ -434,25 +434,25 @@ export default function AuditLogPanel() {
         <table className="demo-audit-table min-w-[1220px] w-full border-collapse">
           <thead className="bg-[#faf7f4]">
             <tr className="border-b border-line">
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Timestamp
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Actor
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Action
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Status
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Resource
               </th>
-              <th className="px-5 py-4 text-left text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Context
               </th>
-              <th className="px-5 py-4 text-right text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">
+              <th className="px-3 py-2.5 text-right text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">
                 Details
               </th>
             </tr>
@@ -468,82 +468,56 @@ export default function AuditLogPanel() {
               const coverage = getCoverageContext(event)
               const semanticUnavailable = String(event.action || '').toLowerCase().includes('semantic_unavailable')
 
+              const contextParts = semanticUnavailable
+                ? [
+                    ['Fallback', fallback || 'deterministic checks'],
+                    ['Coverage', coverage === '' ? '0%' : String(coverage).includes('%') ? coverage : `${coverage}%`],
+                  ]
+                : event.resource_type === 'venue_config' && version !== ''
+                  ? [['Venue', venue || shortId(event.venue_id)], ['Version', version]]
+                  : [
+                      venue ? ['Venue', venue === event.venue_id ? shortId(venue) : venue] : null,
+                      organization ? ['Org', organization === event.organization_id ? shortId(organization) : organization] : null,
+                    ].filter(Boolean)
+
               return <tr key={event.id}>
-                <td className="px-5 py-5 align-top">
-                  <div className="text-[15px] font-extrabold">
-                    {formatDate(event.occurred_at)}
-                  </div>
-                  <div className="mt-1 text-[14px] font-medium text-muted">
-                    {formatTime(event.occurred_at)}
-                  </div>
+                <td className="whitespace-nowrap px-3 py-2 align-middle text-[14px]">
+                  <span className="font-extrabold">{formatDate(event.occurred_at)}</span>{' '}
+                  <span className="text-muted">· {formatTime(event.occurred_at)}</span>
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <div className="break-words text-[15px] font-extrabold">
-                    {event.actor_email || event.actor || 'System/unknown'}
-                  </div>
-                  <div className="mt-1 break-words text-[14px] font-medium text-muted">
-                    {event.actor_role || '—'}
-                  </div>
+                <td className="whitespace-nowrap px-3 py-2 align-middle text-[14px]">
+                  <span className="font-extrabold">{event.actor_email || event.actor || 'System/unknown'}</span>{' '}
+                  <span className="text-muted">· {event.actor_role || '—'}</span>
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <div className="text-[15px] font-bold">
-                    {labelAction(event.action)}
-                  </div>
-                  <div className="mt-1 break-words text-[13px] font-medium text-muted">
-                    {event.action}
-                  </div>
+                <td className="whitespace-nowrap px-3 py-2 align-middle leading-tight">
+                  <div className="text-[14px] font-bold">{labelAction(event.action)}</div>
+                  <div className="text-[12px] font-medium text-muted">{event.action}</div>
                 </td>
 
-                <td className="px-5 py-5 align-top">
+                <td className="px-3 py-2 align-middle">
                   <StatusBadge status={status} />
                 </td>
 
-                <td className="px-5 py-5 align-top">
-                  <div className="break-words text-[14px] font-bold">
-                    {event.resource_type || '—'}
-                  </div>
-                  <div className="mt-1 break-words text-[13px] font-medium text-muted" title={event.resource_id || ''}>
-                    {getResourceSecondary(event)}
-                  </div>
+                <td className="whitespace-nowrap px-3 py-2 align-middle text-[14px]">
+                  <span className="font-bold">{event.resource_type || '—'}</span>{' '}
+                  <span className="text-[13px] text-muted" title={event.resource_id || ''}>· {getResourceSecondary(event)}</span>
                 </td>
 
-                <td className="px-5 py-5 align-top text-[14px] leading-6 text-muted">
-                  {semanticUnavailable ? <>
-                    <div>
-                      <span className="font-bold text-ink">Fallback:</span>{' '}
-                      {fallback || 'deterministic checks'}
-                    </div>
-                    <div>
-                      <span className="font-bold text-ink">Coverage:</span>{' '}
-                      {coverage === '' ? '0%' : String(coverage).includes('%') ? coverage : `${coverage}%`}
-                    </div>
-                  </> : event.resource_type === 'venue_config' && version !== '' ? <>
-                    <div>
-                      <span className="font-bold text-ink">Venue:</span>{' '}
-                      {venue || shortId(event.venue_id)}
-                    </div>
-                    <div>
-                      <span className="font-bold text-ink">Version:</span>{' '}
-                      {version}
-                    </div>
-                  </> : <>
-                    {venue && <div>
-                      <span className="font-bold text-ink">Venue:</span>{' '}
-                      {venue === event.venue_id ? shortId(venue) : venue}
-                    </div>}
-                    {organization && <div>
-                      <span className="font-bold text-ink">Organization:</span>{' '}
-                      {organization === event.organization_id ? shortId(organization) : organization}
-                    </div>}
-                    {!venue && !organization && <span>—</span>}
-                  </>}
+                <td
+                  className="max-w-[240px] truncate px-3 py-2 align-middle text-[13px] text-muted"
+                  title={contextParts.map(([label, value]) => `${label}: ${value}`).join(' · ')}
+                >
+                  {contextParts.length ? contextParts.map(([label, value], index) => <React.Fragment key={label}>
+                    {index > 0 && ' · '}
+                    <span className="font-bold text-ink">{label}:</span> {String(value)}
+                  </React.Fragment>) : '—'}
                 </td>
 
-                <td className="px-5 py-5 text-right align-top">
+                <td className="px-3 py-2 text-right align-middle">
                   <details className="demo-audit-details inline-block text-left">
-                    <summary className="inline-block cursor-pointer list-none rounded-xl border border-line bg-white px-3.5 py-2 text-[13px] font-extrabold text-flexee-700">
+                    <summary className="inline-block cursor-pointer list-none rounded-lg border border-line bg-white px-3 py-1 text-[12px] font-extrabold text-flexee-700">
                       View
                     </summary>
                     <pre>{JSON.stringify(event.detail || {}, null, 2)}</pre>
@@ -567,14 +541,14 @@ export default function AuditLogPanel() {
         </table>
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-line px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="text-[14px] font-medium text-muted">
+      <div className="flex flex-col gap-3 border-t border-line px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-[13px] font-medium text-muted">
           Showing {shownStart.toLocaleString()}–{shownEnd.toLocaleString()} of {displayTotal.toLocaleString()} events
         </div>
 
         <div className="flex gap-2">
           <button
-            className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold text-muted disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-xl border border-line bg-white px-4 py-1.5 text-[13px] font-extrabold text-muted disabled:cursor-not-allowed disabled:opacity-45"
             type="button"
             onClick={() => setPage(value => Math.max(1, value - 1))}
             disabled={currentPage <= 1}
@@ -585,8 +559,8 @@ export default function AuditLogPanel() {
           {pageButtons.map(pageNumber => <button
             key={pageNumber}
             className={pageNumber === currentPage
-              ? 'rounded-xl bg-ink px-4 py-2 text-[13px] font-extrabold text-white'
-              : 'rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold'}
+              ? 'rounded-xl bg-ink px-4 py-1.5 text-[13px] font-extrabold text-white'
+              : 'rounded-xl border border-line bg-white px-4 py-1.5 text-[13px] font-extrabold'}
             type="button"
             onClick={() => setPage(pageNumber)}
           >
@@ -594,7 +568,7 @@ export default function AuditLogPanel() {
           </button>)}
 
           <button
-            className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
+            className="rounded-xl border border-line bg-white px-4 py-1.5 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45"
             type="button"
             onClick={() => setPage(value => Math.min(pageCount, value + 1))}
             disabled={currentPage >= pageCount}
