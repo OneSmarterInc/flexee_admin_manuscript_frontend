@@ -348,12 +348,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   }
 
   return <div>
-    <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
-      Venue editor workspace
-    </div>
-    <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <h2 className="serif text-[32px] leading-none md:text-[36px]">
-        Human editorial review
+        Editorial review
       </h2>
 
       <div className="flex shrink-0 flex-wrap gap-2">
