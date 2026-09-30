@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../../api.js'
+import AdminModal from './AdminModal.jsx'
 
 const emptyVenue = {
   name: '',
@@ -58,6 +59,12 @@ function configToForm(config) {
     current_demand: jsonToText(config.current_demand),
     config_notes: config.config_notes || '',
   }
+}
+
+const blankConfig = Object.fromEntries(Object.keys(emptyConfig).map(key => [key, '']))
+
+function hasConfigInput(form) {
+  return Object.values(form || {}).some(value => String(value ?? '').trim() !== '')
 }
 
 function parseList(value) {
@@ -256,6 +263,8 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   const [venueForm, setVenueForm] = useState(null)
   const [configForm, setConfigForm] = useState({ ...emptyConfig })
   const [showCreate, setShowCreate] = useState(false)
+  const [detailOpen, setDetailOpen] = useState(false)
+  const [createConfigForm, setCreateConfigForm] = useState({ ...blankConfig })
   const [createForm, setCreateForm] = useState({ ...emptyVenue, organization_id: defaultOwnerOrgId })
   const [loading, setLoading] = useState(true)
   const [busy, setBusy] = useState('')
@@ -267,16 +276,9 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
     const payload = await api('/api/admin/venues/')
     const items = payload.venues || []
     setVenues(items)
-    const nextId = preferredId || selectedId || items[0]?.id || ''
-    setSelectedId(nextId)
-    if (nextId) await loadVenue(nextId)
-    else {
-      setSelectedVenue(null)
-      setConfigs([])
-      setFeedback([])
-      setSelectedFeedbackIds([])
-      setVenueForm(null)
-      setConfigForm({ ...emptyConfig })
+    if (preferredId) {
+      setSelectedId(preferredId)
+      await loadVenue(preferredId)
     }
     setLoading(false)
   }
@@ -311,24 +313,85 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
     })
   }, [])
 
+  function openVenue(id) {
+    setSelectedId(id)
+    setSelectedVenue(null)
+    setError('')
+    setSuccess('')
+    setDetailOpen(true)
+    loadVenue(id).catch(err => setError(err.message))
+  }
+
+  function closeVenue() {
+    setDetailOpen(false)
+    setError('')
+    setSuccess('')
+  }
+
+  function openCreate() {
+    setCreateForm({ ...emptyVenue, organization_id: defaultOwnerOrgId, organization_name: '' })
+    setCreateConfigForm({ ...blankConfig })
+    setError('')
+    setSuccess('')
+    setDetailOpen(false)
+    setShowCreate(true)
+  }
+
+  function closeCreate() {
+    if (busy === 'create') return
+    setShowCreate(false)
+    setError('')
+  }
+
   async function createVenue(e) {
     e.preventDefault()
     if (!platformSuperuser && !ownerMemberships.length) return
-    setBusy('create')
     setError('')
     setSuccess('')
+
+    // Validate the optional first configuration before anything is saved.
+    let firstConfig = null
+    if (hasConfigInput(createConfigForm)) {
+      try {
+        firstConfig = configPayload(createConfigForm)
+      } catch (err) {
+        setError(err.message)
+        return
+      }
+    }
+
+    setBusy('create')
     try {
       const requestBody = platformSuperuser
-        ? createForm
+        ? { ...createForm, organization_name: createForm.organization_name || emptyVenue.organization_name }
         : { ...createForm, organization_id: createForm.organization_id || defaultOwnerOrgId }
       const payload = await api('/api/admin/venues/', {
         method: 'POST',
         body: JSON.stringify(requestBody),
       })
+      const venue = payload.venue
+
+      let message = `${venue.name} created. Add its first Venue Agent configuration next.`
+      let configError = ''
+      if (firstConfig) {
+        try {
+          const result = await api(`/api/admin/venues/${venue.id}/config/`, {
+            method: 'POST',
+            body: JSON.stringify(firstConfig),
+          })
+          message = `${venue.name} created with configuration v${result.config.version} active.`
+        } catch (err) {
+          configError = `${venue.name} was created, but its configuration was not saved: ${err.message}`
+        }
+      }
+
       setShowCreate(false)
       setCreateForm({ ...emptyVenue, organization_id: defaultOwnerOrgId })
-      setSuccess(`${payload.venue.name} created. Add its first Venue Agent configuration next.`)
-      await loadVenues(payload.venue.id)
+      setCreateConfigForm({ ...blankConfig })
+      setDetailOpen(true)
+      await loadVenues(venue.id)
+      if (configError) setError(configError)
+      else setSuccess(message)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -427,126 +490,140 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   const canManageSelected = platformSuperuser || selectedRole === 'owner'
   const canCreateVenue = platformSuperuser || ownerMemberships.length > 0
 
+  const activeCount = venues.filter(venue => venue.active).length
+  const detailReady = Boolean(selectedVenue && String(selectedVenue.id) === String(selectedId))
+  const messages = <>
+    {error && <div className="admin-error venue-admin-message">{error}</div>}
+    {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
+  </>
+
   if (loading) {
-    return <div className="premium-card rounded-[28px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Agents…</div>
+    return <div className="premium-card rounded-[22px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Agents…</div>
   }
 
   return <div>
-    <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
-      <div>
-        <div className="text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
-        <h2 className="serif mt-1 text-[43px] leading-none md:text-[54px]">Venue Agents</h2>
-        <p className="mt-3 max-w-[850px] text-[16px] leading-7 text-muted">
-          Configure venue identity, editorial scope, reviewer criteria, disclosure requirements and immutable configuration versions.
-        </p>
-      </div>
-      {canCreateVenue && <button className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange hover:bg-flexee-600" type="button" onClick={() => setShowCreate(value => !value)}>
-        {showCreate ? 'Close create form' : '+ Create venue'}
+    <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
+    <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <h2 className="serif text-[32px] leading-none md:text-[36px]">Venue Agents</h2>
+      {canCreateVenue && <button className="shine rounded-xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange hover:bg-flexee-600" type="button" onClick={openCreate}>
+        + Create venue
       </button>}
     </div>
+    <p className="mb-3 mt-1 max-w-[850px] text-[14px] leading-6 text-muted">
+      Configure venue identity, editorial scope, reviewer criteria, disclosure requirements and immutable configuration versions.
+    </p>
 
-    <div className="grid items-start gap-5 xl:grid-cols-[355px_minmax(0,1fr)]">
-      <aside className="sidebar-content-card premium-card thin-scroll h-fit self-start rounded-[28px] p-4 xl:sticky xl:top-[94px] xl:max-h-[calc(100vh_-_112px)] xl:overflow-y-auto">
-        <div className="mb-4 flex items-center justify-between px-2">
-          <div>
-            <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Subscriber venues</div>
-            <h3 className="serif mt-1 text-[30px]">{venues.filter(venue => venue.active).length} active</h3>
-          </div>
-          <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1.5 text-[13px] font-extrabold text-green-700">Healthy</span>
+    <div className="mb-3 flex flex-wrap gap-2">
+      <div className="inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-3.5 py-1.5">
+        <span className="serif text-[20px] leading-none">{venues.length}</span>
+        <span className="text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Subscriber venues</span>
+      </div>
+      <div className="inline-flex items-center gap-2 rounded-full border border-green-200 bg-green-50 px-3.5 py-1.5 text-green-700">
+        <span className="status-dot bg-green-500"></span>
+        <span className="serif text-[20px] leading-none text-green-950">{activeCount}</span>
+        <span className="text-[12px] font-extrabold uppercase tracking-[.06em]">Active</span>
+      </div>
+      <div className="inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-3.5 py-1.5">
+        <span className="status-dot bg-stone-400"></span>
+        <span className="serif text-[20px] leading-none">{venues.length - activeCount}</span>
+        <span className="text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Inactive</span>
+      </div>
+    </div>
+
+    {!detailOpen && !showCreate && (error || success) && <div className="mb-3 space-y-2">{messages}</div>}
+
+    <div className="premium-card overflow-hidden rounded-[22px]">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3">
+        <div>
+          <div className="text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Subscriber venues</div>
+          <h3 className="serif mt-0.5 text-[24px] leading-none">All venue agents</h3>
         </div>
+        <span className="rounded-full border border-green-200 bg-green-50 px-3 py-1 text-[12px] font-extrabold text-green-700">Healthy</span>
+      </div>
 
-        {showCreate && <form className="mb-4 space-y-3 rounded-[22px] border border-flexee-100 bg-gradient-to-br from-flexee-50 to-white p-4" onSubmit={createVenue}>
-          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">New venue</div>
-          <label className="block">
-            <span className="mb-1.5 block text-[14px] font-extrabold">Venue name</span>
-            <input className="field" value={createForm.name} onChange={e => setCreateForm({...createForm, name:e.target.value})} required />
-          </label>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block">
-              <span className="mb-1.5 block text-[14px] font-extrabold">Type</span>
-              <select className="field" value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
-            </label>
-            {platformSuperuser
-              ? <label className="block">
-                  <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
-                  <input className="field" value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} />
-                </label>
-              : <label className="block">
-                  <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
-                  <select className="field" value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select>
-                </label>}
-          </div>
-          <label className="block">
-            <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
-            <textarea className="field min-h-[88px]" value={createForm.description} onChange={e => setCreateForm({...createForm, description:e.target.value})} />
-          </label>
-          <div className="flex flex-wrap justify-end gap-2">
-            <button className="rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm" type="button" onClick={() => setShowCreate(false)}>Cancel</button>
-            <button className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'create'}>{busy === 'create' ? 'Creating…' : 'Create venue'}</button>
-          </div>
-        </form>}
+      <div className="thin-scroll overflow-x-auto">
+        <table className="data-table w-full min-w-[900px] border-collapse">
+          <thead className="bg-[#faf7f4]">
+            <tr className="border-b border-line">
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Venue name</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Type</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Status</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Active config</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Last updated</th>
+              <th className="w-12 px-5 py-2.5"><span className="sr-only">Open</span></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {venues.map(venue => {
+              const updated = venue.updated_at || venue.config?.created_at || venue.created_at
+              return <tr
+                key={venue.id}
+                className="data-row"
+                tabIndex={0}
+                onClick={() => openVenue(venue.id)}
+                onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openVenue(venue.id) } }}
+              >
+                <td className="px-5 py-2.5 align-middle">
+                  <div className="flex items-center gap-3">
+                    <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-canvas text-flexee-600 serif">{venueInitial(venue.venue_type)}</div>
+                    <span className="text-[15px] font-extrabold">{venue.name}</span>
+                  </div>
+                </td>
+                <td className="px-5 py-2.5 align-middle text-[14px] text-muted">{venueTypeLabel(venue.venue_type)}</td>
+                <td className="px-5 py-2.5 align-middle">
+                  {venue.active
+                    ? <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-0.5 text-[12px] font-extrabold text-green-700"><span className="status-dot !h-[7px] !w-[7px] bg-green-500"></span>Active</span>
+                    : <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-2.5 py-0.5 text-[12px] font-extrabold text-muted"><span className="status-dot !h-[7px] !w-[7px] bg-stone-400"></span>Inactive</span>}
+                </td>
+                <td className="px-5 py-2.5 align-middle">
+                  {venue.config?.version
+                    ? <span className="rounded-full bg-green-50 px-2.5 py-0.5 text-[12px] font-extrabold text-green-700">v{venue.config.version}</span>
+                    : <span className="text-[13px] font-semibold text-muted">No config</span>}
+                </td>
+                <td className="whitespace-nowrap px-5 py-2.5 align-middle text-[14px] text-muted">{updated ? formatDate(updated) : '—'}</td>
+                <td className="px-5 py-2.5 text-right align-middle text-[18px] text-[#b9a597]">›</td>
+              </tr>
+            })}
+            {!venues.length && <tr><td colSpan="6" className="px-5 py-8 text-center text-[14px] font-semibold text-muted">No venues are configured yet.</td></tr>}
+          </tbody>
+        </table>
+      </div>
+      <div className="border-t border-line px-5 py-2.5 text-[13px] font-medium text-muted">Click any row to open its Venue Agent.</div>
+    </div>
 
-        <div className="space-y-2">
-          {venues.map(venue => {
-            const active = selectedId === venue.id
-            const longName = String(venue.name || '').length > 26
-            return <button
-              type="button"
-              key={venue.id}
-              className={`venue-item flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left ${active ? 'active border-line' : 'border-transparent hover:bg-flexee-50'}`}
-              onClick={() => {
-                setSelectedId(venue.id)
-                loadVenue(venue.id).catch(err => setError(err.message))
-              }}
-            >
-              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-flexee-600 serif ${active ? 'bg-white shadow-sm' : 'bg-canvas'}`}>
-                {venueInitial(venue.venue_type)}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className={longName ? 'text-[14px] font-extrabold leading-snug' : 'text-[15px] font-extrabold'}>{venue.name}</div>
-                <div className={`${longName ? 'mt-1' : 'mt-0.5'} text-[13px] font-medium text-muted`}>{venueTypeLabel(venue.venue_type)} · {venue.active ? 'Active' : 'Inactive'}</div>
-              </div>
-              {venue.config?.version && <span className="rounded-full bg-green-50 px-2.5 py-1 text-[12px] font-extrabold text-green-700">v{venue.config.version}</span>}
-            </button>
-          })}
-          {!venues.length && <div className="rounded-2xl border border-dashed border-line p-5 text-center text-[14px] font-semibold text-muted">No venues are configured yet.</div>}
-        </div>
-      </aside>
-
-      <div className="space-y-5">
-        {error && <div className="admin-error venue-admin-message">{error}</div>}
-        {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
-
-        {!selectedVenue ? <div className="premium-card rounded-[28px] p-8 text-center">
-          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">No venue selected</div>
-          <h3 className="serif mt-2 text-[30px]">Create or select a venue to configure its editorial agent.</h3>
-        </div> : <>
-          <div className="premium-card rounded-[28px] bg-gradient-to-r from-white via-white to-flexee-50/65 p-6">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div>
-                <div className="text-[13px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Venue Agent</div>
-                <h3 className="serif mt-1 text-[41px] leading-none">{selectedVenue.name}</h3>
-                <p className="mt-3 max-w-3xl text-[15px] leading-7 text-muted">{selectedVenue.description || 'No description yet.'}</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <Pill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</Pill>
-                <Pill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</Pill>
-                {!canManageSelected && <Pill>Read only</Pill>}
-              </div>
+    {/* ---------------- Venue detail modal ---------------- */}
+    <AdminModal open={detailOpen} onClose={closeVenue} labelledBy="venue-modal-title">
+      {!detailReady ? <div className="p-10 text-center text-[15px] font-semibold text-muted">
+        {error ? <div className="admin-error venue-admin-message mx-auto max-w-xl">{error}</div> : 'Loading Venue Agent…'}
+      </div> : <>
+        <div className="sticky top-0 z-[5] border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Venue Agent · {venueTypeLabel(selectedVenue.venue_type)}</div>
+              <h3 id="venue-modal-title" className="serif mt-0.5 break-words text-[32px] leading-none">{selectedVenue.name}</h3>
+              <p className="mt-1.5 max-w-3xl text-[14px] leading-6 text-muted">{selectedVenue.description || 'No description yet.'}</p>
+            </div>
+            <div className="flex shrink-0 flex-wrap gap-2">
+              <Pill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</Pill>
+              <Pill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</Pill>
+              {!canManageSelected && <Pill>Read only</Pill>}
             </div>
           </div>
+        </div>
 
-          <div className="grid items-start gap-5 2xl:grid-cols-[.72fr_1.28fr] 2xl:grid-rows-[auto_auto_1fr]">
-            <form className="premium-card h-fit rounded-[28px] p-5 2xl:col-start-1 2xl:row-start-1" onSubmit={saveVenue}>
-              <div className="mb-5 flex items-center justify-between">
+        {(error || success) && <div className="space-y-2 px-6 pt-4">{messages}</div>}
+
+        <div className="grid items-start gap-4 p-6 xl:grid-cols-[.72fr_1.28fr]">
+          <div className="space-y-4">
+            <form className="rounded-[20px] border border-line bg-white p-4" onSubmit={saveVenue}>
+              <div className="mb-3 flex items-center justify-between gap-3">
                 <div>
-                  <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Identity</div>
-                  <h4 className="serif mt-1 text-[31px]">Venue metadata</h4>
+                  <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Identity</div>
+                  <h4 className="serif mt-0.5 text-[24px]">Venue metadata</h4>
                 </div>
-                {canManageSelected && <button className="rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
+                {canManageSelected && <button className="rounded-xl border border-line bg-white px-3.5 py-2 text-[13px] font-extrabold shadow-sm disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
               </div>
-
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <label className="block">
                   <span className="mb-1.5 block text-[14px] font-extrabold">Venue name</span>
                   <input className="field" value={venueForm?.name || ''} onChange={e => setVenueForm({...venueForm, name:e.target.value})} required />
@@ -557,7 +634,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
-                  <textarea className="field min-h-[105px]" value={venueForm?.description || ''} onChange={e => setVenueForm({...venueForm, description:e.target.value})} />
+                  <textarea className="field min-h-[90px]" value={venueForm?.description || ''} onChange={e => setVenueForm({...venueForm, description:e.target.value})} />
                 </label>
                 <label className="flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50/80 px-4 py-3">
                   <input type="checkbox" className="h-4 w-4 accent-[#c7662d]" checked={Boolean(venueForm?.active)} onChange={e => setVenueForm({...venueForm, active:e.target.checked})} />
@@ -566,50 +643,19 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               </div>
             </form>
 
-            <form className="premium-card rounded-[28px] p-5 2xl:col-start-2 2xl:row-span-3 2xl:row-start-1" onSubmit={createConfig}>
-              <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-                <div>
-                  <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Editorial intelligence</div>
-                  <h4 className="serif mt-1 text-[31px]">{activeConfig ? `Configuration v${activeConfig.version}` : 'No configuration yet'}</h4>
-                  <div className="mt-1 text-[14px] leading-6 text-muted">New saves create immutable versions while historical submissions remain pinned.</div>
-                </div>
-                {canManageSelected && <button className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
-              </div>
-
-              <div className="grid gap-4 lg:grid-cols-2">
-                <Field label="Aims & scope" help={configFieldHelp.aims_scope} full><textarea className="field min-h-[105px]" value={configForm.aims_scope} onChange={e => setConfigForm({...configForm, aims_scope:e.target.value})} placeholder="What this venue publishes and the boundaries of its subject matter." /></Field>
-                <Field label="Accepted article types" help={configFieldHelp.article_types}><textarea className="field min-h-[105px]" value={configForm.article_types} onChange={e => setConfigForm({...configForm, article_types:e.target.value})} placeholder="One per line. Example: Research article" /></Field>
-                <Field label="Accepted methods" help={configFieldHelp.accepted_methods}><textarea className="field min-h-[105px]" value={configForm.accepted_methods} onChange={e => setConfigForm({...configForm, accepted_methods:e.target.value})} placeholder="Leave blank if method-neutral." /></Field>
-                <Field label="Quality threshold" help={configFieldHelp.quality_threshold} full><textarea className="field min-h-[105px]" value={configForm.quality_threshold} onChange={e => setConfigForm({...configForm, quality_threshold:e.target.value})} /></Field>
-                <Field label="Reviewer criteria" help={configFieldHelp.reviewer_criteria}><textarea className="field min-h-[125px]" value={configForm.reviewer_criteria} onChange={e => setConfigForm({...configForm, reviewer_criteria:e.target.value})} placeholder="Expertise areas, one per line." /></Field>
-                <Field label="Required disclosures" help={configFieldHelp.disclosures}><textarea className="field min-h-[125px]" value={configForm.disclosures} onChange={e => setConfigForm({...configForm, disclosures:e.target.value})} placeholder="One per line." /></Field>
-                <Field label="Reporting standards" help={configFieldHelp.reporting_standards}><textarea className="field min-h-[125px]" value={configForm.reporting_standards} onChange={e => setConfigForm({...configForm, reporting_standards:e.target.value})} placeholder="One per line." /></Field>
-                <Field label="Desk-rejection guidance" help={configFieldHelp.desk_rejection_rules}><textarea className="field min-h-[125px]" value={configForm.desk_rejection_rules} onChange={e => setConfigForm({...configForm, desk_rejection_rules:e.target.value})} placeholder="Free-text guidance for the venue agent. One rule per line." /></Field>
-                <Field label="Deterministic desk-rejection rules (JSON)" help={configFieldHelp.structured_desk_rejection_rules} full><textarea className="field venue-admin-code min-h-[160px]" value={configForm.structured_desk_rejection_rules} onChange={e => setConfigForm({...configForm, structured_desk_rejection_rules:e.target.value})} placeholder="Supported fields: word_count, reference_count, required_sections, manuscript_type, disclosure." /></Field>
-                <Field label="Required submission items (JSON)" help={configFieldHelp.required_submission_items} full><textarea className="field venue-admin-code min-h-[160px]" value={configForm.required_submission_items} onChange={e => setConfigForm({...configForm, required_submission_items:e.target.value})} placeholder="Supported types: text, textarea, url, checkbox, file." /></Field>
-                <Field label="Content retention (days)" help={configFieldHelp.retention_days}><input className="field" type="number" min="1" max="3650" step="1" value={configForm.retention_days} onChange={e => setConfigForm({...configForm, retention_days:e.target.value})} placeholder="Optional. Example: 365" /></Field>
-                <Field label="Policies (JSON)" help={configFieldHelp.policies}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.policies} onChange={e => setConfigForm({...configForm, policies:e.target.value})} placeholder="Structured venue policies in JSON." /></Field>
-                <Field label="Current demand (JSON)" help={configFieldHelp.current_demand}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.current_demand} onChange={e => setConfigForm({...configForm, current_demand:e.target.value})} placeholder="Special issues, tracks, priorities, or topics." /></Field>
-                <Field label="Deadlines (JSON)" help={configFieldHelp.deadlines}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.deadlines} onChange={e => setConfigForm({...configForm, deadlines:e.target.value})} /></Field>
-                <Field label="Submission capacity (JSON)" help={configFieldHelp.submission_capacity}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.submission_capacity} onChange={e => setConfigForm({...configForm, submission_capacity:e.target.value})} /></Field>
-                <Field label="Configuration notes" help={configFieldHelp.config_notes}><textarea className="field min-h-[125px]" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
-              </div>
-            </form>
-
-            <div className="premium-card h-fit rounded-[28px] p-5 2xl:col-start-1 2xl:row-start-2">
+            <div className="rounded-[20px] border border-line bg-white p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
-                  <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editor feedback</div>
-                  <h4 className="serif mt-1 text-[30px]">Venue-specific learning queue</h4>
+                  <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Editor feedback</div>
+                  <h4 className="serif mt-0.5 text-[24px]">Venue-specific learning queue</h4>
                 </div>
-                {canManageSelected && selectedFeedbackIds.length > 0 && <button className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={createFeedbackDraft} disabled={busy === 'feedback-draft'}>{busy === 'feedback-draft' ? 'Creating draft…' : `Create draft from ${selectedFeedbackIds.length} selected`}</button>}
+                {canManageSelected && selectedFeedbackIds.length > 0 && <button className="shine rounded-xl bg-flexee-500 px-3.5 py-2 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={createFeedbackDraft} disabled={busy === 'feedback-draft'}>{busy === 'feedback-draft' ? 'Creating draft…' : `Create draft from ${selectedFeedbackIds.length} selected`}</button>}
               </div>
-
-              <div className="mt-4 space-y-3">
+              <div className="mt-3 space-y-2.5">
                 {feedback.length ? feedback.map(item => {
                   const selectable = item.draftable && !item.applied_to_config_version && canManageSelected
                   const selected = selectedFeedbackIds.includes(item.id)
-                  return <div key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+                  return <div key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-3.5">
                     <div className="flex flex-wrap items-center gap-2">
                       {selectable && <input
                         type="checkbox"
@@ -618,49 +664,140 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                         onChange={e => setSelectedFeedbackIds(current => e.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))}
                         aria-label={`Select ${item.assessment_field} feedback`}
                       />}
-                      <span className="text-[16px] font-extrabold">{venueTypeLabel(String(item.assessment_field || '').replaceAll('_', ' '))}</span>
-                      <span className={`rounded-full px-2.5 py-1 text-[13px] font-extrabold ${item.draftable ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-muted'}`}>{item.draftable ? 'Venue rule' : 'Assessment only'}</span>
-                      {item.applied_to_config_version && <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">Draft v{item.applied_to_config_version}</span>}
+                      <span className="text-[15px] font-extrabold">{venueTypeLabel(String(item.assessment_field || '').replaceAll('_', ' '))}</span>
+                      <span className={`rounded-full px-2.5 py-0.5 text-[12px] font-extrabold ${item.draftable ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-muted'}`}>{item.draftable ? 'Venue rule' : 'Assessment only'}</span>
+                      {item.applied_to_config_version && <span className="rounded-full bg-stone-100 px-2.5 py-0.5 text-[12px] font-extrabold text-muted">Draft v{item.applied_to_config_version}</span>}
                     </div>
-                    <p className="mt-2 text-[14px] leading-6 text-muted">{item.reason || 'No reason recorded.'}</p>
-                    <div className="mt-2 text-[13px] font-semibold text-[#8d8179]">{formatDate(item.created_at)}{item.venue_config_version ? ` · Config v${item.venue_config_version}` : ''}</div>
+                    <p className="mt-1.5 text-[14px] leading-6 text-muted">{item.reason || 'No reason recorded.'}</p>
+                    <div className="mt-1 text-[12px] font-semibold text-[#8d8179]">{formatDate(item.created_at)}{item.venue_config_version ? ` · Config v${item.venue_config_version}` : ''}</div>
                   </div>
-                }) : <div className="rounded-2xl border border-dashed border-line p-5 text-center text-[14px] font-semibold text-muted">No editor feedback has been recorded for this venue yet.</div>}
+                }) : <div className="rounded-2xl border border-dashed border-line p-4 text-center text-[14px] font-semibold text-muted">No editor feedback has been recorded for this venue yet.</div>}
               </div>
             </div>
 
-            <div className="premium-card h-fit rounded-[28px] p-5 2xl:col-start-1 2xl:row-start-3">
-              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Audit trail</div>
-              <h4 className="serif mt-1 text-[30px]">Configuration history</h4>
-
-              <div className="mt-4 space-y-3">
-                {configs.map(config => <div key={config.id} className={`rounded-2xl border p-4 ${config.active ? 'border-green-100 bg-green-50/60' : 'border-line bg-[#fcfaf8]'}`}>
+            <div className="rounded-[20px] border border-line bg-white p-4">
+              <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Audit trail</div>
+              <h4 className="serif mt-0.5 text-[24px]">Configuration history</h4>
+              <div className="mt-3 space-y-2.5">
+                {configs.map(config => <div key={config.id} className={`rounded-2xl border p-3.5 ${config.active ? 'border-green-100 bg-green-50/60' : 'border-line bg-[#fcfaf8]'}`}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
-                      <div className={`grid h-10 w-10 place-items-center rounded-xl text-[13px] font-extrabold ${config.active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-muted'}`}>
-                        v{config.version}
-                      </div>
+                      <div className={`grid h-9 w-9 place-items-center rounded-xl text-[13px] font-extrabold ${config.active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-muted'}`}>v{config.version}</div>
                       <div>
                         <div className="flex items-center gap-2">
                           <span className="text-[15px] font-extrabold">Version {config.version}</span>
-                          {config.active && <span className="rounded-full bg-green-100 px-2 py-1 text-[12px] font-extrabold text-green-700">Active</span>}
+                          {config.active && <span className="rounded-full bg-green-100 px-2 py-0.5 text-[12px] font-extrabold text-green-700">Active</span>}
                         </div>
-                        <div className="mt-1 text-[13px] font-semibold text-muted">{formatDate(config.created_at)} · {formatTime(config.created_at)}</div>
+                        <div className="mt-0.5 text-[12px] font-semibold text-muted">{formatDate(config.created_at)} · {formatTime(config.created_at)}</div>
                       </div>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold" type="button" onClick={() => setConfigForm(configToForm(config))}>Load into editor</button>
-                      {!config.active && canManageSelected && <button className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-60" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
+                      <button className="rounded-xl border border-line bg-white px-3.5 py-1.5 text-[13px] font-extrabold" type="button" onClick={() => setConfigForm(configToForm(config))}>Load into editor</button>
+                      {!config.active && canManageSelected && <button className="rounded-xl border border-line bg-white px-3.5 py-1.5 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-60" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
                     </div>
                   </div>
-                  <p className="mt-4 text-[14px] leading-6 text-muted">{config.aims_scope || 'No aims and scope recorded.'}</p>
+                  <p className="mt-2.5 text-[14px] leading-6 text-muted">{config.aims_scope || 'No aims and scope recorded.'}</p>
                 </div>)}
-                {!configs.length && <div className="rounded-2xl border border-dashed border-line p-5 text-center text-[14px] font-semibold text-muted">No Venue Agent configuration has been created yet.</div>}
+                {!configs.length && <div className="rounded-2xl border border-dashed border-line p-4 text-center text-[14px] font-semibold text-muted">No Venue Agent configuration has been created yet.</div>}
               </div>
             </div>
           </div>
-        </>}
+
+          <form className="rounded-[20px] border border-line bg-white p-4" onSubmit={createConfig}>
+            <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Editorial intelligence</div>
+                <h4 className="serif mt-0.5 text-[24px]">{activeConfig ? `Configuration v${activeConfig.version}` : 'No configuration yet'}</h4>
+                <div className="mt-0.5 text-[13px] leading-6 text-muted">New saves create immutable versions while historical submissions remain pinned.</div>
+              </div>
+              {canManageSelected && <button className="shine rounded-xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
+            </div>
+            <ConfigFields form={configForm} onChange={setConfigForm} />
+          </form>
+        </div>
+      </>}
+    </AdminModal>
+
+    {/* ---------------- Create venue modal (blank) ---------------- */}
+    <AdminModal
+      open={showCreate}
+      onClose={closeCreate}
+      labelledBy="create-venue-title"
+      footer={<div className="flex flex-wrap items-center justify-end gap-2 border-t border-line bg-[#fffdfb] px-6 py-3">
+        <button className="rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm" type="button" onClick={closeCreate} disabled={busy === 'create'}>Cancel</button>
+        <button className="shine rounded-xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="submit" form="create-venue-form" disabled={busy === 'create'}>{busy === 'create' ? 'Creating…' : 'Create venue'}</button>
+      </div>}
+    >
+      <div className="sticky top-0 z-[5] border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">
+        <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">New venue agent</div>
+        <h3 id="create-venue-title" className="serif mt-0.5 text-[32px] leading-none">Create New Venue</h3>
+        <p className="mt-1.5 max-w-3xl text-[14px] leading-6 text-muted">Set the venue identity and, optionally, its first Venue Agent configuration. Nothing is saved until you click Create venue.</p>
       </div>
-    </div>
+
+      {error && <div className="px-6 pt-4"><div className="admin-error venue-admin-message">{error}</div></div>}
+
+      <form id="create-venue-form" className="grid items-start gap-4 p-6 xl:grid-cols-[.72fr_1.28fr]" onSubmit={createVenue}>
+        <div className="rounded-[20px] border border-line bg-white p-4">
+          <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Step 1 · Identity</div>
+          <h4 className="serif mt-0.5 text-[24px]">Venue metadata</h4>
+          <div className="mt-3 space-y-3">
+            <label className="block">
+              <span className="mb-1.5 block text-[14px] font-extrabold">Venue name</span>
+              <input className="field" autoFocus value={createForm.name} onChange={e => setCreateForm({...createForm, name:e.target.value})} placeholder="e.g. Journal of Applied AI Operations" required />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-[14px] font-extrabold">Venue type</span>
+              <select className="field" value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
+            </label>
+            {platformSuperuser
+              ? <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
+                  <input className="field" value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} placeholder={emptyVenue.organization_name} />
+                </label>
+              : <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
+                  <select className="field" value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select>
+                </label>}
+            <label className="block">
+              <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
+              <textarea className="field min-h-[90px]" value={createForm.description} onChange={e => setCreateForm({...createForm, description:e.target.value})} placeholder="What this venue publishes, in one or two sentences." />
+            </label>
+            <label className="flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50/80 px-4 py-3">
+              <input type="checkbox" className="h-4 w-4 accent-[#c7662d]" checked={Boolean(createForm.active)} onChange={e => setCreateForm({...createForm, active:e.target.checked})} />
+              <span className="text-[14px] font-bold text-green-800">Active and visible to authors for matching</span>
+            </label>
+          </div>
+        </div>
+
+        <div className="rounded-[20px] border border-line bg-white p-4">
+          <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Step 2 · Editorial intelligence</div>
+          <h4 className="serif mt-0.5 text-[24px]">First configuration</h4>
+          <div className="mb-4 mt-0.5 text-[13px] leading-6 text-muted">Optional. If you fill it in, it is saved as version 1 and activated right after the venue is created.</div>
+          <ConfigFields form={createConfigForm} onChange={setCreateConfigForm} />
+        </div>
+      </form>
+    </AdminModal>
+  </div>
+}
+
+function ConfigFields({ form, onChange }) {
+  const set = (key, value) => onChange({ ...form, [key]: value })
+  return <div className="grid gap-4 lg:grid-cols-2">
+    <Field label="Aims & scope" help={configFieldHelp.aims_scope} full><textarea className="field min-h-[90px]" value={form.aims_scope} onChange={e => set('aims_scope', e.target.value)} placeholder="What this venue publishes and the boundaries of its subject matter." /></Field>
+    <Field label="Accepted article types" help={configFieldHelp.article_types}><textarea className="field min-h-[90px]" value={form.article_types} onChange={e => set('article_types', e.target.value)} placeholder="One per line. Example: Research article" /></Field>
+    <Field label="Accepted methods" help={configFieldHelp.accepted_methods}><textarea className="field min-h-[90px]" value={form.accepted_methods} onChange={e => set('accepted_methods', e.target.value)} placeholder="Leave blank if method-neutral." /></Field>
+    <Field label="Quality threshold" help={configFieldHelp.quality_threshold} full><textarea className="field min-h-[90px]" value={form.quality_threshold} onChange={e => set('quality_threshold', e.target.value)} placeholder="Minimum quality expectations before an editor considers review." /></Field>
+    <Field label="Reviewer criteria" help={configFieldHelp.reviewer_criteria}><textarea className="field min-h-[110px]" value={form.reviewer_criteria} onChange={e => set('reviewer_criteria', e.target.value)} placeholder="Expertise areas, one per line." /></Field>
+    <Field label="Required disclosures" help={configFieldHelp.disclosures}><textarea className="field min-h-[110px]" value={form.disclosures} onChange={e => set('disclosures', e.target.value)} placeholder="One per line." /></Field>
+    <Field label="Reporting standards" help={configFieldHelp.reporting_standards}><textarea className="field min-h-[110px]" value={form.reporting_standards} onChange={e => set('reporting_standards', e.target.value)} placeholder="One per line." /></Field>
+    <Field label="Desk-rejection guidance" help={configFieldHelp.desk_rejection_rules}><textarea className="field min-h-[110px]" value={form.desk_rejection_rules} onChange={e => set('desk_rejection_rules', e.target.value)} placeholder="Free-text guidance for the venue agent. One rule per line." /></Field>
+    <Field label="Deterministic desk-rejection rules (JSON)" help={configFieldHelp.structured_desk_rejection_rules} full><textarea className="field venue-admin-code min-h-[140px]" value={form.structured_desk_rejection_rules} onChange={e => set('structured_desk_rejection_rules', e.target.value)} placeholder="Supported fields: word_count, reference_count, required_sections, manuscript_type, disclosure." /></Field>
+    <Field label="Required submission items (JSON)" help={configFieldHelp.required_submission_items} full><textarea className="field venue-admin-code min-h-[140px]" value={form.required_submission_items} onChange={e => set('required_submission_items', e.target.value)} placeholder="Supported types: text, textarea, url, checkbox, file." /></Field>
+    <Field label="Content retention (days)" help={configFieldHelp.retention_days}><input className="field" type="number" min="1" max="3650" step="1" value={form.retention_days} onChange={e => set('retention_days', e.target.value)} placeholder="Optional. Example: 365" /></Field>
+    <Field label="Policies (JSON)" help={configFieldHelp.policies}><textarea className="field venue-admin-code min-h-[110px]" value={form.policies} onChange={e => set('policies', e.target.value)} placeholder="Structured venue policies in JSON." /></Field>
+    <Field label="Current demand (JSON)" help={configFieldHelp.current_demand}><textarea className="field venue-admin-code min-h-[110px]" value={form.current_demand} onChange={e => set('current_demand', e.target.value)} placeholder="Special issues, tracks, priorities, or topics." /></Field>
+    <Field label="Deadlines (JSON)" help={configFieldHelp.deadlines}><textarea className="field venue-admin-code min-h-[110px]" value={form.deadlines} onChange={e => set('deadlines', e.target.value)} /></Field>
+    <Field label="Submission capacity (JSON)" help={configFieldHelp.submission_capacity}><textarea className="field venue-admin-code min-h-[110px]" value={form.submission_capacity} onChange={e => set('submission_capacity', e.target.value)} /></Field>
+    <Field label="Configuration notes" help={configFieldHelp.config_notes}><textarea className="field min-h-[110px]" value={form.config_notes} onChange={e => set('config_notes', e.target.value)} /></Field>
   </div>
 }

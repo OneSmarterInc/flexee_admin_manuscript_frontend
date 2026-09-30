@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api, apiBlob } from '../../api.js'
+import AdminModal, { KvTable } from './AdminModal.jsx'
 
 const statusLabels = {
   submitted: 'Submitted',
@@ -195,6 +196,13 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
     }
   }
 
+  function closeSubmission() {
+    setSelectedId('')
+    setDetail(null)
+    setError('')
+    setSuccess('')
+  }
+
   async function refreshDetail() {
     if (!selectedId) return
     const payload = await api(`/api/admin/venue-submissions/${selectedId}/`)
@@ -340,12 +348,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   }
 
   return <div>
-    <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
-      Venue editor workspace
-    </div>
-    <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <h2 className="serif text-[32px] leading-none md:text-[36px]">
-        Human editorial review
+        Editorial review
       </h2>
 
       <div className="flex shrink-0 flex-wrap gap-2">
@@ -422,76 +427,86 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
         Apply
       </button>
     </div>
-    <div className="grid items-start gap-4 2xl:grid-cols-[410px_minmax(0,1fr)]">
-      <aside className="sidebar-content-card premium-card h-fit self-start overflow-hidden rounded-[28px]">
-        <div className="flex items-center justify-between border-b border-line px-5 py-5">
-          <div>
-            <h3 className="serif text-[30px] leading-none">Submission queue</h3>
-            <div className="mt-1.5 text-[14px] font-medium text-muted">Prioritized editorial workload</div>
-          </div>
-          <div className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-1.5 text-[13px] font-extrabold text-flexee-700">
-            {data.items?.length || 0} record{data.items?.length === 1 ? '' : 's'}
-          </div>
+    <div className="premium-card overflow-hidden rounded-[22px]">
+      <div className="flex items-center justify-between border-b border-line px-5 py-3">
+        <div>
+          <div className="text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Prioritized editorial workload</div>
+          <h3 className="serif mt-0.5 text-[24px] leading-none">Submission queue</h3>
         </div>
-
-        <div className="thin-scroll max-h-[max(360px,calc(100vh_-_360px))] overflow-y-auto">
-          {loading ? <div className="p-5 text-[14px] font-semibold text-muted">Loading editorial queue…</div> :
-            data.items?.length ? data.items.map(item => {
-              const submitted = item.submitted_at || item.created_at
-              return <button
-                type="button"
-                key={item.id}
-                className={`queue-row w-full border-b border-line px-5 py-5 text-left ${selectedId === item.id ? 'active' : ''}`}
-                onClick={() => openSubmission(item.id)}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <span className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">{item.venue?.name}</span>
-                  <QueuePill value={item.status} />
-                </div>
-                <div className="mt-2 text-[17px] font-extrabold">{item.manuscript?.title}</div>
-                <div className="mt-1 text-[14px] leading-5 text-muted">
-                  {item.manuscript?.author_name}
-                </div>
-                <div className="mt-3 flex items-center justify-between text-[13px] font-semibold text-[#91857d]">
-                  <span>{formatDate(submitted)}</span>
-                  <span>{formatTime(submitted)}</span>
-                </div>
-              </button>
-            }) : <div className="p-5">
-              <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Queue clear</div>
-              <div className="mt-2 text-[16px] font-extrabold">No venue submissions match these filters.</div>
-            </div>
-          }
+        <div className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-1 text-[12px] font-extrabold text-flexee-700">
+          {data.items?.length || 0} record{data.items?.length === 1 ? '' : 's'}
         </div>
-      </aside>
+      </div>
 
-      <article className="premium-card overflow-hidden rounded-[28px]">
-        {!selectedId ? <div className="p-8 text-center">
-          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Select a submission</div>
-          <h3 className="serif mt-2 text-[30px]">The editorial brief, evidence, and decision tools will appear here.</h3>
-        </div> : detailLoading || !detail ? <div className="p-8 text-center text-[15px] font-semibold text-muted">Loading editorial packet…</div> : <>
-          <div className="border-b border-line bg-gradient-to-r from-white via-white to-flexee-50/75 px-6 py-6">
-            <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
-              <div>
-                <div className="text-[13px] font-extrabold uppercase tracking-[.09em] text-flexee-600">
+      <div className="thin-scroll overflow-x-auto">
+        <table className="data-table w-full min-w-[1000px] border-collapse">
+          <thead className="bg-[#faf7f4]">
+            <tr className="border-b border-line">
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Venue</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Manuscript title</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Author</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Submitted</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Editorial status</th>
+              <th className="w-12 px-5 py-2.5"><span className="sr-only">Open</span></th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-line">
+            {loading ? <tr><td colSpan="6" className="px-5 py-8 text-center text-[14px] font-semibold text-muted">Loading editorial queue…</td></tr> :
+              data.items?.length ? data.items.map(item => {
+                const submitted = item.submitted_at || item.created_at
+                return <tr
+                  key={item.id}
+                  className="data-row"
+                  tabIndex={0}
+                  onClick={() => openSubmission(item.id)}
+                  onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openSubmission(item.id) } }}
+                >
+                  <td className="px-5 py-2.5 align-middle text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">{item.venue?.name}</td>
+                  <td className="px-5 py-2.5 align-middle text-[15px] font-extrabold">{item.manuscript?.title}</td>
+                  <td className="px-5 py-2.5 align-middle text-[14px] text-muted">{item.manuscript?.author_name}</td>
+                  <td className="whitespace-nowrap px-5 py-2.5 align-middle text-[14px]">
+                    <span className="font-bold">{formatDate(submitted)}</span> <span className="text-muted">· {formatTime(submitted)}</span>
+                  </td>
+                  <td className="px-5 py-2.5 align-middle"><QueuePill value={item.status} /></td>
+                  <td className="px-5 py-2.5 text-right align-middle text-[18px] text-[#b9a597]">›</td>
+                </tr>
+              }) : <tr><td colSpan="6" className="px-5 py-8 text-center">
+                <div className="text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Queue clear</div>
+                <div className="mt-1 text-[15px] font-extrabold">No venue submissions match these filters.</div>
+              </td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div className="border-t border-line px-5 py-2.5 text-[13px] font-medium text-muted">Click any row to open the full submission.</div>
+    </div>
+
+    <AdminModal open={Boolean(selectedId)} onClose={closeSubmission} labelledBy="submission-modal-title">
+        {detailLoading || !detail ? <div className="p-10 text-center text-[15px] font-semibold text-muted">
+          {error ? <div className="admin-error venue-admin-message mx-auto max-w-xl">{error}</div> : 'Loading editorial packet…'}
+        </div> : <>
+          <div className="sticky top-0 z-[5] border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">
+            <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0">
+                <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">
                   {detail.venue?.name} · Configuration v{detail.venue_config_version || '—'}
                 </div>
-                <h3 className="serif mt-1 text-[40px] leading-none">{detail.manuscript?.title}</h3>
-                <div className="mt-3 flex flex-wrap items-center gap-2 text-[14px] font-medium text-muted">
+                <h3 id="submission-modal-title" className="serif mt-0.5 break-words text-[32px] leading-none">{detail.manuscript?.title}</h3>
+                <div className="mt-1.5 flex flex-wrap items-center gap-2 text-[13px] font-medium text-muted">
                   <span>{detail.manuscript?.author_name}</span>
                   <span className="text-[#cbb8ad]">•</span>
                   <span>{pretty(detail.manuscript?.manuscript_type)}</span>
-                  {detail.manuscript?.author_email && <>
+                  {(detail.submitted_at || detail.created_at) && <>
                     <span className="text-[#cbb8ad]">•</span>
-                    <span>{detail.manuscript.author_email}</span>
+                    <span>Submitted {formatDate(detail.submitted_at || detail.created_at)}, {formatTime(detail.submitted_at || detail.created_at)}</span>
                   </>}
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
+              <div className="flex shrink-0 flex-wrap items-center gap-2">
                 <StatusPill value={detail.status} />
                 <button
-                  className="rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-xl border border-line bg-white px-3.5 py-2 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
                   type="button"
                   onClick={downloadManuscript}
                   disabled={busy === 'download' || Boolean(detail.retention_purged_at)}
@@ -499,7 +514,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                   {detail.retention_purged_at ? 'Manuscript expired' : busy === 'download' ? 'Downloading…' : 'Download manuscript'}
                 </button>
                 {canEditSelected && ['submitted', 'revision_requested'].includes(detail.status) && <button
-                  className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="shine rounded-xl bg-flexee-500 px-3.5 py-2 text-[13px] font-extrabold text-white shadow-orange hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
                   type="button"
                   onClick={startReview}
                   disabled={busy === 'review'}
@@ -510,36 +525,32 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             </div>
           </div>
 
-          {detail.retention_purged_at && <div className="mx-6 mt-5 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-[13px] font-bold text-green-700">
+          {error && <div className="admin-error venue-admin-message mx-6 mt-4">{error}</div>}
+          {success && <div className="venue-admin-success venue-admin-message mx-6 mt-4">{success}</div>}
+
+          {detail.retention_purged_at && <div className="mx-6 mt-4 rounded-2xl border border-green-200 bg-green-50 px-4 py-3 text-[13px] font-bold text-green-700">
             Venue-retained manuscript content expired on {new Date(detail.retention_purged_at).toLocaleString()}. Editorial status and human decision metadata remain available.
           </div>}
-          {!detail.retention_purged_at && detail.retention_expires_at && <div className="mx-6 mt-5 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[13px] font-semibold text-muted">
+          {!detail.retention_purged_at && detail.retention_expires_at && <div className="mx-6 mt-4 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[13px] font-semibold text-muted">
             Retention expiry: {new Date(detail.retention_expires_at).toLocaleString()}
           </div>}
 
-          <div className="grid gap-3 px-6 py-5 sm:grid-cols-2 xl:grid-cols-4">
-            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
-              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Venue config</div>
-              <div className="mt-1.5 text-[16px] font-extrabold">{detail.venue_config_version ? `v${detail.venue_config_version}` : '—'}</div>
-            </div>
-            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
-              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Evidence items</div>
-              <div className="mt-1.5 text-[16px] font-extrabold">{detail.evidence?.length || 0}</div>
-            </div>
-            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
-              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Editorial brief</div>
-              <div className="mt-1.5 text-[16px] font-extrabold">{detail.editorial_brief && Object.keys(detail.editorial_brief).length ? 'Prepared' : 'Pending'}</div>
-            </div>
-            <div className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
-              <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-muted">Coverage</div>
-              <div className="mt-1.5 flex items-center gap-2 text-[16px] font-extrabold">
-                {coveragePercent}%
-                <span className={`status-dot ${coveragePercent >= 100 ? 'bg-green-500' : 'bg-amber-500'}`}></span>
-              </div>
-            </div>
+          <div className="grid gap-3 px-6 pt-4 lg:grid-cols-2">
+            <KvTable title="Manuscript" rows={[
+              ['Author', detail.manuscript?.author_name || '—'],
+              ['Email', <span className="break-all">{detail.manuscript?.author_email || '—'}</span>],
+              ['Co-authors', detail.manuscript?.coauthors || '—'],
+              ['File', detail.retention_purged_at ? 'Expired under retention policy' : detail.manuscript?.manuscript_filename || '—'],
+            ]} />
+            <KvTable title="Review packet" rows={[
+              ['Venue config', detail.venue_config_version ? `v${detail.venue_config_version}` : '—'],
+              ['Evidence items', detail.evidence?.length || 0],
+              ['Editorial brief', detail.editorial_brief && Object.keys(detail.editorial_brief).length ? 'Prepared' : 'Pending'],
+              ['Coverage', <span className="inline-flex items-center gap-2">{coveragePercent}% <span className={`status-dot ${coveragePercent >= 100 ? 'bg-green-500' : 'bg-amber-500'}`}></span></span>],
+            ]} />
           </div>
 
-          <div className="px-6">
+          <div className="px-6 pt-2">
             <div className="flex gap-1 overflow-x-auto border-b border-line">
               {[
                 ['brief','Editorial brief'],
@@ -550,44 +561,24 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               ].map(([value,label]) => <button
                 type="button"
                 key={value}
-                className={`workspace-tab whitespace-nowrap px-4 py-3.5 text-[14px] font-extrabold ${detailTab === value ? 'active' : 'text-muted'}`}
+                className={`workspace-tab whitespace-nowrap px-3.5 py-2.5 text-[14px] font-extrabold ${detailTab === value ? 'active' : 'text-muted'}`}
                 onClick={() => setDetailTab(value)}
               >{label}</button>)}
             </div>
           </div>
 
-          <div className="p-6">
-            {detailTab === 'brief' && <div className="space-y-5">
-              <div className="rounded-[22px] border border-line bg-[#fffdfb] p-5">
-                <div className="mb-4 text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Manuscript</div>
-                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                  <div className="rounded-2xl bg-canvas p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Author</div>
-                    <div className="mt-1.5 text-[14px] font-extrabold">{detail.manuscript?.author_name}</div>
-                  </div>
-                  <div className="rounded-2xl bg-canvas p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Email</div>
-                    <div className="mt-1.5 break-all text-[14px] font-extrabold">{detail.manuscript?.author_email || '—'}</div>
-                  </div>
-                  <div className="rounded-2xl bg-canvas p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Co-authors</div>
-                    <div className="mt-1.5 text-[14px] font-extrabold">{detail.manuscript?.coauthors || '—'}</div>
-                  </div>
-                  <div className="rounded-2xl bg-canvas p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">File</div>
-                    <div className="mt-1.5 text-[14px] font-extrabold">{detail.retention_purged_at ? 'Expired under retention policy' : detail.manuscript?.manuscript_filename || '—'}</div>
-                  </div>
-                </div>
-
-                {detail.manuscript?.abstract && <div className="mt-5">
-                  <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Abstract</div>
-                  <p className="mt-2 text-[16px] leading-7">{detail.manuscript.abstract}</p>
+          <div className="px-6 py-4">
+            {detailTab === 'brief' && <div className="space-y-4">
+              {(detail.manuscript?.abstract || detail.manuscript?.disclosure) && <div>
+                {detail.manuscript?.abstract && <div>
+                  <div className="text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Abstract</div>
+                  <p className="mt-1 text-[15px] leading-7">{detail.manuscript.abstract}</p>
                 </div>}
-                {detail.manuscript?.disclosure && <div className="mt-4">
-                  <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">AI-use disclosure</div>
-                  <p className="mt-2 text-[16px] leading-7">{detail.manuscript.disclosure}</p>
+                {detail.manuscript?.disclosure && <div className={detail.manuscript?.abstract ? 'mt-3' : ''}>
+                  <div className="text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">AI-use disclosure</div>
+                  <p className="mt-1 text-[15px] leading-7">{detail.manuscript.disclosure}</p>
                 </div>}
-              </div>
+              </div>}
 
               {detail.requirements?.configured && <div className="rounded-[22px] border border-line bg-[#fffdfb] p-5">
                 <div className="mb-4 text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Venue submission requirements</div>
@@ -605,53 +596,34 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                 </div>
               </div>}
 
-              <div className="rounded-[24px] border border-flexee-100 bg-gradient-to-br from-[#fff9f4] via-white to-white p-6">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+              <div className="rounded-2xl border border-flexee-100 bg-gradient-to-br from-[#fff9f4] via-white to-white p-4">
+                <div className="flex flex-col gap-2 xl:flex-row xl:items-start xl:justify-between">
                   <div>
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">AI-prepared editorial brief</div>
-                    <h4 className="serif mt-1 text-[30px] leading-tight">{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h4>
-                    <p className="mt-2 max-w-5xl text-[15px] leading-7 text-muted">
+                    <div className="text-[12px] font-extrabold uppercase tracking-[.1em] text-flexee-600">AI-prepared editorial brief</div>
+                    <h4 className="serif mt-0.5 text-[24px] leading-tight">{detail.editorial_brief?.editor_summary || 'No editorial summary is available.'}</h4>
+                    <p className="mt-1 max-w-5xl text-[13px] leading-6 text-muted">
                       {detail.editorial_brief?.decision_authority || 'This brief is advisory. The system never makes the final editorial decision. Acceptance, revision and rejection remain human decisions.'}
                     </p>
                   </div>
-                  {coveragePercent < 100 && <span className="rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-[13px] font-extrabold text-amber-700">Limited analysis</span>}
+                  {coveragePercent < 100 && <span className="shrink-0 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-[12px] font-extrabold text-amber-700">Limited analysis</span>}
                 </div>
 
-                <div className="mt-5 grid gap-3 xl:grid-cols-2">
-                  <div className="rounded-2xl border border-line bg-white p-4">
-                    <div className="mb-2 flex items-center justify-between text-[13px] font-extrabold">
-                      <span className="uppercase tracking-[.06em] text-muted">Analysis coverage</span>
-                      <span>{coverage.chunks_analyzed || 0} / {coverage.chunks_total || 0} chunks</span>
-                    </div>
-                    <div className="h-2 overflow-hidden rounded-full bg-stone-100">
-                      <div className="h-full rounded-full bg-flexee-500" style={{ width: `${Math.max(0, Math.min(100, coveragePercent))}%` }}></div>
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl border border-line bg-white p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">Outlet fit</div>
-                    <div className="mt-1.5 text-[15px] font-semibold">{briefValue(detail.editorial_brief?.outlet_fit)}</div>
-                  </div>
-
-                  <div className="rounded-2xl border border-line bg-white p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">Contribution</div>
-                    <div className="mt-1.5 text-[15px] font-semibold">{briefValue(detail.editorial_brief?.contribution)}</div>
-                  </div>
-
-                  <div className="rounded-2xl border border-line bg-white p-4">
-                    <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-flexee-600">Methods</div>
-                    <div className="mt-1.5 text-[15px] font-semibold">{briefValue(detail.editorial_brief?.methods)}</div>
-                  </div>
+                <div className="mt-3">
+                  <KvTable title="Assessment" rows={[
+                    ['Analysis coverage', `${coverage.chunks_analyzed || 0} / ${coverage.chunks_total || 0} chunks · ${coveragePercent}%`],
+                    ['Outlet fit', briefValue(detail.editorial_brief?.outlet_fit)],
+                    ['Contribution', briefValue(detail.editorial_brief?.contribution)],
+                    ['Methods', briefValue(detail.editorial_brief?.methods)],
+                    ...(detail.editorial_brief?.reviewer_expertise?.length > 0 ? [[
+                      'Reviewer expertise',
+                      <span className="flex flex-wrap gap-1.5">
+                        {detail.editorial_brief.reviewer_expertise.map(item => <span key={item} className="rounded-full border border-flexee-100 bg-flexee-50 px-2.5 py-0.5 text-[12px] font-bold text-flexee-800">{item}</span>)}
+                      </span>,
+                    ]] : []),
+                  ]} />
                 </div>
 
-                {detail.editorial_brief?.reviewer_expertise?.length > 0 && <div className="mt-5">
-                  <div className="mb-2 text-[13px] font-extrabold uppercase tracking-[.05em] text-muted">Suggested reviewer expertise</div>
-                  <div className="flex flex-wrap gap-2">
-                    {detail.editorial_brief.reviewer_expertise.map(item => <span key={item} className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-2 text-[13px] font-bold text-flexee-800">{item}</span>)}
-                  </div>
-                </div>}
-
-                {detail.editorial_brief?.unresolved_risks?.length > 0 && <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+                {detail.editorial_brief?.unresolved_risks?.length > 0 && <div className="mt-3 rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
                   <div className="text-[13px] font-extrabold uppercase tracking-[.05em] text-amber-700">Unresolved risks</div>
                   <ul className="mt-2 list-disc space-y-1 pl-5 text-[14px] leading-6 text-amber-900">
                     {detail.editorial_brief.unresolved_risks.map((item,index) => <li key={index}>{typeof item === 'string' ? item : item.risk || JSON.stringify(item)}</li>)}
@@ -685,20 +657,11 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               <p className="mx-auto mt-2 max-w-lg text-[15px] leading-7 text-muted">This submission currently contains deterministic review output only.</p>
             </div>)}
 
-            {detailTab === 'rules' && <div className="grid gap-4 lg:grid-cols-2">
-              <div className="rounded-[22px] border border-line bg-white p-5">
-                <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Accepted article types</div>
-                <div className="mt-2 text-[16px] font-extrabold">{detail.venue_config?.article_types?.join(', ') || '—'}</div>
-              </div>
-              <div className="rounded-[22px] border border-line bg-white p-5">
-                <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Quality threshold</div>
-                <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config?.quality_threshold || '—'}</div>
-              </div>
-              {detail.venue_config?.aims_scope && <div className="rounded-[22px] border border-line bg-white p-5 lg:col-span-2">
-                <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Aims & scope</div>
-                <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config.aims_scope}</div>
-              </div>}
-            </div>}
+            {detailTab === 'rules' && <KvTable title="Venue rules" rows={[
+              ['Accepted article types', detail.venue_config?.article_types?.join(', ') || '—'],
+              ['Quality threshold', detail.venue_config?.quality_threshold || '—'],
+              ...(detail.venue_config?.aims_scope ? [['Aims & scope', detail.venue_config.aims_scope]] : []),
+            ]} />}
 
             {detailTab === 'feedback' && <div className="space-y-4">
               <div className="rounded-[22px] border border-line bg-white p-5">
@@ -777,7 +740,6 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             </div>}
           </div>
         </>}
-      </article>
-    </div>
+    </AdminModal>
   </div>
 }
