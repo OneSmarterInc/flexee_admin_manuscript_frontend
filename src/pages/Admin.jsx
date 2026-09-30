@@ -19,7 +19,7 @@ function StatusPill({ value }) { return <span className={`admin-badge ${value ||
 
 const viewLayouts = {
   smtp: { section: 'px-4 py-5 md:px-7', inner: 'mx-auto max-w-[1500px]' },
-  default: { section: 'px-4 py-6 md:px-7 md:py-8', inner: 'mx-auto max-w-[1750px]' },
+  default: { section: 'px-4 py-4 md:px-7 md:py-5', inner: 'mx-auto max-w-[1750px]' },
 }
 
 function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = 'admin', view = 'default', mainRef = null }) {
@@ -749,14 +749,6 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
           </button>
         </>}
 
-        <div className="mt-6 rounded-[22px] border border-flexee-100 bg-gradient-to-br from-flexee-50 to-white p-4">
-          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Editorial system</div>
-          <div className="mt-3 flex items-center gap-2 text-[14px] font-extrabold">
-            <span className="status-dot bg-green-500"></span>
-            API & queue healthy
-          </div>
-          <div className="mt-2 text-[13px] leading-5 text-muted">Production services and editorial queues are available.</div>
-        </div>
       </div>
 
       <div className="border-t border-line p-4">

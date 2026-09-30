@@ -340,25 +340,20 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
   }
 
   return <div>
-    <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
-      <div>
-        <div className="mb-1 text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
-          Venue editor workspace
-        </div>
-        <h2 className="serif text-[43px] leading-[.98] md:text-[54px]">
-          Human editorial review
-        </h2>
-        <p className="mt-3 max-w-[880px] text-[16px] leading-7 text-muted">
-          Review manuscript context, venue-specific evidence and AI-prepared editorial intelligence before recording a final human decision.
-        </p>
-      </div>
+    <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
+      Venue editor workspace
+    </div>
+    <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <h2 className="serif text-[32px] leading-none md:text-[36px]">
+        Human editorial review
+      </h2>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex shrink-0 flex-wrap gap-2">
         <button
           type="button"
           onClick={exportQueue}
           disabled={!data.items?.length}
-          className="rounded-2xl border border-line bg-white/90 px-5 py-3 text-[14px] font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-xl border border-line bg-white/90 px-4 py-2.5 text-[13px] font-extrabold shadow-sm transition hover:-translate-y-0.5 hover:shadow-card disabled:cursor-not-allowed disabled:opacity-50"
         >
           Export queue
         </button>
@@ -366,90 +361,68 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           type="button"
           onClick={loadQueue}
           disabled={loading}
-          className="shine rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
+          className="shine rounded-xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange transition hover:-translate-y-0.5 hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? 'Refreshing…' : 'Refresh queue'}
         </button>
       </div>
     </div>
+    <p className="mb-3 mt-1.5 max-w-[880px] text-[14px] leading-6 text-muted">
+      Review manuscript context, venue-specific evidence and AI-prepared editorial intelligence before recording a final human decision.
+    </p>
 
-    {error && <div className="admin-error venue-admin-message mb-4">{error}</div>}
-    {success && <div className="venue-admin-success venue-admin-message mb-4">{success}</div>}
+    {error && <div className="admin-error venue-admin-message mb-3">{error}</div>}
+    {success && <div className="venue-admin-success venue-admin-message mb-3">{success}</div>}
 
-    <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-      <button type="button" onClick={() => setFilters({...filters, status:''})} className="metric premium-card rounded-[22px] p-5 text-left">
-        <div className="serif text-[36px] leading-none">{data.counts?.total || 0}</div>
-        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editorial queue</div>
-        {data.counts?.total ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100"><div className="h-full w-[75%] rounded-full bg-flexee-500"></div></div>
-          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
-      </button>
-
-      <button type="button" onClick={() => setFilters({...filters, status:'submitted'})} className="metric premium-card rounded-[22px] p-5 text-left">
-        <div className="serif text-[36px] leading-none">{data.counts?.submitted || 0}</div>
-        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Submitted</div>
-        {data.counts?.submitted ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-flexee-100"><div className="h-full w-[58%] rounded-full bg-flexee-500"></div></div>
-          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
-      </button>
-
-      <button type="button" onClick={() => setFilters({...filters, status:'under_review'})} className="metric premium-card rounded-[22px] p-5 text-left">
-        <div className="serif text-[36px] leading-none">{data.counts?.under_review || 0}</div>
-        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Under review</div>
-        {data.counts?.under_review ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-blue-100"><div className="h-full w-[58%] rounded-full bg-blue-500"></div></div>
-          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
-      </button>
-
-      <button type="button" onClick={() => setFilters({...filters, status:'revision_requested'})} className="metric premium-card rounded-[22px] p-5 text-left">
-        <div className="serif text-[36px] leading-none">{data.counts?.revision_requested || 0}</div>
-        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Revision</div>
-        {data.counts?.revision_requested ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-amber-100"><div className="h-full w-[66%] rounded-full bg-amber-500"></div></div>
-          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
-      </button>
-
-      <button type="button" onClick={() => setFilters({...filters, status:'accepted'})} className="metric premium-card rounded-[22px] p-5 text-left">
-        <div className="serif text-[36px] leading-none">{data.counts?.accepted || 0}</div>
-        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Accepted</div>
-        {data.counts?.accepted ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-green-100"><div className="h-full w-[42%] rounded-full bg-green-500"></div></div>
-          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
-      </button>
-
-      <button type="button" onClick={() => setFilters({...filters, status:'rejected'})} className="metric premium-card rounded-[22px] p-5 text-left">
-        <div className="serif text-[36px] leading-none">{data.counts?.rejected || 0}</div>
-        <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Rejected</div>
-        {data.counts?.rejected ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-red-100"><div className="h-full w-[42%] rounded-full bg-red-500"></div></div>
-          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
-      </button>
+    <div className="mb-3 flex flex-wrap gap-2">
+      {[
+        { status: '', label: 'Editorial queue', count: data.counts?.total, dot: 'bg-flexee-500' },
+        { status: 'submitted', label: 'Submitted', count: data.counts?.submitted, dot: 'bg-flexee-400' },
+        { status: 'under_review', label: 'Under review', count: data.counts?.under_review, dot: 'bg-blue-500' },
+        { status: 'revision_requested', label: 'Revision', count: data.counts?.revision_requested, dot: 'bg-amber-500' },
+        { status: 'accepted', label: 'Accepted', count: data.counts?.accepted, dot: 'bg-green-500' },
+        { status: 'rejected', label: 'Rejected', count: data.counts?.rejected, dot: 'bg-red-500' },
+      ].map(chip => <button
+        type="button"
+        key={chip.label}
+        onClick={() => setFilters({...filters, status: chip.status})}
+        className={`metric-chip inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-3.5 py-1.5 text-left ${filters.status === chip.status ? 'active' : ''}`}
+      >
+        <span className={`status-dot ${chip.dot}`}></span>
+        <span className="serif text-[20px] leading-none">{chip.count || 0}</span>
+        <span className="text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">{chip.label}</span>
+      </button>)}
     </div>
 
-    <div className="premium-card mb-6 grid gap-3 rounded-[24px] p-3 lg:grid-cols-[1.55fr_.75fr_.75fr_auto]">
+    <div className="premium-card mb-4 grid gap-2 rounded-[18px] p-2 lg:grid-cols-[1.55fr_.75fr_.75fr_auto]">
       <div className="relative">
-        <svg className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <svg className="search-icon text-muted" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <circle cx="11" cy="11" r="7"/>
           <path d="m20 20-3.4-3.4"/>
         </svg>
         <input
-          className="field pl-11"
+          className="field field-compact field-search"
           value={filters.q}
           onChange={e => setFilters({...filters, q:e.target.value})}
           placeholder="Search manuscript, author, email, or venue..."
         />
       </div>
 
-      <select className="field" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
+      <select className="field field-compact" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
         <option value="">All venues</option>
         {venues.map(venue => <option value={venue.id} key={venue.id}>{venue.name}</option>)}
       </select>
 
-      <select className="field" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
+      <select className="field field-compact" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
         <option value="">All editorial statuses</option>
         {Object.entries(statusLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}
       </select>
 
-      <button className="rounded-2xl bg-ink px-6 py-3 text-[14px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>
+      <button className="rounded-xl bg-ink px-5 py-2.5 text-[13px] font-extrabold text-white transition hover:bg-flexee-800" type="button" onClick={loadQueue}>
         Apply
       </button>
     </div>
-
-    <div className="grid items-start gap-5 2xl:grid-cols-[410px_minmax(0,1fr)]">
+    <div className="grid items-start gap-4 2xl:grid-cols-[410px_minmax(0,1fr)]">
       <aside className="sidebar-content-card premium-card h-fit self-start overflow-hidden rounded-[28px]">
         <div className="flex items-center justify-between border-b border-line px-5 py-5">
           <div>
@@ -461,7 +434,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           </div>
         </div>
 
-        <div className="thin-scroll max-h-[520px] overflow-y-auto">
+        <div className="thin-scroll max-h-[max(360px,calc(100vh_-_360px))] overflow-y-auto">
           {loading ? <div className="p-5 text-[14px] font-semibold text-muted">Loading editorial queue…</div> :
             data.items?.length ? data.items.map(item => {
               const submitted = item.submitted_at || item.created_at

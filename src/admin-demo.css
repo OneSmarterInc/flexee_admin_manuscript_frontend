@@ -162,13 +162,16 @@ html {
   -webkit-backdrop-filter: blur(22px);
 }
 
-:where(.admin-demo-root) .premium-card {
+:where(.admin-demo-root .premium-card) {
   background:
     linear-gradient(
       145deg,
       rgba(255,255,255,.97),
       rgba(255,252,249,.91)
     );
+}
+
+:where(.admin-demo-root) .premium-card {
   border: 1px solid rgba(232,220,211,.94);
   box-shadow:
     0 10px 32px rgba(66,38,23,.065),
@@ -229,7 +232,28 @@ html {
   }
 }
 
-:where(.admin-demo-root) .field,
+/* Size and spacing of .field carry zero specificity so utility classes such as
+   pl-11, min-h-[120px] or py-2 always win, whatever order the stylesheets load in. */
+:where(.admin-demo-root .field) {
+  width: 100%;
+  min-height: 48px;
+  padding: 11px 14px;
+}
+
+:where(.admin-demo-root) .field {
+  color: #211d1a;
+  font-size: 15px;
+  font-weight: 500;
+  background: rgba(255,255,255,.96);
+  border: 1px solid #e4d6cc;
+  border-radius: 14px;
+  outline: none;
+  transition:
+    border-color .18s ease,
+    box-shadow .18s ease,
+    background .18s ease;
+}
+
 :where(.admin-demo-root) .admin-field input,
 :where(.admin-demo-root) .admin-field select,
 :where(.admin-demo-root) .admin-field textarea,
@@ -837,4 +861,44 @@ html {
 :where(.admin-demo-root) .venue-admin-help-popover pre {
   font-size: 12.5px;
   line-height: 1.5;
+}
+
+/* Compact header controls (editor workspace and audit log). */
+:where(.admin-demo-root) .field.field-compact {
+  min-height: 42px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  font-size: 14px;
+  border-radius: 12px;
+}
+
+:where(.admin-demo-root) .field.field-search {
+  padding-left: 42px;
+}
+
+:where(.admin-demo-root) .search-icon {
+  position: absolute;
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+:where(.admin-demo-root) .metric-chip {
+  transition:
+    background .18s ease,
+    border-color .18s ease,
+    box-shadow .18s ease,
+    transform .18s ease;
+}
+
+:where(.admin-demo-root) .metric-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(66,38,23,.07);
+}
+
+:where(.admin-demo-root) .metric-chip.active {
+  border-color: #efc7ae;
+  background: linear-gradient(135deg, #fff7f1, #fceee4);
+  box-shadow: inset 0 0 0 1px rgba(199,102,45,.12);
 }

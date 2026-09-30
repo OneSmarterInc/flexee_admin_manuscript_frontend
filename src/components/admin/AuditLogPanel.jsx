@@ -304,42 +304,32 @@ export default function AuditLogPanel() {
   }
 
   return <div>
-    <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
-      <div>
-        <div className="text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
-          Production controls
-        </div>
+    <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
+      Production controls
+    </div>
+    <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+      <h2 className="serif text-[32px] leading-none md:text-[36px]">
+        Audit log
+      </h2>
 
-        <h2 className="serif mt-1 text-[43px] leading-none md:text-[54px]">
-          Audit log
-        </h2>
-
-        <p className="mt-3 max-w-[850px] text-[16px] leading-7 text-muted">
-          Structured, immutable records of editor access, administrative actions,
-          configuration changes and system activity.
-        </p>
-      </div>
-
-      <div className="premium-card min-w-[195px] rounded-[22px] px-5 py-4 text-right">
-        <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">
-          Recorded events
-        </div>
-
-        <div className="serif mt-1 text-[36px]">
-          {loading ? '—' : total.toLocaleString()}
-        </div>
+      <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line bg-white/90 px-4 py-1.5 shadow-sm">
+        <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Recorded events</span>
+        <span className="serif text-[22px] leading-none">{loading ? '—' : total.toLocaleString()}</span>
       </div>
     </div>
+    <p className="mb-3 mt-1.5 max-w-[850px] text-[14px] leading-6 text-muted">
+      Structured, immutable records of editor access, administrative actions, configuration changes and system activity.
+    </p>
 
     <form
-      className="premium-card mb-5 grid gap-3 rounded-[24px] p-3 lg:grid-cols-[1.4fr_.7fr_.7fr_auto_auto]"
+      className="premium-card mb-3 grid gap-2 rounded-[18px] p-2 lg:grid-cols-[1.4fr_.7fr_.7fr_auto_auto]"
       onSubmit={apply}
     >
       <div className="relative">
         <svg
-          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
-          width="18"
-          height="18"
+          className="search-icon text-muted"
+          width="17"
+          height="17"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
@@ -350,7 +340,7 @@ export default function AuditLogPanel() {
         </svg>
 
         <input
-          className="field pl-11"
+          className="field field-compact field-search"
           type="search"
           placeholder="Search actor, action, role, or resource ID..."
           value={filters.q}
@@ -359,7 +349,7 @@ export default function AuditLogPanel() {
       </div>
 
       <select
-        className="field"
+        className="field field-compact"
         value={filters.action}
         onChange={e => setFilters({ ...filters, action: e.target.value })}
       >
@@ -370,7 +360,7 @@ export default function AuditLogPanel() {
       </select>
 
       <select
-        className="field"
+        className="field field-compact"
         value={filters.severity}
         onChange={e => setFilters({ ...filters, severity: e.target.value })}
       >
@@ -382,14 +372,14 @@ export default function AuditLogPanel() {
       </select>
 
       <button
-        className="rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange"
+        className="rounded-xl bg-flexee-500 px-5 py-2.5 text-[13px] font-extrabold text-white shadow-orange"
         type="submit"
       >
         Apply
       </button>
 
       <button
-        className="rounded-2xl border border-line bg-white px-5 py-3 text-[14px] font-extrabold"
+        className="rounded-xl border border-line bg-white px-5 py-2.5 text-[13px] font-extrabold"
         type="button"
         onClick={() => {
           const cleared = { q: '', action: '', severity: '' }
@@ -401,74 +391,23 @@ export default function AuditLogPanel() {
       </button>
     </form>
 
-    {error && <div className="admin-error mb-5">{error}</div>}
+    {error && <div className="admin-error mb-3">{error}</div>}
 
-    <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      <div className="rounded-[22px] border border-green-100 bg-gradient-to-br from-green-50 to-white p-5 shadow-card">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-green-700">
-              Successful
-            </div>
-            <div className="mt-1 text-[30px] font-extrabold text-green-950">
-              {loading ? '—' : metrics.success}
-            </div>
-          </div>
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-green-100 text-[18px] font-black text-green-700">
-            ✓
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-[22px] border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5 shadow-card">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-blue-700">
-              Information
-            </div>
-            <div className="mt-1 text-[30px] font-extrabold text-blue-950">
-              {loading ? '—' : metrics.info}
-            </div>
-          </div>
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-100 text-[18px] font-black text-blue-700">
-            i
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-[22px] border border-amber-100 bg-gradient-to-br from-amber-50 to-white p-5 shadow-card">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-amber-700">
-              Warnings
-            </div>
-            <div className="mt-1 text-[30px] font-extrabold text-amber-950">
-              {loading ? '—' : metrics.warning}
-            </div>
-          </div>
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-amber-100 text-[18px] font-black text-amber-700">
-            !
-          </div>
-        </div>
-      </div>
-
-      <div className="rounded-[22px] border border-red-100 bg-gradient-to-br from-red-50 to-white p-5 shadow-card">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="text-[13px] font-extrabold uppercase tracking-[.06em] text-red-700">
-              Errors
-            </div>
-            <div className="mt-1 text-[30px] font-extrabold text-red-950">
-              {loading ? '—' : metrics.error}
-            </div>
-          </div>
-          <div className="grid h-12 w-12 place-items-center rounded-2xl bg-red-100 text-[18px] font-black text-red-700">
-            ×
-          </div>
-        </div>
-      </div>
+    <div className="mb-3 flex flex-wrap gap-2">
+      {[
+        { key: 'success', label: 'Successful', symbol: '✓', wrap: 'border-green-200 bg-green-50 text-green-700', value: 'text-green-950' },
+        { key: 'info', label: 'Information', symbol: 'i', wrap: 'border-blue-200 bg-blue-50 text-blue-700', value: 'text-blue-950' },
+        { key: 'warning', label: 'Warnings', symbol: '!', wrap: 'border-amber-200 bg-amber-50 text-amber-700', value: 'text-amber-950' },
+        { key: 'error', label: 'Errors', symbol: '×', wrap: 'border-red-200 bg-red-50 text-red-700', value: 'text-red-950' },
+      ].map(chip => <div
+        key={chip.key}
+        className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 ${chip.wrap}`}
+      >
+        <span className="grid h-5 w-5 place-items-center rounded-full bg-white/80 text-[12px] font-black">{chip.symbol}</span>
+        <span className={`text-[16px] font-extrabold leading-none ${chip.value}`}>{loading ? '—' : metrics[chip.key]}</span>
+        <span className="text-[12px] font-extrabold uppercase tracking-[.06em]">{chip.label}</span>
+      </div>)}
     </div>
-
     <div className="premium-card overflow-hidden rounded-[28px]">
       <div className="flex items-center justify-between border-b border-line px-5 py-5">
         <div>
