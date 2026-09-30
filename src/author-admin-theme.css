@@ -826,3 +826,52 @@
   padding: 0;
   flex: 0 0 auto;
 }
+
+/* ---------- 17. Forgot / reset password ---------- */
+.author-admin-theme .author-auth-forgot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -6px;
+}
+
+.author-admin-theme.author-admin-theme .author-auth-forgot .author-text-link,
+.author-admin-theme.author-admin-theme .author-reset-again {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent-600);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.author-admin-theme .author-auth-forgot .author-text-link:hover,
+.author-admin-theme .author-reset-again:hover {
+  text-decoration: underline;
+}
+
+.author-admin-theme.author-admin-theme .author-reset-success {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.author-admin-theme .author-reset-hint {
+  display: block;
+  margin-top: 4px;
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.author-admin-theme.author-admin-theme .author-reset-show {
+  margin: 0;
+}
+
+.author-admin-theme.author-admin-theme .author-reset-show input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+}
