@@ -23,7 +23,9 @@ export function AuthorFlowNav({ active }) {
         className={`author-flow-step ${state}`}
         onClick={() => {
           if (disabled) return
-          go(path)
+          // With an active manuscript, step 1 opens it for review/editing
+          // instead of the blank "new submission" form (which resets the session).
+          go(key === 'details' && manuscriptActive ? '/author/manuscript' : path)
         }}
         disabled={disabled}
         aria-disabled={disabled}
