@@ -138,11 +138,6 @@ export default function AuthorNewSubmission() {
         </form>
 
         <aside className="author-form-aside">
-          <div className="author-panel author-guide-card">
-            <p className="kicker">Secure manuscript session</p>
-            <h2>Upload once.</h2>
-            <p className="author-muted-copy">After upload, this browser receives a manuscript access token. The backend—not the URL alone—controls access to the manuscript and its venue submissions.</p>
-          </div>
           <div className="author-mini-note">
             <b>Accepted files</b>
             <span>PDF, DOCX, Markdown, or ZIP</span>
