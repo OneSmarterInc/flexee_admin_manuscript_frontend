@@ -942,3 +942,72 @@ html {
 :where(.admin-demo-root) .admin-modal-panel {
   animation: adminModalPanelIn .24s cubic-bezier(.2,.85,.28,1);
 }
+
+/* In-portal manuscript viewer: readable document typography. */
+:where(.admin-demo-root) .manuscript-doc {
+  color: #211d1a;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  font-size: 15.5px;
+  line-height: 1.75;
+  overflow-wrap: anywhere;
+}
+
+:where(.admin-demo-root) .manuscript-doc :is(h1, h2, h3, h4, h5, h6) {
+  margin: 1.4em 0 .5em;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -.02em;
+  color: #211d1a;
+}
+
+:where(.admin-demo-root) .manuscript-doc h1 { font-size: 32px; }
+:where(.admin-demo-root) .manuscript-doc h2 { font-size: 26px; }
+:where(.admin-demo-root) .manuscript-doc h3 { font-size: 21px; }
+:where(.admin-demo-root) .manuscript-doc :is(h4, h5, h6) { font-size: 17px; }
+:where(.admin-demo-root) .manuscript-doc > :first-child { margin-top: 0; }
+:where(.admin-demo-root) .manuscript-doc p { margin: 0 0 1em; }
+:where(.admin-demo-root) .manuscript-doc :is(ul, ol) { margin: 0 0 1em; padding-left: 1.6em; }
+:where(.admin-demo-root) .manuscript-doc ul { list-style: disc; }
+:where(.admin-demo-root) .manuscript-doc ol { list-style: decimal; }
+:where(.admin-demo-root) .manuscript-doc li { margin: .25em 0; }
+:where(.admin-demo-root) .manuscript-doc a { color: #ae4e20; text-decoration: underline; }
+:where(.admin-demo-root) .manuscript-doc blockquote {
+  margin: 0 0 1em;
+  padding: .4em 1em;
+  border-left: 3px solid #eabea2;
+  background: #fff9f5;
+  color: #574f49;
+}
+:where(.admin-demo-root) .manuscript-doc :is(code, pre) {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13.5px;
+}
+:where(.admin-demo-root) .manuscript-doc code { padding: .1em .35em; border-radius: 6px; background: #f5ede7; }
+:where(.admin-demo-root) .manuscript-doc pre {
+  margin: 0 0 1em;
+  padding: 12px 14px;
+  overflow-x: auto;
+  border: 1px solid #e8dcd3;
+  border-radius: 12px;
+  background: #fcfaf8;
+}
+:where(.admin-demo-root) .manuscript-doc pre code { padding: 0; background: none; }
+:where(.admin-demo-root) .manuscript-doc hr { margin: 1.6em 0; border: 0; border-top: 1px solid #e8dcd3; }
+:where(.admin-demo-root) .manuscript-doc img { max-width: 100%; height: auto; margin: .5em 0; }
+:where(.admin-demo-root) .manuscript-doc table {
+  display: block;
+  max-width: 100%;
+  margin: 0 0 1.2em;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+:where(.admin-demo-root) .manuscript-doc :is(th, td) {
+  padding: 7px 10px;
+  border: 1px solid #e8dcd3;
+  text-align: left;
+  vertical-align: top;
+}
+:where(.admin-demo-root) .manuscript-doc th,
+:where(.admin-demo-root) .manuscript-doc tr:first-child td { background: #faf7f4; font-weight: 700; }

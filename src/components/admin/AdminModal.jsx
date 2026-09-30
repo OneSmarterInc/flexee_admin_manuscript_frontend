@@ -1,25 +1,49 @@
 import React, { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
+// Open modals, newest last. Escape closes only the top one, so a viewer opened
+// on top of the submission modal closes by itself.
+const openModals = []
+
 /*
  * Centered modal overlay for the admin shell.
  * Rendered into .admin-demo-root so the scoped admin styles still apply.
  * Closes with the X button, the Escape key, or a click on the backdrop.
  */
-export default function AdminModal({ open, onClose, labelledBy, children, footer = null, maxWidth = 'max-w-[1180px]' }) {
+export default function AdminModal({
+  open,
+  onClose,
+  labelledBy,
+  children,
+  footer = null,
+  maxWidth = 'max-w-[1180px]',
+  zIndex = 'z-[70]',
+  panelClassName = 'max-h-[92vh]',
+}) {
   const bodyRef = useRef(null)
+  const idRef = useRef(Symbol('admin-modal'))
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
 
+  // Depends on `open` only, so the stack keeps the order modals were opened in
+  // even when a parent re-renders with a new onClose function.
   useEffect(() => {
     if (!open) return undefined
+    const id = idRef.current
+    openModals.push(id)
     function onKeyDown(event) {
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && openModals[openModals.length - 1] === id) {
         event.stopPropagation()
-        onClose?.()
+        onCloseRef.current?.()
       }
     }
     document.addEventListener('keydown', onKeyDown)
-    return () => document.removeEventListener('keydown', onKeyDown)
-  }, [open, onClose])
+    return () => {
+      document.removeEventListener('keydown', onKeyDown)
+      const index = openModals.lastIndexOf(id)
+      if (index !== -1) openModals.splice(index, 1)
+    }
+  }, [open])
 
   useEffect(() => {
     if (open && bodyRef.current) bodyRef.current.scrollTop = 0
@@ -31,14 +55,14 @@ export default function AdminModal({ open, onClose, labelledBy, children, footer
 
   return createPortal(
     <div
-      className="admin-modal-backdrop fixed inset-0 z-[70] grid place-items-center bg-[#21170f]/40 p-3 backdrop-blur-[6px] md:p-6"
+      className={`admin-modal-backdrop fixed inset-0 ${zIndex} grid place-items-center bg-[#21170f]/40 p-3 backdrop-blur-[6px] md:p-6`}
       onMouseDown={event => { if (event.target === event.currentTarget) onClose?.() }}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={labelledBy}
-        className={`admin-modal-panel relative flex max-h-[92vh] w-full ${maxWidth} flex-col overflow-hidden rounded-[26px] border border-white/80 bg-[#fffdfb] shadow-float`}
+        className={`admin-modal-panel relative flex ${panelClassName} w-full ${maxWidth} flex-col overflow-hidden rounded-[26px] border border-white/80 bg-[#fffdfb] shadow-float`}
       >
         <button
           type="button"

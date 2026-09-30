@@ -10,6 +10,7 @@ const actionLabels = {
   'venue_config.activated': 'Venue configuration activated',
   'venue_submission.viewed': 'Submission viewed',
   'venue_submission.manuscript_downloaded': 'Manuscript downloaded',
+  'venue_submission.manuscript_viewed': 'Manuscript viewed',
   'venue_submission.requirement_downloaded': 'Requirement file downloaded',
   'venue_submission.review_started': 'Editorial review started',
   'venue_submission.feedback_recorded': 'Editor feedback recorded',
