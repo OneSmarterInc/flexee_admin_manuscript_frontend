@@ -58,7 +58,7 @@ export default function AuthorNewSubmission() {
 
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Could not continue.</b> {error}</div>}
 
-      <div className="author-form-layout">
+            <div className="author-form-layout" style={{ gridTemplateColumns: 'minmax(0, 1fr)' }}>
         <form className="author-workflow-form" onSubmit={submit}>
           <section className="author-form-section">
             <div className="author-form-section-head">
@@ -137,12 +137,7 @@ export default function AuthorNewSubmission() {
           </div>
         </form>
 
-        <aside className="author-form-aside">
-          <div className="author-mini-note">
-            <b>Accepted files</b>
-            <span>PDF, DOCX, Markdown, or ZIP</span>
-          </div>
-        </aside>
+       
       </div>
     </div>
   </PublicationShell>
