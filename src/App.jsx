@@ -46,6 +46,12 @@ function RequireAuthor({ children }) {
   return children
 }
 
+// Author portal pages share the Admin panel design system.
+// The class only wraps author routes, so public pages keep their current look.
+function AuthorTheme({ children }) {
+  return <div className="author-admin-theme">{children}</div>
+}
+
 export default function App() {
   const [path, setPath] = useState(window.location.pathname.replace(/\/$/, '') || '/')
   useEffect(() => {
@@ -57,16 +63,16 @@ export default function App() {
   if (path === '/submit-book' || path === '/submit-book.html' || path === '/submit-book.php') return <SubmitBook />
   if (path === '/submit-article' || path === '/submit-article.html' || path === '/submit-article.php') return <SubmitArticle />
 
-  if (path === '/author/login') return <AuthorLogin />
-  if (path === '/author/signup') return <AuthorSignup />
-  if (path === '/author') return <RequireAuthor><AuthorDashboard /></RequireAuthor>
-  if (path === '/author/new') return <RequireAuthor><AuthorNewSubmission /></RequireAuthor>
-  if (path === '/author/manuscript-details') return <RequireAuthor><AuthorManuscriptDetails /></RequireAuthor>
-  if (path === '/author/readiness') return <RequireAuthor><AuthorReadiness /></RequireAuthor>
-  if (path === '/author/venues') return <RequireAuthor><AuthorVenueMatches /></RequireAuthor>
-  if (path === '/author/venue-assessment' || path.startsWith('/author/venue-assessment/')) return <RequireAuthor><AuthorVenueAssessment /></RequireAuthor>
-  if (path === '/author/status') return <RequireAuthor><AuthorSubmissionStatus /></RequireAuthor>
-  if (path === '/author/transfer') return <RequireAuthor><AuthorTransfer /></RequireAuthor>
+  if (path === '/author/login') return <AuthorTheme><AuthorLogin /></AuthorTheme>
+  if (path === '/author/signup') return <AuthorTheme><AuthorSignup /></AuthorTheme>
+  if (path === '/author') return <AuthorTheme><RequireAuthor><AuthorDashboard /></RequireAuthor></AuthorTheme>
+  if (path === '/author/new') return <AuthorTheme><RequireAuthor><AuthorNewSubmission /></RequireAuthor></AuthorTheme>
+  if (path === '/author/manuscript-details') return <AuthorTheme><RequireAuthor><AuthorManuscriptDetails /></RequireAuthor></AuthorTheme>
+  if (path === '/author/readiness') return <AuthorTheme><RequireAuthor><AuthorReadiness /></RequireAuthor></AuthorTheme>
+  if (path === '/author/venues') return <AuthorTheme><RequireAuthor><AuthorVenueMatches /></RequireAuthor></AuthorTheme>
+  if (path === '/author/venue-assessment' || path.startsWith('/author/venue-assessment/')) return <AuthorTheme><RequireAuthor><AuthorVenueAssessment /></RequireAuthor></AuthorTheme>
+  if (path === '/author/status') return <AuthorTheme><RequireAuthor><AuthorSubmissionStatus /></RequireAuthor></AuthorTheme>
+  if (path === '/author/transfer') return <AuthorTheme><RequireAuthor><AuthorTransfer /></RequireAuthor></AuthorTheme>
 
   if (path.startsWith('/admin')) return <AdminPage path={path} />
   return <Home />
