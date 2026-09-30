@@ -14,9 +14,11 @@ import AuthorSubmissionStatus from './pages/AuthorSubmissionStatus.jsx'
 import AuthorTransfer from './pages/AuthorTransfer.jsx'
 import AuthorManuscriptDetails from './pages/AuthorManuscriptDetails.jsx'
 import { fetchAuthorSession } from './authorApi.js'
+import { AuthorAccountContext } from './components/AuthorAccountMenu.jsx'
 
 function RequireAuthor({ children }) {
   const [allowed, setAllowed] = useState(false)
+  const [account, setAccount] = useState(null)
 
   useEffect(() => {
     let active = true
@@ -25,6 +27,7 @@ function RequireAuthor({ children }) {
       .then(user => {
         if (!active) return
         if (user) {
+          setAccount({ name: user.name || '', email: user.email || '' })
           setAllowed(true)
           return
         }
@@ -43,7 +46,7 @@ function RequireAuthor({ children }) {
   }, [])
 
   if (!allowed) return null
-  return children
+  return <AuthorAccountContext.Provider value={account}>{children}</AuthorAccountContext.Provider>
 }
 
 // Author portal pages share the Admin panel design system.

@@ -4,6 +4,7 @@ import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
 import EditorWorkspacePanel from '../components/admin/EditorWorkspacePanel.jsx'
 import AuditLogPanel from '../components/admin/AuditLogPanel.jsx'
+import AdminAccountMenu from '../components/admin/AdminAccountMenu.jsx'
 import '../admin-professional.css'
 
 const decisions = {
@@ -22,7 +23,7 @@ const viewLayouts = {
   default: { section: 'px-4 py-4 md:px-7 md:py-5', inner: 'mx-auto max-w-[1750px]' },
 }
 
-function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = 'admin', view = 'default', mainRef = null }) {
+function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = '', view = 'default', mainRef = null, platformSuperuser = false, memberships = [] }) {
   const layout = viewLayouts[view] || viewLayouts.default
   return (
     <div className="admin-demo-root h-screen overflow-hidden">
@@ -56,15 +57,7 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
               Systems operational
             </div>
             <button type="button" className="rounded-xl px-4 py-2.5 text-[14px] font-bold text-muted transition hover:bg-white hover:text-ink">Help</button>
-            <button type="button" className="desktop-only flex items-center gap-3 rounded-2xl border border-line bg-white/90 px-3 py-2 shadow-sm transition hover:shadow-card">
-              <div className="grid h-9 w-9 place-items-center rounded-xl bg-flexee-500 text-[13px] font-black text-white">
-                {(username || 'A').charAt(0).toUpperCase()}
-              </div>
-              <div className="pr-1 text-left">
-                <div className="text-[13px] font-extrabold">{username || 'admin'}</div>
-                <div className="text-[12px] font-medium text-muted">Administrator</div>
-              </div>
-            </button>
+            {username && <AdminAccountMenu username={username} platformSuperuser={platformSuperuser} memberships={memberships} />}
           </div>
         </div>
       </header>
@@ -772,7 +765,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
     </div>
   )
 
-  return <AdminTop sidebar={sidebarContent} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} username={username} view={currentView} mainRef={mainRef}>
+  return <AdminTop sidebar={sidebarContent} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} username={username} platformSuperuser={platformSuperuser} memberships={memberships} view={currentView} mainRef={mainRef}>
     
     {currentView === 'smtp' ? (
       <SMTPSettingsPage />
