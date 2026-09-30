@@ -446,7 +446,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
     </div>
 
     <div className="grid items-start gap-5 xl:grid-cols-[355px_minmax(0,1fr)]">
-      <aside className="sidebar-content-card premium-card h-fit self-start rounded-[28px] p-4">
+      <aside className="sidebar-content-card premium-card thin-scroll h-fit self-start rounded-[28px] p-4 xl:sticky xl:top-[94px] xl:max-h-[calc(100vh_-_112px)] xl:overflow-y-auto">
         <div className="mb-4 flex items-center justify-between px-2">
           <div>
             <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Subscriber venues</div>
@@ -536,8 +536,8 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
             </div>
           </div>
 
-          <div className="grid items-start gap-5 2xl:grid-cols-[.72fr_1.28fr]">
-            <form className="premium-card h-fit rounded-[28px] p-5" onSubmit={saveVenue}>
+          <div className="grid items-start gap-5 2xl:grid-cols-[.72fr_1.28fr] 2xl:grid-rows-[auto_auto_1fr]">
+            <form className="premium-card h-fit rounded-[28px] p-5 2xl:col-start-1 2xl:row-start-1" onSubmit={saveVenue}>
               <div className="mb-5 flex items-center justify-between">
                 <div>
                   <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Identity</div>
@@ -566,7 +566,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               </div>
             </form>
 
-            <form className="premium-card rounded-[28px] p-5" onSubmit={createConfig}>
+            <form className="premium-card rounded-[28px] p-5 2xl:col-start-2 2xl:row-span-3 2xl:row-start-1" onSubmit={createConfig}>
               <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Editorial intelligence</div>
@@ -595,10 +595,8 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                 <Field label="Configuration notes" help={configFieldHelp.config_notes}><textarea className="field min-h-[125px]" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
               </div>
             </form>
-          </div>
 
-          <div className="grid items-start gap-5 xl:grid-cols-2">
-            <div className="premium-card h-fit rounded-[28px] p-5">
+            <div className="premium-card h-fit rounded-[28px] p-5 2xl:col-start-1 2xl:row-start-2">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div>
                   <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editor feedback</div>
@@ -631,7 +629,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               </div>
             </div>
 
-            <div className="premium-card h-fit rounded-[28px] p-5">
+            <div className="premium-card h-fit rounded-[28px] p-5 2xl:col-start-1 2xl:row-start-3">
               <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Audit trail</div>
               <h4 className="serif mt-1 text-[30px]">Configuration history</h4>
 
