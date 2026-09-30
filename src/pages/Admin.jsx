@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api.js'
 import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
@@ -17,7 +17,13 @@ const decisions = {
 function Field({ label, children }) { return <label className="admin-field"><span>{label}</span>{children}</label> }
 function StatusPill({ value }) { return <span className={`admin-badge ${value || ''}`}>{decisions[value] || value || '—'}</span> }
 
-function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = 'admin' }) {
+const viewLayouts = {
+  smtp: { section: 'px-4 py-5 md:px-7', inner: 'mx-auto max-w-[1500px]' },
+  default: { section: 'px-4 py-6 md:px-7 md:py-8', inner: 'mx-auto max-w-[1750px]' },
+}
+
+function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, username = 'admin', view = 'default', mainRef = null }) {
+  const layout = viewLayouts[view] || viewLayouts.default
   return (
     <div className="admin-demo-root h-screen overflow-hidden">
       <header className="fixed inset-x-0 top-0 z-40 h-[78px] border-b border-white/80 glass shadow-[0_5px_22px_rgba(62,37,23,.04)]">
@@ -50,7 +56,7 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
               Systems operational
             </div>
             <button type="button" className="rounded-xl px-4 py-2.5 text-[14px] font-bold text-muted transition hover:bg-white hover:text-ink">Help</button>
-            <div className="desktop-only flex items-center gap-3 rounded-2xl border border-line bg-white/90 px-3 py-2 shadow-sm">
+            <button type="button" className="desktop-only flex items-center gap-3 rounded-2xl border border-line bg-white/90 px-3 py-2 shadow-sm transition hover:shadow-card">
               <div className="grid h-9 w-9 place-items-center rounded-xl bg-flexee-500 text-[13px] font-black text-white">
                 {(username || 'A').charAt(0).toUpperCase()}
               </div>
@@ -58,7 +64,7 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
                 <div className="text-[13px] font-extrabold">{username || 'admin'}</div>
                 <div className="text-[12px] font-medium text-muted">Administrator</div>
               </div>
-            </div>
+            </button>
           </div>
         </div>
       </header>
@@ -81,10 +87,12 @@ function AdminTop({ children, sidebar, sidebarOpen = false, onToggleSidebar, use
         </aside>
       )}
 
-      <main className="page-scroll soft-grid h-screen overflow-y-auto pt-[78px]">
-        <div className="mx-auto max-w-[1750px] px-4 py-6 md:px-7 md:py-8">
-          {children}
-        </div>
+      <main ref={mainRef} className="page-scroll soft-grid h-screen overflow-y-auto pt-[78px]">
+        <section key={view} className={`view active ${layout.section}`}>
+          <div className={layout.inner}>
+            {children}
+          </div>
+        </section>
         <div className="h-10"></div>
       </main>
     </div>
@@ -327,7 +335,7 @@ function SMTPSettingsPage({ onSave }) {
   }
 
   return (
-    <div className="mx-auto max-w-[1500px]">
+    <>
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">System settings</div>
@@ -402,7 +410,7 @@ function SMTPSettingsPage({ onSave }) {
             </label>
             <label>
               <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Sender email</span>
-              <input className="field" type="email" value={form.sender_email || ''} onChange={e => updateForm({ sender_email: e.target.value })} />
+              <input className="field" type="email" value={form.sender_email || ''} onChange={e => updateForm({ sender_email: e.target.value })} placeholder="editor@flexee.org" />
             </label>
             <label className="md:col-span-2">
               <span className="mb-1 block text-[13px] font-extrabold uppercase tracking-[.04em] text-muted">Reply-to email</span>
@@ -479,7 +487,7 @@ function SMTPSettingsPage({ onSave }) {
           </div>
         </div>
       </form>
-    </div>
+    </>
   );
 }
 
@@ -634,6 +642,19 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   const [zipViewItem, setZipViewItem] = useState(null)
   const [currentView, setCurrentView] = useState('editor')
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const mainRef = useRef(null)
+
+  useEffect(() => {
+    function onKeyDown(event) {
+      if (event.key === 'Escape') setSidebarOpen(false)
+    }
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [])
+
+  useEffect(() => {
+    mainRef.current?.scrollTo?.({ top: 0, behavior: 'smooth' })
+  }, [currentView])
   const setKindFilter = (k) => { if (!platformSuperuser) return; const nf = {...filters, kind: k}; setFilters(nf); setApplied(nf); setCurrentView('dashboard'); }
   
   const query = useMemo(() => new URLSearchParams(Object.entries(applied).filter(([,v]) => v)).toString(), [applied])
@@ -759,7 +780,7 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
     </div>
   )
 
-  return <AdminTop sidebar={sidebarContent} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} username={username}>
+  return <AdminTop sidebar={sidebarContent} sidebarOpen={sidebarOpen} onToggleSidebar={() => setSidebarOpen(!sidebarOpen)} username={username} view={currentView} mainRef={mainRef}>
     
     {currentView === 'smtp' ? (
       <SMTPSettingsPage />

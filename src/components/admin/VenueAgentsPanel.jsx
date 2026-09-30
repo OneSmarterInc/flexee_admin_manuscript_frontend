@@ -124,13 +124,39 @@ function configPayload(form) {
   }
 }
 
-function SmallPill({ children, tone = 'neutral' }) {
-  return <span className={`venue-admin-pill ${tone}`}>{children}</span>
+function Pill({ children, tone = 'neutral' }) {
+  const tones = {
+    neutral: 'border-line bg-white text-muted',
+    good: 'border-green-200 bg-green-50 text-green-700',
+    warn: 'border-amber-200 bg-amber-50 text-amber-700',
+  }
+  return <span className={`rounded-full border px-3 py-2 text-[13px] font-extrabold ${tones[tone] || tones.neutral}`}>{children}</span>
 }
 
-function Field({ label, hint, children, full = false, help = null }) {
-  return <div className={`venue-admin-field ${full ? 'full' : ''}`}>
-    <div className="venue-admin-field-label-row">
+function formatDate(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function formatTime(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+}
+
+function venueTypeLabel(value) {
+  const text = String(value || '')
+  return text ? text.charAt(0).toUpperCase() + text.slice(1) : ''
+}
+
+function venueInitial(value) {
+  return value === 'journal' ? 'J' : value === 'conference' ? 'C' : 'P'
+}
+
+function Field({ label, children, full = false, help = null }) {
+  return <div className={`block ${full ? 'lg:col-span-2' : ''}`}>
+    <div className="mb-1.5 flex items-center gap-2 text-[14px] font-extrabold">
       <span>{label}</span>
       {help && <details className="venue-admin-help">
         <summary aria-label={`Show help for ${label}`} title={`Help for ${label}`}>
@@ -147,7 +173,6 @@ function Field({ label, hint, children, full = false, help = null }) {
         </div>
       </details>}
     </div>
-    {hint && <small>{hint}</small>}
     {children}
   </div>
 }
@@ -403,10 +428,10 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   const canCreateVenue = platformSuperuser || ownerMemberships.length > 0
 
   if (loading) {
-    return <div className="venue-admin-state"><h3>Loading Venue Agents…</h3></div>
+    return <div className="premium-card rounded-[28px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Agents…</div>
   }
 
-  return <div className="venue-admin-layout">
+  return <div>
     <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
       <div>
         <div className="text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
@@ -421,173 +446,223 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
     </div>
 
     <div className="grid items-start gap-5 xl:grid-cols-[355px_minmax(0,1fr)]">
-    <aside className="venue-admin-list sidebar-content-card premium-card h-fit self-start rounded-[28px] p-4">
-      <div className="venue-admin-list-head mb-4 flex items-center justify-between px-2">
-        <div>
-          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Subscriber venues</div>
-          <h3 className="serif mt-1 text-[30px]">{venues.filter(venue => venue.active).length} active</h3>
-        </div>
-        <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1.5 text-[13px] font-extrabold text-green-700">Healthy</span>
-      </div>
-
-      {showCreate && <form className="venue-admin-create" onSubmit={createVenue}>
-        <Field label="Venue name" full><input value={createForm.name} onChange={e => setCreateForm({...createForm, name:e.target.value})} required /></Field>
-        <div className="venue-admin-two">
-          <Field label="Type"><select value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select></Field>
-          {platformSuperuser
-            ? <Field label="Organization"><input value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} /></Field>
-            : <Field label="Organization"><select value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select></Field>}
-        </div>
-        <Field label="Description" full><textarea rows="3" value={createForm.description} onChange={e => setCreateForm({...createForm, description:e.target.value})} /></Field>
-        <div className="venue-admin-actions">
-          <button className="admin-btn secondary" type="button" onClick={() => setShowCreate(false)}>Cancel</button>
-          <button className="admin-btn" type="submit" disabled={busy === 'create'}>{busy === 'create' ? 'Creating…' : 'Create venue'}</button>
-        </div>
-      </form>}
-
-      <div className="venue-admin-venue-list space-y-2">
-        {venues.map(venue => <button
-          type="button"
-          key={venue.id}
-          className={`venue-admin-venue venue-item flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left ${selectedId === venue.id ? 'active border-line' : 'border-transparent hover:bg-flexee-50'}`}
-          onClick={() => {
-            setSelectedId(venue.id)
-            loadVenue(venue.id).catch(err => setError(err.message))
-          }}
-        >
-          <span className="venue-admin-venue-icon grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-canvas text-flexee-600 serif">{venue.venue_type === 'journal' ? 'J' : venue.venue_type === 'conference' ? 'C' : 'P'}</span>
-          <span>
-            <b>{venue.name}</b>
-            <small>{venue.venue_type} · {venue.active ? 'Active' : 'Inactive'}</small>
-          </span>
-          {venue.config?.version && <SmallPill tone="good">v{venue.config.version}</SmallPill>}
-        </button>)}
-        {!venues.length && <div className="venue-admin-empty">No venues are configured yet.</div>}
-      </div>
-    </aside>
-
-    <section className="venue-admin-main space-y-5">
-      {error && <div className="admin-error venue-admin-message">{error}</div>}
-      {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
-
-      {!selectedVenue ? <div className="venue-admin-state">
-        <p className="venue-admin-kicker">No venue selected</p>
-        <h3>Create or select a venue to configure its editorial agent.</h3>
-      </div> : <>
-        <div className="venue-admin-header premium-card rounded-[28px] bg-gradient-to-r from-white via-white to-flexee-50/65 p-6">
+      <aside className="sidebar-content-card premium-card h-fit self-start rounded-[28px] p-4">
+        <div className="mb-4 flex items-center justify-between px-2">
           <div>
-            <div className="text-[13px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Venue Agent</div>
-            <h2 className="serif mt-1 text-[41px] leading-none">{selectedVenue.name}</h2>
-            <p className="mt-3 max-w-3xl text-[15px] leading-7 text-muted">{selectedVenue.description || 'No description yet.'}</p>
+            <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Subscriber venues</div>
+            <h3 className="serif mt-1 text-[30px]">{venues.filter(venue => venue.active).length} active</h3>
           </div>
-          <div className="venue-admin-header-badges">
-            <SmallPill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</SmallPill>
-            <SmallPill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</SmallPill>
-            {!canManageSelected && <SmallPill>Read only</SmallPill>}
-          </div>
+          <span className="rounded-full border border-green-200 bg-green-50 px-2.5 py-1.5 text-[13px] font-extrabold text-green-700">Healthy</span>
         </div>
 
-        <form className="venue-admin-card premium-card rounded-[28px] p-5" onSubmit={saveVenue}>
-          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div><div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Identity</div><h3 className="serif mt-1 text-[31px]">Venue metadata</h3></div>
-            {canManageSelected && <button className="admin-btn secondary" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
+        {showCreate && <form className="mb-4 space-y-3 rounded-[22px] border border-flexee-100 bg-gradient-to-br from-flexee-50 to-white p-4" onSubmit={createVenue}>
+          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">New venue</div>
+          <label className="block">
+            <span className="mb-1.5 block text-[14px] font-extrabold">Venue name</span>
+            <input className="field" value={createForm.name} onChange={e => setCreateForm({...createForm, name:e.target.value})} required />
+          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <label className="block">
+              <span className="mb-1.5 block text-[14px] font-extrabold">Type</span>
+              <select className="field" value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
+            </label>
+            {platformSuperuser
+              ? <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
+                  <input className="field" value={createForm.organization_name} onChange={e => setCreateForm({...createForm, organization_name:e.target.value})} />
+                </label>
+              : <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
+                  <select className="field" value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select>
+                </label>}
           </div>
-          <div className="venue-admin-form-grid demo-form-grid">
-            <Field label="Venue name"><input value={venueForm?.name || ''} onChange={e => setVenueForm({...venueForm, name:e.target.value})} required /></Field>
-            <Field label="Venue type"><select value={venueForm?.venue_type || 'journal'} onChange={e => setVenueForm({...venueForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select></Field>
-            <Field label="Description" full><textarea rows="3" value={venueForm?.description || ''} onChange={e => setVenueForm({...venueForm, description:e.target.value})} /></Field>
-            <label className="venue-admin-check full"><input type="checkbox" checked={Boolean(venueForm?.active)} onChange={e => setVenueForm({...venueForm, active:e.target.checked})} /><span>Active and visible to authors for matching</span></label>
+          <label className="block">
+            <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
+            <textarea className="field min-h-[88px]" value={createForm.description} onChange={e => setCreateForm({...createForm, description:e.target.value})} />
+          </label>
+          <div className="flex flex-wrap justify-end gap-2">
+            <button className="rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm" type="button" onClick={() => setShowCreate(false)}>Cancel</button>
+            <button className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'create'}>{busy === 'create' ? 'Creating…' : 'Create venue'}</button>
           </div>
-        </form>
+        </form>}
 
-        <form className="venue-admin-card premium-card rounded-[28px] p-5" onSubmit={createConfig}>
-          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Editorial intelligence</div>
-              <h3 className="serif mt-1 text-[31px]">Create the next configuration version</h3>
-              <p>Saving creates a new immutable version and makes it active. Existing submissions remain pinned to the version they used.</p>
-            </div>
-            {canManageSelected && <button className="admin-btn" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
-          </div>
+        <div className="space-y-2">
+          {venues.map(venue => {
+            const active = selectedId === venue.id
+            const longName = String(venue.name || '').length > 26
+            return <button
+              type="button"
+              key={venue.id}
+              className={`venue-item flex w-full items-center gap-3 rounded-2xl border p-3.5 text-left ${active ? 'active border-line' : 'border-transparent hover:bg-flexee-50'}`}
+              onClick={() => {
+                setSelectedId(venue.id)
+                loadVenue(venue.id).catch(err => setError(err.message))
+              }}
+            >
+              <div className={`grid h-11 w-11 shrink-0 place-items-center rounded-xl text-flexee-600 serif ${active ? 'bg-white shadow-sm' : 'bg-canvas'}`}>
+                {venueInitial(venue.venue_type)}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className={longName ? 'text-[14px] font-extrabold leading-snug' : 'text-[15px] font-extrabold'}>{venue.name}</div>
+                <div className={`${longName ? 'mt-1' : 'mt-0.5'} text-[13px] font-medium text-muted`}>{venueTypeLabel(venue.venue_type)} · {venue.active ? 'Active' : 'Inactive'}</div>
+              </div>
+              {venue.config?.version && <span className="rounded-full bg-green-50 px-2.5 py-1 text-[12px] font-extrabold text-green-700">v{venue.config.version}</span>}
+            </button>
+          })}
+          {!venues.length && <div className="rounded-2xl border border-dashed border-line p-5 text-center text-[14px] font-semibold text-muted">No venues are configured yet.</div>}
+        </div>
+      </aside>
 
-          <div className="venue-admin-form-grid demo-form-grid">
-            <Field label="Aims & scope" hint="What this venue publishes and the boundaries of its subject matter." help={configFieldHelp.aims_scope} full><textarea rows="6" value={configForm.aims_scope} onChange={e => setConfigForm({...configForm, aims_scope:e.target.value})} /></Field>
-            <Field label="Accepted article types" hint="One per line. Example: Research article" help={configFieldHelp.article_types}><textarea rows="5" value={configForm.article_types} onChange={e => setConfigForm({...configForm, article_types:e.target.value})} /></Field>
-            <Field label="Accepted methods" hint="One per line. Leave blank if method-neutral." help={configFieldHelp.accepted_methods}><textarea rows="5" value={configForm.accepted_methods} onChange={e => setConfigForm({...configForm, accepted_methods:e.target.value})} /></Field>
-            <Field label="Quality threshold" help={configFieldHelp.quality_threshold} full><textarea rows="4" value={configForm.quality_threshold} onChange={e => setConfigForm({...configForm, quality_threshold:e.target.value})} /></Field>
-            <Field label="Reviewer criteria" hint="Expertise areas, one per line." help={configFieldHelp.reviewer_criteria}><textarea rows="5" value={configForm.reviewer_criteria} onChange={e => setConfigForm({...configForm, reviewer_criteria:e.target.value})} /></Field>
-            <Field label="Required disclosures" hint="One per line." help={configFieldHelp.disclosures}><textarea rows="5" value={configForm.disclosures} onChange={e => setConfigForm({...configForm, disclosures:e.target.value})} /></Field>
-            <Field label="Reporting standards" hint="One per line." help={configFieldHelp.reporting_standards}><textarea rows="6" value={configForm.reporting_standards} onChange={e => setConfigForm({...configForm, reporting_standards:e.target.value})} /></Field>
-            <Field label="Desk-rejection guidance" hint="Free-text guidance for the venue agent. One rule per line." help={configFieldHelp.desk_rejection_rules}><textarea rows="6" value={configForm.desk_rejection_rules} onChange={e => setConfigForm({...configForm, desk_rejection_rules:e.target.value})} /></Field>
-            <Field label="Deterministic desk-rejection rules (JSON)" hint='Supported fields: word_count, reference_count, required_sections, manuscript_type, disclosure. Numeric fields use >, >=, <, <=, ==, !=. required_sections uses missing_any or missing_all with an array of section names.' help={configFieldHelp.structured_desk_rejection_rules} full><textarea className="venue-admin-code" rows="10" value={configForm.structured_desk_rejection_rules} onChange={e => setConfigForm({...configForm, structured_desk_rejection_rules:e.target.value})} /></Field>
-            <Field label="Required submission items (JSON)" hint='Supported types: text, textarea, url, checkbox, file.' help={configFieldHelp.required_submission_items} full><textarea className="venue-admin-code" rows="10" value={configForm.required_submission_items} onChange={e => setConfigForm({...configForm, required_submission_items:e.target.value})} /></Field>
-            <Field label="Content retention (days)" hint="Optional. Starts when the author formally submits. Leave blank to keep content until a future policy is configured." help={configFieldHelp.retention_days}><input type="number" min="1" max="3650" step="1" value={configForm.retention_days} onChange={e => setConfigForm({...configForm, retention_days:e.target.value})} placeholder="Example: 365" /></Field>
-            <Field label="Policies (JSON)" hint='Structured venue policies in JSON.' help={configFieldHelp.policies} full><textarea className="venue-admin-code" rows="10" value={configForm.policies} onChange={e => setConfigForm({...configForm, policies:e.target.value})} /></Field>
-            <Field label="Current demand (JSON)" hint='Special issues, tracks, priorities, or topics.' help={configFieldHelp.current_demand}><textarea className="venue-admin-code" rows="7" value={configForm.current_demand} onChange={e => setConfigForm({...configForm, current_demand:e.target.value})} /></Field>
-            <Field label="Deadlines (JSON)" help={configFieldHelp.deadlines}><textarea className="venue-admin-code" rows="7" value={configForm.deadlines} onChange={e => setConfigForm({...configForm, deadlines:e.target.value})} /></Field>
-            <Field label="Submission capacity (JSON)" help={configFieldHelp.submission_capacity}><textarea className="venue-admin-code" rows="7" value={configForm.submission_capacity} onChange={e => setConfigForm({...configForm, submission_capacity:e.target.value})} /></Field>
-            <Field label="Configuration notes" help={configFieldHelp.config_notes}><textarea rows="7" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
-          </div>
-        </form>
+      <div className="space-y-5">
+        {error && <div className="admin-error venue-admin-message">{error}</div>}
+        {success && <div className="venue-admin-success venue-admin-message">{success}</div>}
 
-        <section className="venue-admin-card premium-card rounded-[28px] p-5">
-          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editor feedback</div>
-              <h3 className="serif mt-1 text-[30px]">Venue-specific learning queue</h3>
-              <p>Assessment corrections remain evidence only. Venue-rule corrections can be turned into an inactive draft configuration for owner review; the live Venue Agent is never changed automatically.</p>
-            </div>
-            {canManageSelected && selectedFeedbackIds.length > 0 && <button className="admin-btn" type="button" onClick={createFeedbackDraft} disabled={busy === 'feedback-draft'}>{busy === 'feedback-draft' ? 'Creating draft…' : `Create draft from ${selectedFeedbackIds.length} selected`}</button>}
-          </div>
-          <div className="venue-admin-history mt-4 space-y-3">
-            {feedback.length ? feedback.map(item => {
-              const selectable = item.draftable && !item.applied_to_config_version && canManageSelected
-              const selected = selectedFeedbackIds.includes(item.id)
-              return <article key={item.id}>
-                <div>
-                  <div className="venue-admin-history-title flex flex-wrap items-center gap-2">
-                    {selectable && <input
-                      type="checkbox"
-                      checked={selected}
-                      onChange={e => setSelectedFeedbackIds(current => e.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))}
-                      aria-label={`Select ${item.assessment_field} feedback`}
-                    />}
-                    <b>{String(item.assessment_field || '').replaceAll('_', ' ')}</b>
-                    <SmallPill tone={item.draftable ? 'good' : 'neutral'}>{item.draftable ? 'Venue rule' : 'Assessment only'}</SmallPill>
-                    {item.applied_to_config_version && <SmallPill>Draft v{item.applied_to_config_version}</SmallPill>}
-                  </div>
-                  <p>{item.reason || 'No reason recorded.'}</p>
-                  <small>Recorded {new Date(item.created_at).toLocaleString()}{item.venue_config_version ? ` · Based on config v${item.venue_config_version}` : ''}</small>
-                </div>
-              </article>
-            }) : <div className="venue-admin-empty">No editor feedback has been recorded for this venue yet.</div>}
-          </div>
-        </section>
-
-        <section className="venue-admin-card premium-card rounded-[28px] p-5">
-          <div className="venue-admin-card-head mb-5 flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div><div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Audit trail</div><h3 className="serif mt-1 text-[30px]">Configuration history</h3><p>Older versions can be reactivated without changing the historical version attached to past submissions.</p></div>
-          </div>
-          <div className="venue-admin-history mt-4 space-y-3">
-            {configs.map(config => <article key={config.id}>
+        {!selectedVenue ? <div className="premium-card rounded-[28px] p-8 text-center">
+          <div className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">No venue selected</div>
+          <h3 className="serif mt-2 text-[30px]">Create or select a venue to configure its editorial agent.</h3>
+        </div> : <>
+          <div className="premium-card rounded-[28px] bg-gradient-to-r from-white via-white to-flexee-50/65 p-6">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
               <div>
-                <div className="venue-admin-history-title flex flex-wrap items-center gap-2">
-                  <b>Version {config.version}</b>
-                  {config.active && <SmallPill tone="good">Active</SmallPill>}
-                </div>
-                <p>{config.aims_scope || 'No aims and scope recorded.'}</p>
-                <small>Created {new Date(config.created_at).toLocaleString()}</small>
+                <div className="text-[13px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Venue Agent</div>
+                <h3 className="serif mt-1 text-[41px] leading-none">{selectedVenue.name}</h3>
+                <p className="mt-3 max-w-3xl text-[15px] leading-7 text-muted">{selectedVenue.description || 'No description yet.'}</p>
               </div>
-              <div className="venue-admin-history-actions">
-                <button className="admin-btn secondary" type="button" onClick={() => setConfigForm(configToForm(config))}>Load into editor</button>
-                {!config.active && canManageSelected && <button className="admin-btn secondary" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
+              <div className="flex flex-wrap gap-2">
+                <Pill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</Pill>
+                <Pill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</Pill>
+                {!canManageSelected && <Pill>Read only</Pill>}
               </div>
-            </article>)}
-            {!configs.length && <div className="venue-admin-empty">No Venue Agent configuration has been created yet.</div>}
+            </div>
           </div>
-        </section>
-      </>}
-    </section>
+
+          <div className="grid items-start gap-5 2xl:grid-cols-[.72fr_1.28fr]">
+            <form className="premium-card h-fit rounded-[28px] p-5" onSubmit={saveVenue}>
+              <div className="mb-5 flex items-center justify-between">
+                <div>
+                  <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Identity</div>
+                  <h4 className="serif mt-1 text-[31px]">Venue metadata</h4>
+                </div>
+                {canManageSelected && <button className="rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'venue'}>{busy === 'venue' ? 'Saving…' : 'Save metadata'}</button>}
+              </div>
+
+              <div className="space-y-4">
+                <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Venue name</span>
+                  <input className="field" value={venueForm?.name || ''} onChange={e => setVenueForm({...venueForm, name:e.target.value})} required />
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Venue type</span>
+                  <select className="field" value={venueForm?.venue_type || 'journal'} onChange={e => setVenueForm({...venueForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
+                </label>
+                <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
+                  <textarea className="field min-h-[105px]" value={venueForm?.description || ''} onChange={e => setVenueForm({...venueForm, description:e.target.value})} />
+                </label>
+                <label className="flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50/80 px-4 py-3">
+                  <input type="checkbox" className="h-4 w-4 accent-[#c7662d]" checked={Boolean(venueForm?.active)} onChange={e => setVenueForm({...venueForm, active:e.target.checked})} />
+                  <span className="text-[14px] font-bold text-green-800">Active and visible to authors for matching</span>
+                </label>
+              </div>
+            </form>
+
+            <form className="premium-card rounded-[28px] p-5" onSubmit={createConfig}>
+              <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Editorial intelligence</div>
+                  <h4 className="serif mt-1 text-[31px]">{activeConfig ? `Configuration v${activeConfig.version}` : 'No configuration yet'}</h4>
+                  <div className="mt-1 text-[14px] leading-6 text-muted">New saves create immutable versions while historical submissions remain pinned.</div>
+                </div>
+                {canManageSelected && <button className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={busy === 'config'}>{busy === 'config' ? 'Creating…' : activeConfig ? 'Create new version' : 'Create first config'}</button>}
+              </div>
+
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Field label="Aims & scope" help={configFieldHelp.aims_scope} full><textarea className="field min-h-[105px]" value={configForm.aims_scope} onChange={e => setConfigForm({...configForm, aims_scope:e.target.value})} placeholder="What this venue publishes and the boundaries of its subject matter." /></Field>
+                <Field label="Accepted article types" help={configFieldHelp.article_types}><textarea className="field min-h-[105px]" value={configForm.article_types} onChange={e => setConfigForm({...configForm, article_types:e.target.value})} placeholder="One per line. Example: Research article" /></Field>
+                <Field label="Accepted methods" help={configFieldHelp.accepted_methods}><textarea className="field min-h-[105px]" value={configForm.accepted_methods} onChange={e => setConfigForm({...configForm, accepted_methods:e.target.value})} placeholder="Leave blank if method-neutral." /></Field>
+                <Field label="Quality threshold" help={configFieldHelp.quality_threshold} full><textarea className="field min-h-[105px]" value={configForm.quality_threshold} onChange={e => setConfigForm({...configForm, quality_threshold:e.target.value})} /></Field>
+                <Field label="Reviewer criteria" help={configFieldHelp.reviewer_criteria}><textarea className="field min-h-[125px]" value={configForm.reviewer_criteria} onChange={e => setConfigForm({...configForm, reviewer_criteria:e.target.value})} placeholder="Expertise areas, one per line." /></Field>
+                <Field label="Required disclosures" help={configFieldHelp.disclosures}><textarea className="field min-h-[125px]" value={configForm.disclosures} onChange={e => setConfigForm({...configForm, disclosures:e.target.value})} placeholder="One per line." /></Field>
+                <Field label="Reporting standards" help={configFieldHelp.reporting_standards}><textarea className="field min-h-[125px]" value={configForm.reporting_standards} onChange={e => setConfigForm({...configForm, reporting_standards:e.target.value})} placeholder="One per line." /></Field>
+                <Field label="Desk-rejection guidance" help={configFieldHelp.desk_rejection_rules}><textarea className="field min-h-[125px]" value={configForm.desk_rejection_rules} onChange={e => setConfigForm({...configForm, desk_rejection_rules:e.target.value})} placeholder="Free-text guidance for the venue agent. One rule per line." /></Field>
+                <Field label="Deterministic desk-rejection rules (JSON)" help={configFieldHelp.structured_desk_rejection_rules} full><textarea className="field venue-admin-code min-h-[160px]" value={configForm.structured_desk_rejection_rules} onChange={e => setConfigForm({...configForm, structured_desk_rejection_rules:e.target.value})} placeholder="Supported fields: word_count, reference_count, required_sections, manuscript_type, disclosure." /></Field>
+                <Field label="Required submission items (JSON)" help={configFieldHelp.required_submission_items} full><textarea className="field venue-admin-code min-h-[160px]" value={configForm.required_submission_items} onChange={e => setConfigForm({...configForm, required_submission_items:e.target.value})} placeholder="Supported types: text, textarea, url, checkbox, file." /></Field>
+                <Field label="Content retention (days)" help={configFieldHelp.retention_days}><input className="field" type="number" min="1" max="3650" step="1" value={configForm.retention_days} onChange={e => setConfigForm({...configForm, retention_days:e.target.value})} placeholder="Optional. Example: 365" /></Field>
+                <Field label="Policies (JSON)" help={configFieldHelp.policies}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.policies} onChange={e => setConfigForm({...configForm, policies:e.target.value})} placeholder="Structured venue policies in JSON." /></Field>
+                <Field label="Current demand (JSON)" help={configFieldHelp.current_demand}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.current_demand} onChange={e => setConfigForm({...configForm, current_demand:e.target.value})} placeholder="Special issues, tracks, priorities, or topics." /></Field>
+                <Field label="Deadlines (JSON)" help={configFieldHelp.deadlines}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.deadlines} onChange={e => setConfigForm({...configForm, deadlines:e.target.value})} /></Field>
+                <Field label="Submission capacity (JSON)" help={configFieldHelp.submission_capacity}><textarea className="field venue-admin-code min-h-[125px]" value={configForm.submission_capacity} onChange={e => setConfigForm({...configForm, submission_capacity:e.target.value})} /></Field>
+                <Field label="Configuration notes" help={configFieldHelp.config_notes}><textarea className="field min-h-[125px]" value={configForm.config_notes} onChange={e => setConfigForm({...configForm, config_notes:e.target.value})} /></Field>
+              </div>
+            </form>
+          </div>
+
+          <div className="grid items-start gap-5 xl:grid-cols-2">
+            <div className="premium-card h-fit rounded-[28px] p-5">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                  <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editor feedback</div>
+                  <h4 className="serif mt-1 text-[30px]">Venue-specific learning queue</h4>
+                </div>
+                {canManageSelected && selectedFeedbackIds.length > 0 && <button className="shine rounded-2xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={createFeedbackDraft} disabled={busy === 'feedback-draft'}>{busy === 'feedback-draft' ? 'Creating draft…' : `Create draft from ${selectedFeedbackIds.length} selected`}</button>}
+              </div>
+
+              <div className="mt-4 space-y-3">
+                {feedback.length ? feedback.map(item => {
+                  const selectable = item.draftable && !item.applied_to_config_version && canManageSelected
+                  const selected = selectedFeedbackIds.includes(item.id)
+                  return <div key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+                    <div className="flex flex-wrap items-center gap-2">
+                      {selectable && <input
+                        type="checkbox"
+                        className="h-4 w-4 accent-[#c7662d]"
+                        checked={selected}
+                        onChange={e => setSelectedFeedbackIds(current => e.target.checked ? [...current, item.id] : current.filter(id => id !== item.id))}
+                        aria-label={`Select ${item.assessment_field} feedback`}
+                      />}
+                      <span className="text-[16px] font-extrabold">{venueTypeLabel(String(item.assessment_field || '').replaceAll('_', ' '))}</span>
+                      <span className={`rounded-full px-2.5 py-1 text-[13px] font-extrabold ${item.draftable ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-muted'}`}>{item.draftable ? 'Venue rule' : 'Assessment only'}</span>
+                      {item.applied_to_config_version && <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">Draft v{item.applied_to_config_version}</span>}
+                    </div>
+                    <p className="mt-2 text-[14px] leading-6 text-muted">{item.reason || 'No reason recorded.'}</p>
+                    <div className="mt-2 text-[13px] font-semibold text-[#8d8179]">{formatDate(item.created_at)}{item.venue_config_version ? ` · Config v${item.venue_config_version}` : ''}</div>
+                  </div>
+                }) : <div className="rounded-2xl border border-dashed border-line p-5 text-center text-[14px] font-semibold text-muted">No editor feedback has been recorded for this venue yet.</div>}
+              </div>
+            </div>
+
+            <div className="premium-card h-fit rounded-[28px] p-5">
+              <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Audit trail</div>
+              <h4 className="serif mt-1 text-[30px]">Configuration history</h4>
+
+              <div className="mt-4 space-y-3">
+                {configs.map(config => <div key={config.id} className={`rounded-2xl border p-4 ${config.active ? 'border-green-100 bg-green-50/60' : 'border-line bg-[#fcfaf8]'}`}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className={`grid h-10 w-10 place-items-center rounded-xl text-[13px] font-extrabold ${config.active ? 'bg-green-100 text-green-700' : 'bg-stone-100 text-muted'}`}>
+                        v{config.version}
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[15px] font-extrabold">Version {config.version}</span>
+                          {config.active && <span className="rounded-full bg-green-100 px-2 py-1 text-[12px] font-extrabold text-green-700">Active</span>}
+                        </div>
+                        <div className="mt-1 text-[13px] font-semibold text-muted">{formatDate(config.created_at)} · {formatTime(config.created_at)}</div>
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      <button className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold" type="button" onClick={() => setConfigForm(configToForm(config))}>Load into editor</button>
+                      {!config.active && canManageSelected && <button className="rounded-xl border border-line bg-white px-4 py-2 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-60" type="button" disabled={busy === `activate-${config.id}`} onClick={() => activateConfig(config)}>{busy === `activate-${config.id}` ? 'Activating…' : 'Reactivate'}</button>}
+                    </div>
+                  </div>
+                  <p className="mt-4 text-[14px] leading-6 text-muted">{config.aims_scope || 'No aims and scope recorded.'}</p>
+                </div>)}
+                {!configs.length && <div className="rounded-2xl border border-dashed border-line p-5 text-center text-[14px] font-semibold text-muted">No Venue Agent configuration has been created yet.</div>}
+              </div>
+            </div>
+          </div>
+        </>}
+      </div>
     </div>
   </div>
 }
