@@ -2,7 +2,7 @@
    Scoped to the admin root so public author pages keep their existing styles. */
 
 .admin-demo-root,
-.admin-demo-root * {
+:where(.admin-demo-root) * {
   box-sizing: border-box;
 }
 
@@ -10,7 +10,118 @@ html {
   scroll-behavior: smooth;
 }
 
-.admin-demo-root {
+/* Scoped Tailwind preflight. index.html disables preflight globally so the public
+   author pages keep their styles; the demo relies on it, so it is restored here for
+   the admin shell only. :where() keeps specificity at zero, so every utility class
+   and every existing admin rule still wins. */
+:where(.admin-demo-root),
+:where(.admin-demo-root) *,
+:where(.admin-demo-root) ::before,
+:where(.admin-demo-root) ::after {
+  border-width: 0;
+  border-style: solid;
+  border-color: #e5e7eb;
+}
+
+:where(.admin-demo-root) {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  tab-size: 4;
+}
+
+:where(.admin-demo-root :is(h1, h2, h3, h4, h5, h6)) {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+:where(.admin-demo-root :is(blockquote, dl, dd, h1, h2, h3, h4, h5, h6, hr, figure, p, pre)) {
+  margin: 0;
+}
+
+:where(.admin-demo-root :is(ol, ul, menu)) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.admin-demo-root :is(b, strong)) {
+  font-weight: bolder;
+}
+
+:where(.admin-demo-root :is(small)) {
+  font-size: 80%;
+}
+
+:where(.admin-demo-root :is(a)) {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+:where(.admin-demo-root :is(table)) {
+  text-indent: 0;
+  border-color: inherit;
+  border-collapse: collapse;
+}
+
+:where(.admin-demo-root :is(button, input, optgroup, select, textarea)) {
+  font-family: inherit;
+  font-feature-settings: inherit;
+  font-variation-settings: inherit;
+  font-size: 100%;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  color: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+:where(.admin-demo-root :is(button, select)) {
+  text-transform: none;
+}
+
+:where(.admin-demo-root :is(button, input[type='button'], input[type='reset'], input[type='submit'])) {
+  -webkit-appearance: button;
+  background-color: transparent;
+  background-image: none;
+}
+
+:where(.admin-demo-root :is(button, [role='button'])) {
+  cursor: pointer;
+}
+
+:where(.admin-demo-root :disabled) {
+  cursor: default;
+}
+
+:where(.admin-demo-root :is(summary)) {
+  display: list-item;
+}
+
+:where(.admin-demo-root :is(textarea)) {
+  resize: vertical;
+}
+
+:where(.admin-demo-root :is(input, textarea))::placeholder {
+  opacity: 1;
+  color: #9ca3af;
+}
+
+:where(.admin-demo-root :is(img, svg, video, canvas, audio, iframe, embed, object)) {
+  display: block;
+  vertical-align: middle;
+}
+
+:where(.admin-demo-root :is(img, video)) {
+  max-width: 100%;
+  height: auto;
+}
+
+:where(.admin-demo-root [hidden]) {
+  display: none;
+}
+
+:where(.admin-demo-root) {
   margin: 0;
   color: #211d1a;
   font-family:
@@ -29,29 +140,29 @@ html {
   overflow: hidden;
 }
 
-.admin-demo-root button,
-.admin-demo-root input,
-.admin-demo-root select,
-.admin-demo-root textarea {
+:where(.admin-demo-root) button,
+:where(.admin-demo-root) input,
+:where(.admin-demo-root) select,
+:where(.admin-demo-root) textarea {
   font: inherit;
 }
 
-.admin-demo-root button {
+:where(.admin-demo-root) button {
   -webkit-tap-highlight-color: transparent;
 }
 
-.admin-demo-root .serif {
+:where(.admin-demo-root) .serif {
   font-family: Georgia, "Times New Roman", serif;
   letter-spacing: -.045em;
 }
 
-.admin-demo-root .glass {
+:where(.admin-demo-root) .glass {
   background: rgba(255,255,255,.78);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
 }
 
-.admin-demo-root .premium-card {
+:where(.admin-demo-root) .premium-card {
   background:
     linear-gradient(
       145deg,
@@ -64,7 +175,7 @@ html {
     inset 0 1px 0 rgba(255,255,255,.9);
 }
 
-.admin-demo-root .warm-panel {
+:where(.admin-demo-root) .warm-panel {
   background:
     linear-gradient(
       145deg,
@@ -73,35 +184,35 @@ html {
     );
 }
 
-.admin-demo-root .soft-grid {
+:where(.admin-demo-root) .soft-grid {
   background-image:
     linear-gradient(rgba(101,70,49,.024) 1px, transparent 1px),
     linear-gradient(90deg, rgba(101,70,49,.024) 1px, transparent 1px);
   background-size: 28px 28px;
 }
 
-.admin-demo-root .page-scroll::-webkit-scrollbar,
-.admin-demo-root .thin-scroll::-webkit-scrollbar {
+:where(.admin-demo-root) .page-scroll::-webkit-scrollbar,
+:where(.admin-demo-root) .thin-scroll::-webkit-scrollbar {
   width: 9px;
   height: 9px;
 }
 
-.admin-demo-root .page-scroll::-webkit-scrollbar-thumb,
-.admin-demo-root .thin-scroll::-webkit-scrollbar-thumb {
+:where(.admin-demo-root) .page-scroll::-webkit-scrollbar-thumb,
+:where(.admin-demo-root) .thin-scroll::-webkit-scrollbar-thumb {
   background: #d6c4b7;
   border-radius: 999px;
 }
 
-.admin-demo-root .page-scroll::-webkit-scrollbar-track,
-.admin-demo-root .thin-scroll::-webkit-scrollbar-track {
+:where(.admin-demo-root) .page-scroll::-webkit-scrollbar-track,
+:where(.admin-demo-root) .thin-scroll::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.admin-demo-root .view {
+:where(.admin-demo-root) .view {
   display: none;
 }
 
-.admin-demo-root .view.active {
+:where(.admin-demo-root) .view.active {
   display: block;
   animation: pageIn .25s ease-out;
 }
@@ -118,16 +229,16 @@ html {
   }
 }
 
-.admin-demo-root .field,
-.admin-demo-root .admin-field input,
-.admin-demo-root .admin-field select,
-.admin-demo-root .admin-field textarea,
-.admin-demo-root .venue-admin-card input,
-.admin-demo-root .venue-admin-card select,
-.admin-demo-root .venue-admin-card textarea,
-.admin-demo-root .venue-admin-create input,
-.admin-demo-root .venue-admin-create select,
-.admin-demo-root .venue-admin-create textarea {
+:where(.admin-demo-root) .field,
+:where(.admin-demo-root) .admin-field input,
+:where(.admin-demo-root) .admin-field select,
+:where(.admin-demo-root) .admin-field textarea,
+:where(.admin-demo-root) .venue-admin-card input,
+:where(.admin-demo-root) .venue-admin-card select,
+:where(.admin-demo-root) .venue-admin-card textarea,
+:where(.admin-demo-root) .venue-admin-create input,
+:where(.admin-demo-root) .venue-admin-create select,
+:where(.admin-demo-root) .venue-admin-create textarea {
   width: 100%;
   min-height: 48px;
   padding: 11px 14px;
@@ -144,41 +255,41 @@ html {
     background .18s ease;
 }
 
-.admin-demo-root .field:hover,
-.admin-demo-root .admin-field input:hover,
-.admin-demo-root .admin-field select:hover,
-.admin-demo-root .admin-field textarea:hover,
-.admin-demo-root .venue-admin-card input:hover,
-.admin-demo-root .venue-admin-card select:hover,
-.admin-demo-root .venue-admin-card textarea:hover,
-.admin-demo-root .venue-admin-create input:hover,
-.admin-demo-root .venue-admin-create select:hover,
-.admin-demo-root .venue-admin-create textarea:hover {
+:where(.admin-demo-root) .field:hover,
+:where(.admin-demo-root) .admin-field input:hover,
+:where(.admin-demo-root) .admin-field select:hover,
+:where(.admin-demo-root) .admin-field textarea:hover,
+:where(.admin-demo-root) .venue-admin-card input:hover,
+:where(.admin-demo-root) .venue-admin-card select:hover,
+:where(.admin-demo-root) .venue-admin-card textarea:hover,
+:where(.admin-demo-root) .venue-admin-create input:hover,
+:where(.admin-demo-root) .venue-admin-create select:hover,
+:where(.admin-demo-root) .venue-admin-create textarea:hover {
   background: #fff;
   border-color: #d9bead;
 }
 
-.admin-demo-root .field:focus,
-.admin-demo-root .admin-field input:focus,
-.admin-demo-root .admin-field select:focus,
-.admin-demo-root .admin-field textarea:focus,
-.admin-demo-root .venue-admin-card input:focus,
-.admin-demo-root .venue-admin-card select:focus,
-.admin-demo-root .venue-admin-card textarea:focus,
-.admin-demo-root .venue-admin-create input:focus,
-.admin-demo-root .venue-admin-create select:focus,
-.admin-demo-root .venue-admin-create textarea:focus {
+:where(.admin-demo-root) .field:focus,
+:where(.admin-demo-root) .admin-field input:focus,
+:where(.admin-demo-root) .admin-field select:focus,
+:where(.admin-demo-root) .admin-field textarea:focus,
+:where(.admin-demo-root) .venue-admin-card input:focus,
+:where(.admin-demo-root) .venue-admin-card select:focus,
+:where(.admin-demo-root) .venue-admin-card textarea:focus,
+:where(.admin-demo-root) .venue-admin-create input:focus,
+:where(.admin-demo-root) .venue-admin-create select:focus,
+:where(.admin-demo-root) .venue-admin-create textarea:focus {
   background: #fff;
   border-color: #c7662d;
   box-shadow: 0 0 0 4px rgba(199,102,45,.09);
 }
 
-.admin-demo-root textarea.field,
-.admin-demo-root textarea {
+:where(.admin-demo-root) textarea.field,
+:where(.admin-demo-root) textarea {
   resize: vertical;
 }
 
-.admin-demo-root .status-dot {
+:where(.admin-demo-root) .status-dot {
   display: inline-block;
   width: 9px;
   height: 9px;
@@ -186,7 +297,7 @@ html {
   flex: 0 0 auto;
 }
 
-.admin-demo-root .nav-item {
+:where(.admin-demo-root) .nav-item {
   position: relative;
   transition:
     background .18s ease,
@@ -194,7 +305,7 @@ html {
     transform .18s ease;
 }
 
-.admin-demo-root .nav-item::before {
+:where(.admin-demo-root) .nav-item::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -207,11 +318,11 @@ html {
   transition: height .18s ease;
 }
 
-.admin-demo-root .nav-item:hover {
+:where(.admin-demo-root) .nav-item:hover {
   transform: translateX(2px);
 }
 
-.admin-demo-root .nav-item.active {
+:where(.admin-demo-root) .nav-item.active {
   color: #984219;
   background:
     linear-gradient(
@@ -222,62 +333,62 @@ html {
   box-shadow: inset 0 0 0 1px rgba(199,102,45,.07);
 }
 
-.admin-demo-root .nav-item.active::before {
+:where(.admin-demo-root) .nav-item.active::before {
   height: 25px;
 }
 
-.admin-demo-root .admin-demo-backdrop,
-.admin-demo-root #drawerBackdrop {
+:where(.admin-demo-root) .admin-demo-backdrop,
+:where(.admin-demo-root) #drawerBackdrop {
   opacity: 0;
   pointer-events: none;
   transition: opacity .28s ease;
 }
 
-.admin-demo-root .admin-demo-backdrop.open,
-.admin-demo-root #drawerBackdrop.open {
+:where(.admin-demo-root) .admin-demo-backdrop.open,
+:where(.admin-demo-root) #drawerBackdrop.open {
   opacity: 1;
   pointer-events: auto;
 }
 
-.admin-demo-root .admin-demo-drawer,
-.admin-demo-root #drawer {
+:where(.admin-demo-root) .admin-demo-drawer,
+:where(.admin-demo-root) #drawer {
   transform: translateX(-112%);
   transition:
     transform .32s cubic-bezier(.2,.85,.28,1),
     box-shadow .32s ease;
 }
 
-.admin-demo-root .admin-demo-drawer.open,
-.admin-demo-root #drawer.open {
+:where(.admin-demo-root) .admin-demo-drawer.open,
+:where(.admin-demo-root) #drawer.open {
   transform: translateX(0);
   box-shadow: 35px 0 100px rgba(40,22,13,.27);
 }
 
-.admin-demo-root .admin-demo-hamburger,
-.admin-demo-root #hamburger {
+:where(.admin-demo-root) .admin-demo-hamburger,
+:where(.admin-demo-root) #hamburger {
   transition:
     transform .18s ease,
     background .18s ease,
     box-shadow .18s ease;
 }
 
-.admin-demo-root .admin-demo-hamburger:hover,
-.admin-demo-root #hamburger:hover {
+:where(.admin-demo-root) .admin-demo-hamburger:hover,
+:where(.admin-demo-root) #hamburger:hover {
   transform: translateY(-2px);
 }
 
-.admin-demo-root .admin-demo-hamburger.active,
-.admin-demo-root #hamburger.active {
+:where(.admin-demo-root) .admin-demo-hamburger.active,
+:where(.admin-demo-root) #hamburger.active {
   background: #8c3b19;
   box-shadow: 0 14px 30px rgba(140,59,25,.31);
 }
 
-.admin-demo-root .shine {
+:where(.admin-demo-root) .shine {
   position: relative;
   overflow: hidden;
 }
 
-.admin-demo-root .shine::before {
+:where(.admin-demo-root) .shine::before {
   content: "";
   position: absolute;
   top: -50%;
@@ -295,17 +406,17 @@ html {
   transition: left .55s ease;
 }
 
-.admin-demo-root .shine:hover::before {
+:where(.admin-demo-root) .shine:hover::before {
   left: 140%;
 }
 
-.admin-demo-root .metric {
+:where(.admin-demo-root) .metric {
   position: relative;
   overflow: hidden;
   isolation: isolate;
 }
 
-.admin-demo-root .metric::before {
+:where(.admin-demo-root) .metric::before {
   content: "";
   position: absolute;
   z-index: -1;
@@ -322,18 +433,18 @@ html {
     );
 }
 
-.admin-demo-root .queue-row {
+:where(.admin-demo-root) .queue-row {
   border-left: 4px solid transparent;
   transition:
     background .18s ease,
     border-color .18s ease;
 }
 
-.admin-demo-root .queue-row:hover {
+:where(.admin-demo-root) .queue-row:hover {
   background: #fff9f5;
 }
 
-.admin-demo-root .queue-row.active {
+:where(.admin-demo-root) .queue-row.active {
   border-left-color: #c7662d;
   background:
     linear-gradient(
@@ -343,12 +454,12 @@ html {
     );
 }
 
-.admin-demo-root .workspace-tab {
+:where(.admin-demo-root) .workspace-tab {
   position: relative;
   transition: color .18s ease;
 }
 
-.admin-demo-root .workspace-tab::after {
+:where(.admin-demo-root) .workspace-tab::after {
   content: "";
   position: absolute;
   left: 15px;
@@ -361,24 +472,24 @@ html {
   transition: transform .18s ease;
 }
 
-.admin-demo-root .workspace-tab.active {
+:where(.admin-demo-root) .workspace-tab.active {
   color: #9d461d;
 }
 
-.admin-demo-root .workspace-tab.active::after {
+:where(.admin-demo-root) .workspace-tab.active::after {
   transform: scaleX(1);
 }
 
-.admin-demo-root .tab-panel {
+:where(.admin-demo-root) .tab-panel {
   display: none;
 }
 
-.admin-demo-root .tab-panel.active {
+:where(.admin-demo-root) .tab-panel.active {
   display: block;
   animation: pageIn .2s ease;
 }
 
-.admin-demo-root .venue-item {
+:where(.admin-demo-root) .venue-item {
   transition:
     background .18s ease,
     border-color .18s ease,
@@ -386,11 +497,11 @@ html {
     transform .18s ease;
 }
 
-.admin-demo-root .venue-item:hover {
+:where(.admin-demo-root) .venue-item:hover {
   transform: translateY(-1px);
 }
 
-.admin-demo-root .venue-item.active {
+:where(.admin-demo-root) .venue-item.active {
   border-color: #efc7ae;
   background:
     linear-gradient(
@@ -401,25 +512,25 @@ html {
   box-shadow: 0 10px 24px rgba(90,49,27,.075);
 }
 
-.admin-demo-root .audit-table tbody tr {
+:where(.admin-demo-root) .demo-audit-table tbody tr {
   transition: background .16s ease;
 }
 
-.admin-demo-root .audit-table tbody tr:hover {
+:where(.admin-demo-root) .demo-audit-table tbody tr:hover {
   background: #fff9f5;
 }
 
-.admin-demo-root .sidebar-content-card {
+:where(.admin-demo-root) .sidebar-content-card {
   height: fit-content !important;
   align-self: start !important;
 }
 
 /* Live form bridges: keep repo behavior but make controls visually identical to the demo. */
-.admin-demo-root .admin-field {
+:where(.admin-demo-root) .admin-field {
   display: block;
 }
 
-.admin-demo-root .admin-field > span {
+:where(.admin-demo-root) .admin-field > span {
   display: block;
   margin-bottom: 6px;
   color: #211d1a;
@@ -427,7 +538,7 @@ html {
   font-weight: 800;
 }
 
-.admin-demo-root .admin-field > small {
+:where(.admin-demo-root) .admin-field > small {
   display: block;
   margin-top: 6px;
   color: #746c66;
@@ -435,7 +546,7 @@ html {
   line-height: 1.45;
 }
 
-.admin-demo-root .admin-btn {
+:where(.admin-demo-root) .admin-btn {
   border: 0;
   border-radius: 16px;
   background: #c7662d;
@@ -447,70 +558,70 @@ html {
   cursor: pointer;
 }
 
-.admin-demo-root .admin-btn.secondary {
+:where(.admin-demo-root) .admin-btn.secondary {
   border: 1px solid #e8dcd3;
   background: #fff;
   color: #211d1a;
   box-shadow: none;
 }
 
-.admin-demo-root .admin-btn.danger {
+:where(.admin-demo-root) .admin-btn.danger {
   background: #b91c1c;
   box-shadow: none;
 }
 
-.admin-demo-root .admin-btn:disabled {
+:where(.admin-demo-root) .admin-btn:disabled {
   cursor: not-allowed;
   opacity: .6;
 }
 
-.admin-demo-root .venue-admin-layout {
+:where(.admin-demo-root) .venue-admin-layout {
   width: 100%;
 }
 
-.admin-demo-root .venue-admin-main,
-.admin-demo-root .editor-detail,
-.admin-demo-root .editor-workspace {
+:where(.admin-demo-root) .venue-admin-main,
+:where(.admin-demo-root) .editor-detail,
+:where(.admin-demo-root) .editor-workspace {
   min-width: 0;
 }
 
-.admin-demo-root .venue-admin-list,
-.admin-demo-root .editor-queue {
+:where(.admin-demo-root) .venue-admin-list,
+:where(.admin-demo-root) .editor-queue {
   height: fit-content !important;
   align-self: start !important;
 }
 
-.admin-demo-root .venue-admin-list-head,
-.admin-demo-root .venue-admin-card-head,
-.admin-demo-root .venue-admin-header {
+:where(.admin-demo-root) .venue-admin-list-head,
+:where(.admin-demo-root) .venue-admin-card-head,
+:where(.admin-demo-root) .venue-admin-header {
   border: 0;
 }
 
-.admin-demo-root .venue-admin-header {
+:where(.admin-demo-root) .venue-admin-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   gap: 18px;
 }
 
-.admin-demo-root .venue-admin-header-badges {
+:where(.admin-demo-root) .venue-admin-header-badges {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.admin-demo-root .venue-admin-form-grid.demo-form-grid {
+:where(.admin-demo-root) .venue-admin-form-grid.demo-form-grid {
   display: grid;
   gap: 16px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.admin-demo-root .venue-admin-form-grid .full,
-.admin-demo-root .admin-field.full {
+:where(.admin-demo-root) .venue-admin-form-grid .full,
+:where(.admin-demo-root) .admin-field.full {
   grid-column: 1 / -1;
 }
 
-.admin-demo-root .venue-admin-check {
+:where(.admin-demo-root) .venue-admin-check {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -520,20 +631,20 @@ html {
   padding: 12px 16px;
 }
 
-.admin-demo-root .venue-admin-check input {
+:where(.admin-demo-root) .venue-admin-check input {
   width: 16px;
   height: 16px;
   min-height: auto;
   accent-color: #c7662d;
 }
 
-.admin-demo-root .venue-admin-check span {
+:where(.admin-demo-root) .venue-admin-check span {
   color: #166534;
   font-size: 14px;
   font-weight: 700;
 }
 
-.admin-demo-root .venue-admin-venue b {
+:where(.admin-demo-root) .venue-admin-venue b {
   display: block;
   color: #211d1a;
   font-size: 15px;
@@ -541,7 +652,7 @@ html {
   line-height: 1.25;
 }
 
-.admin-demo-root .venue-admin-venue small {
+:where(.admin-demo-root) .venue-admin-venue small {
   display: block;
   margin-top: 3px;
   color: #746c66;
@@ -550,7 +661,7 @@ html {
   text-transform: capitalize;
 }
 
-.admin-demo-root .venue-admin-create {
+:where(.admin-demo-root) .venue-admin-create {
   display: grid;
   gap: 12px;
   margin: 0 0 14px;
@@ -560,21 +671,21 @@ html {
   background: #fff9f5;
 }
 
-.admin-demo-root .venue-admin-two {
+:where(.admin-demo-root) .venue-admin-two {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
 }
 
-.admin-demo-root .venue-admin-actions,
-.admin-demo-root .venue-admin-history-actions {
+:where(.admin-demo-root) .venue-admin-actions,
+:where(.admin-demo-root) .venue-admin-history-actions {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.admin-demo-root .venue-admin-card-head > div > p {
+:where(.admin-demo-root) .venue-admin-card-head > div > p {
   margin: 5px 0 0;
   max-width: 860px;
   color: #746c66;
@@ -582,7 +693,7 @@ html {
   line-height: 1.6;
 }
 
-.admin-demo-root .venue-admin-history article {
+:where(.admin-demo-root) .venue-admin-history article {
   display: flex;
   justify-content: space-between;
   gap: 16px;
@@ -592,19 +703,19 @@ html {
   padding: 15px;
 }
 
-.admin-demo-root .venue-admin-history article p {
+:where(.admin-demo-root) .venue-admin-history article p {
   margin: 7px 0;
   color: #746c66;
   font-size: 14px;
   line-height: 1.6;
 }
 
-.admin-demo-root .venue-admin-history article small {
+:where(.admin-demo-root) .venue-admin-history article small {
   color: #8d8179;
   font-size: 12px;
 }
 
-.admin-demo-root .venue-admin-state {
+:where(.admin-demo-root) .venue-admin-state {
   border: 1px dashed #e8dcd3;
   border-radius: 20px;
   background: rgba(255,255,255,.72);
@@ -612,26 +723,26 @@ html {
   text-align: center;
 }
 
-.admin-demo-root .venue-admin-state h3 {
+:where(.admin-demo-root) .venue-admin-state h3 {
   margin: 6px 0 0;
   color: #211d1a;
   font-size: 18px;
   font-weight: 800;
 }
 
-.admin-demo-root .venue-admin-message {
+:where(.admin-demo-root) .venue-admin-message {
   border-radius: 18px;
   padding: 12px 14px;
 }
 
-.admin-demo-root .venue-admin-success {
+:where(.admin-demo-root) .venue-admin-success {
   border: 1px solid #bbf7d0;
   background: #f0fdf4;
   color: #15803d;
   font-weight: 700;
 }
 
-.admin-demo-root .admin-error {
+:where(.admin-demo-root) .admin-error {
   border: 1px solid #fecaca;
   background: #fef2f2;
   color: #b91c1c;
@@ -640,15 +751,15 @@ html {
   font-weight: 700;
 }
 
-.admin-demo-root .audit-details {
+:where(.admin-demo-root) .demo-audit-details {
   position: relative;
 }
 
-.admin-demo-root .audit-details summary {
+:where(.admin-demo-root) .demo-audit-details summary {
   cursor: pointer;
 }
 
-.admin-demo-root .audit-details pre {
+:where(.admin-demo-root) .demo-audit-details pre {
   position: absolute;
   right: 0;
   top: calc(100% + 8px);
@@ -670,18 +781,60 @@ html {
 }
 
 @media (max-width: 900px) {
-  .admin-demo-root .venue-admin-header {
+  :where(.admin-demo-root) .venue-admin-header {
     flex-direction: column;
   }
 
-  .admin-demo-root .venue-admin-form-grid.demo-form-grid,
-  .admin-demo-root .venue-admin-two {
+  :where(.admin-demo-root) .venue-admin-form-grid.demo-form-grid,
+  :where(.admin-demo-root) .venue-admin-two {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 767px) {
-  .admin-demo-root .desktop-only {
+  :where(.admin-demo-root) .desktop-only {
     display: none !important;
   }
+}
+
+/* Venue Agent field help popovers, scaled to the demo typography. */
+:where(.admin-demo-root) .venue-admin-help summary {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border-color: #e4d6cc;
+  color: #c7662d;
+}
+
+:where(.admin-demo-root) .venue-admin-help summary:hover,
+:where(.admin-demo-root) .venue-admin-help[open] summary {
+  background: #fff9f5;
+  border-color: #d9bead;
+  color: #8c3b19;
+}
+
+:where(.admin-demo-root) .venue-admin-help-popover {
+  top: 32px;
+  width: min(460px, 76vw);
+  padding: 16px;
+  border-color: #e8dcd3;
+  border-radius: 16px;
+  box-shadow: 0 18px 55px rgba(66,38,23,.14);
+}
+
+:where(.admin-demo-root) .venue-admin-help-popover b {
+  font-size: 12px;
+  letter-spacing: .07em;
+  color: #ae4e20;
+}
+
+:where(.admin-demo-root) .venue-admin-help-popover p {
+  font-size: 14px;
+  line-height: 1.55;
+  color: #746c66;
+}
+
+:where(.admin-demo-root) .venue-admin-help-popover pre {
+  font-size: 12.5px;
+  line-height: 1.5;
 }

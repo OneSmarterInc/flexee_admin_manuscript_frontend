@@ -32,6 +32,41 @@ function StatusPill({ value }) {
   </span>
 }
 
+const queueLabels = {
+  submitted: 'Submitted',
+  under_review: 'In review',
+  revision_requested: 'Revision',
+  accepted: 'Accepted',
+  rejected: 'Rejected',
+  withdrawn: 'Withdrawn',
+  transferred: 'Transferred',
+}
+
+function QueuePill({ value }) {
+  const styles = {
+    accepted: 'border-green-200 bg-green-50 text-green-700',
+    rejected: 'border-red-200 bg-red-50 text-red-700',
+    revision_requested: 'border-amber-200 bg-amber-50 text-amber-700',
+    under_review: 'border-blue-200 bg-blue-50 text-blue-700',
+    submitted: 'border-flexee-100 bg-flexee-50 text-flexee-700',
+  }
+  return <span className={`rounded-full border px-2.5 py-1 text-[12px] font-extrabold ${styles[value] || 'border-line bg-white text-muted'}`}>
+    {queueLabels[value] || statusLabels[value] || value || '—'}
+  </span>
+}
+
+function formatDate(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
+function formatTime(value) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return '—'
+  return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+}
+
 function pretty(value) {
   return String(value || '').replaceAll('_', ' ').replace(/\b\w/g, x => x.toUpperCase())
 }
@@ -304,7 +339,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
     return value.summary || value.detail || fallback
   }
 
-  return <div className="editor-workspace">
+  return <div>
     <div className="mb-7 flex flex-col justify-between gap-5 xl:flex-row xl:items-end">
       <div>
         <div className="mb-1 text-[13px] font-extrabold uppercase tracking-[.15em] text-flexee-600">
@@ -345,37 +380,43 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
       <button type="button" onClick={() => setFilters({...filters, status:''})} className="metric premium-card rounded-[22px] p-5 text-left">
         <div className="serif text-[36px] leading-none">{data.counts?.total || 0}</div>
         <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Editorial queue</div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100"><div className="h-full w-[75%] rounded-full bg-flexee-500"></div></div>
+        {data.counts?.total ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-stone-100"><div className="h-full w-[75%] rounded-full bg-flexee-500"></div></div>
+          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
       </button>
 
       <button type="button" onClick={() => setFilters({...filters, status:'submitted'})} className="metric premium-card rounded-[22px] p-5 text-left">
         <div className="serif text-[36px] leading-none">{data.counts?.submitted || 0}</div>
         <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Submitted</div>
-        <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>
+        {data.counts?.submitted ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-flexee-100"><div className="h-full w-[58%] rounded-full bg-flexee-500"></div></div>
+          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
       </button>
 
       <button type="button" onClick={() => setFilters({...filters, status:'under_review'})} className="metric premium-card rounded-[22px] p-5 text-left">
         <div className="serif text-[36px] leading-none">{data.counts?.under_review || 0}</div>
         <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Under review</div>
-        <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>
+        {data.counts?.under_review ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-blue-100"><div className="h-full w-[58%] rounded-full bg-blue-500"></div></div>
+          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
       </button>
 
       <button type="button" onClick={() => setFilters({...filters, status:'revision_requested'})} className="metric premium-card rounded-[22px] p-5 text-left">
         <div className="serif text-[36px] leading-none">{data.counts?.revision_requested || 0}</div>
         <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Revision</div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-amber-100"><div className="h-full w-[66%] rounded-full bg-amber-500"></div></div>
+        {data.counts?.revision_requested ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-amber-100"><div className="h-full w-[66%] rounded-full bg-amber-500"></div></div>
+          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
       </button>
 
       <button type="button" onClick={() => setFilters({...filters, status:'accepted'})} className="metric premium-card rounded-[22px] p-5 text-left">
         <div className="serif text-[36px] leading-none">{data.counts?.accepted || 0}</div>
         <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Accepted</div>
-        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-green-100"><div className="h-full w-[42%] rounded-full bg-green-500"></div></div>
+        {data.counts?.accepted ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-green-100"><div className="h-full w-[42%] rounded-full bg-green-500"></div></div>
+          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
       </button>
 
       <button type="button" onClick={() => setFilters({...filters, status:'rejected'})} className="metric premium-card rounded-[22px] p-5 text-left">
         <div className="serif text-[36px] leading-none">{data.counts?.rejected || 0}</div>
         <div className="mt-2 text-[13px] font-extrabold uppercase tracking-[.07em] text-muted">Rejected</div>
-        <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>
+        {data.counts?.rejected ? <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-red-100"><div className="h-full w-[42%] rounded-full bg-red-500"></div></div>
+          : <div className="mt-4 h-1.5 rounded-full bg-stone-100"></div>}
       </button>
     </div>
 
@@ -423,7 +464,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
         <div className="thin-scroll max-h-[520px] overflow-y-auto">
           {loading ? <div className="p-5 text-[14px] font-semibold text-muted">Loading editorial queue…</div> :
             data.items?.length ? data.items.map(item => {
-              const submitted = new Date(item.submitted_at || item.created_at)
+              const submitted = item.submitted_at || item.created_at
               return <button
                 type="button"
                 key={item.id}
@@ -432,15 +473,15 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               >
                 <div className="flex items-start justify-between gap-3">
                   <span className="text-[13px] font-extrabold uppercase tracking-[.08em] text-flexee-600">{item.venue?.name}</span>
-                  <StatusPill value={item.status} />
+                  <QueuePill value={item.status} />
                 </div>
                 <div className="mt-2 text-[17px] font-extrabold">{item.manuscript?.title}</div>
                 <div className="mt-1 text-[14px] leading-5 text-muted">
-                  {item.manuscript?.author_name}{item.manuscript?.author_email ? ` · ${item.manuscript.author_email}` : ''}
+                  {item.manuscript?.author_name}
                 </div>
                 <div className="mt-3 flex items-center justify-between text-[13px] font-semibold text-[#91857d]">
-                  <span>{submitted.toLocaleDateString()}</span>
-                  <span>{submitted.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</span>
+                  <span>{formatDate(submitted)}</span>
+                  <span>{formatTime(submitted)}</span>
                 </div>
               </button>
             }) : <div className="p-5">
@@ -646,11 +687,11 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               </div>
             </div>}
 
-            {detailTab === 'evidence' && <div className="rounded-[22px] border border-line bg-white p-5">
+            {detailTab === 'evidence' && (detail.evidence?.length ? <div className="rounded-[22px] border border-line bg-white p-5">
               <div className="text-[13px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Evidence trail</div>
               <h3 className="serif mt-1 text-[28px]">Findings linked to manuscript, venue policy, or verified sources</h3>
               <div className="mt-4 grid gap-3">
-                {detail.evidence?.length ? detail.evidence.map(item => <article key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
+                {detail.evidence.map(item => <article key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
                   <div className="flex items-start justify-between gap-3">
                     <b className="text-[15px]">{pretty(item.finding_type)}</b>
                     <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[12px] font-extrabold text-muted">{pretty(item.source_type)}</span>
@@ -658,12 +699,18 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                   <p className="mt-2 text-[15px] leading-7 text-muted">{item.claim}</p>
                   <small className="text-[13px] text-muted">{item.source_locator || 'No locator'}{item.source_url ? ` · ${item.source_url}` : ''}</small>
                   {item.excerpt && <blockquote className="mt-3 border-l-2 border-flexee-500 pl-3 text-[14px] leading-6 text-muted">{item.excerpt}</blockquote>}
-                </article>) : <div className="rounded-[22px] border border-line bg-white p-8 text-center">
-                  <h4 className="text-[19px] font-extrabold">No evidence items available</h4>
-                  <p className="mx-auto mt-2 max-w-lg text-[15px] leading-7 text-muted">This submission currently contains deterministic review output only.</p>
-                </div>}
+                </article>)}
               </div>
-            </div>}
+            </div> : <div className="rounded-[22px] border border-line bg-white p-8 text-center">
+              <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-flexee-50 text-flexee-600">
+                <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M4 5h16v14H4z"/>
+                  <path d="M8 9h8M8 13h5"/>
+                </svg>
+              </div>
+              <h4 className="mt-4 text-[19px] font-extrabold">No evidence items available</h4>
+              <p className="mx-auto mt-2 max-w-lg text-[15px] leading-7 text-muted">This submission currently contains deterministic review output only.</p>
+            </div>)}
 
             {detailTab === 'rules' && <div className="grid gap-4 lg:grid-cols-2">
               <div className="rounded-[22px] border border-line bg-white p-5">
@@ -674,13 +721,14 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                 <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Quality threshold</div>
                 <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config?.quality_threshold || '—'}</div>
               </div>
-              <div className="rounded-[22px] border border-line bg-white p-5 lg:col-span-2">
+              {detail.venue_config?.aims_scope && <div className="rounded-[22px] border border-line bg-white p-5 lg:col-span-2">
                 <div className="text-[13px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Aims & scope</div>
-                <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config?.aims_scope || '—'}</div>
-              </div>
+                <div className="mt-2 text-[15px] leading-7 text-muted">{detail.venue_config.aims_scope}</div>
+              </div>}
             </div>}
 
-            {detailTab === 'feedback' && <div className="rounded-[22px] border border-line bg-white p-5">
+            {detailTab === 'feedback' && <div className="space-y-4">
+              <div className="rounded-[22px] border border-line bg-white p-5">
               <div className="flex items-center gap-2">
                 <span className="text-[17px] font-extrabold">Correct the agent</span>
                 <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">Venue scoped</span>
@@ -720,17 +768,16 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                 </label>
                 <button className="w-fit rounded-2xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm" type="submit" disabled={busy === 'feedback'}>{busy === 'feedback' ? 'Recording…' : 'Record feedback'}</button>
               </form> : <p className="mt-4 text-[14px] text-muted">Your role has read-only access to this venue's editorial workspace.</p>}
+              </div>
 
-              {detail.feedback?.length > 0 && <div className="mt-5 space-y-3">
-                {detail.feedback.map(item => <article key={item.id} className="rounded-2xl border border-line bg-[#fcfaf8] p-4">
-                  <div className="flex items-center gap-2">
-                    <span className="text-[16px] font-extrabold">{pretty(item.assessment_field)}</span>
-                    <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">Assessment only</span>
-                  </div>
-                  <p className="mt-2 text-[14px] leading-6 text-muted">{item.reason || 'No reason recorded.'}</p>
-                  <div className="mt-2 text-[13px] font-semibold text-[#8d8179]">{new Date(item.created_at).toLocaleString()}</div>
-                </article>)}
-              </div>}
+              {detail.feedback?.map(item => <div key={item.id} className="rounded-[22px] border border-line bg-white p-5">
+                <div className="flex items-center gap-2">
+                  <span className="text-[17px] font-extrabold">{pretty(item.assessment_field)}</span>
+                  <span className="rounded-full bg-stone-100 px-2.5 py-1 text-[13px] font-extrabold text-muted">{item.draftable ? 'Venue rule' : 'Assessment only'}</span>
+                </div>
+                <p className="mt-2 text-[15px] leading-7 text-muted">{item.reason || 'No reason recorded.'}</p>
+                <div className="mt-2 text-[13px] font-semibold text-[#8d8179]">{formatDate(item.created_at)}{item.venue_config_version ? ` · Config v${item.venue_config_version}` : ''}</div>
+              </div>)}
             </div>}
 
             {detailTab === 'decision' && <div className="rounded-[22px] border border-line bg-white p-6">
@@ -743,14 +790,14 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
                 <div className="mt-2 text-[13px] text-muted">{detail.decision.decided_by ? `Decided by ${detail.decision.decided_by}` : ''}{detail.decision.decided_at ? ` · ${new Date(detail.decision.decided_at).toLocaleString()}` : ''}</div>
               </div>}
 
-              {decisionAllowed ? <form className="mt-5 grid gap-3">
-                <div className="grid gap-3 md:grid-cols-3">
+              {decisionAllowed ? <form onSubmit={e => e.preventDefault()}>
+                <div className="mt-5 grid gap-3 md:grid-cols-3">
                   <button type="button" onClick={() => setDecision('accepted')} className={`rounded-2xl border border-green-200 bg-green-50 px-4 py-4 text-[14px] font-extrabold text-green-800 hover:bg-green-100 ${decision === 'accepted' ? 'ring-2 ring-green-300' : ''}`}>Accept manuscript</button>
                   <button type="button" onClick={() => setDecision('revision_requested')} className={`rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-[14px] font-extrabold text-amber-800 hover:bg-amber-100 ${decision === 'revision_requested' ? 'ring-2 ring-amber-300' : ''}`}>Request revision</button>
                   <button type="button" onClick={() => setDecision('rejected')} className={`rounded-2xl border border-red-200 bg-red-50 px-4 py-4 text-[14px] font-extrabold text-red-700 hover:bg-red-100 ${decision === 'rejected' ? 'ring-2 ring-red-300' : ''}`}>Reject manuscript</button>
                 </div>
-                <textarea className="field mt-1 min-h-[120px]" required={decision !== 'accepted'} value={decisionNote} onChange={e => setDecisionNote(e.target.value)} placeholder="Editorial note..." />
-                <button className="shine w-fit rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={recordDecision} disabled={busy === 'decision'}>
+                <textarea className="field mt-4 min-h-[120px]" required={decision !== 'accepted'} value={decisionNote} onChange={e => setDecisionNote(e.target.value)} placeholder="Editorial note..." />
+                <button className="shine mt-4 w-fit rounded-2xl bg-flexee-500 px-5 py-3 text-[14px] font-extrabold text-white shadow-orange disabled:cursor-not-allowed disabled:opacity-60" type="button" onClick={recordDecision} disabled={busy === 'decision'}>
                   {busy === 'decision' ? 'Recording…' : `Record: ${statusLabels[decision]}`}
                 </button>
               </form> : <p className="mt-4 text-[14px] text-muted">This submission is currently {statusLabels[detail.status] || detail.status}; no new decision action is available from this state.</p>}
