@@ -63,7 +63,7 @@ function Toast({ toast }) {
 
 export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const [tab, setTab] = useState('new')
-  const [filters, setFilters] = useState({ q: '', type: '', acceptance: 'accepting' })
+  const [filters, setFilters] = useState({ q: '', type: '', acceptance: 'accepting', sort: 'newest' })
   const [data, setData] = useState({ items: [], counts: {}, last_run: null, settings: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -85,6 +85,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     if (filters.acceptance) params.set('acceptance', filters.acceptance)
     if (filters.type) params.set('type', filters.type)
     if (filters.q.trim()) params.set('q', filters.q.trim())
+    if (filters.sort) params.set('sort', filters.sort)
     try {
       const payload = await api(`/api/admin/venue-discovery/?${params}`)
       setData(payload)
@@ -245,7 +246,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
       </button>)}
     </div>
 
-    <div className="premium-card mb-4 grid gap-2 rounded-[18px] p-2 lg:grid-cols-[1.5fr_.7fr_.7fr]">
+    <div className="premium-card mb-4 grid gap-2 rounded-[18px] p-2 lg:grid-cols-[1.4fr_.6fr_.6fr_.6fr]">
       <div className="relative">
         <svg className="search-icon text-muted" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
         <input className="field field-compact field-search" value={filters.q} onChange={e => setFilters({ ...filters, q: e.target.value })}
@@ -256,6 +257,9 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
       </select>
       <select className="field field-compact" value={filters.acceptance} onChange={e => setFilters({ ...filters, acceptance: e.target.value })}>
         <option value="accepting">Accepting</option><option value="">All statuses</option><option value="unclear">Unclear</option><option value="closed">Closed</option>
+      </select>
+      <select className="field field-compact" value={filters.sort} onChange={e => setFilters({ ...filters, sort: e.target.value })} aria-label="Sort">
+        <option value="newest">Sort: newest found</option><option value="confidence">Sort: highest confidence</option><option value="verified">Sort: recently verified</option>
       </select>
     </div>
 
