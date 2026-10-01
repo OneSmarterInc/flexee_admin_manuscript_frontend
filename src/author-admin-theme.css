@@ -875,3 +875,8 @@
   margin: 0;
   padding: 0;
 }
+
+.author-admin-theme.author-admin-theme .author-reset-alt {
+  margin-top: 14px;
+  text-align: center;
+}
