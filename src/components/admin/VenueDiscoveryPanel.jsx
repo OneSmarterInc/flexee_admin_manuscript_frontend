@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
 
+const INCONCLUSIVE = 'Latest check was inconclusive; showing the previous verified result.'
 const TABS = [['new', 'New'], ['added', 'Added'], ['changed', 'Changed'], ['ignored', 'Ignored']]
 const TYPE_LABEL = { journal: 'Journal', publisher: 'Publisher', conference: 'Conference' }
 
@@ -200,6 +201,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const settings = data.settings || {}
   const counts = data.counts || {}
   const items = data.items || []
+  const hidden = data.hidden_by_status_filter || 0
 
   return <div>
     <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
@@ -273,7 +275,8 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         <table className="data-table w-full min-w-[1180px] border-collapse">
           <thead className="bg-[#faf7f4]">
             <tr className="border-b border-line">
-              {['Venue', 'Type', 'Accepts', 'Status', 'Confidence', 'Last checked'].map(label => <th key={label} className="px-4 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">{label}</th>)}
+              {['Venue', 'Type', 'Accepts', 'Status', 'Confidence'].map(label => <th key={label} className="px-4 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">{label}</th>)}
+              <th className="px-4 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted" title="When this venue's official pages were last read">Last verified</th>
               <th className="px-4 py-2.5 text-right text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Actions</th>
             </tr>
           </thead>
@@ -300,7 +303,11 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
                 </td>
                 <td className="px-4 py-2.5 align-middle"><StatusBadge value={item.acceptance_status} /></td>
                 <td className="px-4 py-2.5 align-middle"><ConfidenceBadge value={item.confidence} /></td>
-                <td className="whitespace-nowrap px-4 py-2.5 align-middle text-[13px] text-muted">{formatChecked(item.last_checked_at)}</td>
+                <td className="whitespace-nowrap px-4 py-2.5 align-middle text-[13px] text-muted" title="When this venue's official pages were last read">
+                  {formatChecked(item.last_checked_at)}
+                  {item.checked_in_last_run && <div className="mt-1"><span className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[11px] font-extrabold text-green-700">This run</span></div>}
+                  {item.last_error === INCONCLUSIVE && <div className="mt-1 text-[11px] font-semibold text-amber-700" title={item.last_error}>Last check inconclusive</div>}
+                </td>
                 <td className="px-4 py-2.5 align-middle"><Actions item={item} /></td>
               </tr>)
                 : <tr><td colSpan="7" className="px-5 py-10 text-center">
@@ -310,8 +317,13 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
           </tbody>
         </table>
       </div>
+      {hidden > 0 && <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-[#fffaf6] px-5 py-2.5 text-[13px] font-semibold text-ink">
+        <span>{hidden} more {TABS.find(([key]) => key === tab)?.[1].toLowerCase()} venue{hidden === 1 ? ' is' : 's are'} not {filters.acceptance} (unclear or closed).</span>
+        <button type="button" onClick={() => setFilters({ ...filters, acceptance: '' })}
+          className="rounded-xl border border-line bg-white px-3 py-1.5 text-[12px] font-extrabold shadow-sm hover:shadow-card">Show all statuses</button>
+      </div>}
       <div className="border-t border-line px-5 py-2.5 text-[13px] font-medium text-muted">
-        Rules shown are from the most recent successful check of each venue's official pages. Click a row for details and sources.
+        Rules shown are from the most recent verified check of each venue's official pages. "Last verified" is when that venue's pages were last read; "This run" marks venues the latest run looked at. Click a row for details and sources.
       </div>
     </div>
 
@@ -326,7 +338,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
             <div className="min-w-0">
               <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Discovered {(TYPE_LABEL[detail.venue_type] || '').toLowerCase()}{detail.organization_name ? ` · ${detail.organization_name}` : ''}</div>
               <h3 id="discovered-venue-title" className="serif mt-0.5 break-words text-[30px] leading-none">{detail.name}</h3>
-              <div className="mt-1.5 text-[13px] font-medium text-muted">Last checked {formatChecked(detail.last_checked_at)}. Rules below come from that check of the official pages.</div>
+              <div className="mt-1.5 text-[13px] font-medium text-muted">Last verified {formatChecked(detail.last_checked_at)} · first found {formatChecked(detail.first_discovered_at)}. Rules below come from the most recent verified check of the official pages.</div>
             </div>
             <div className="flex shrink-0 flex-wrap items-center gap-2"><StatusBadge value={detail.acceptance_status} /><ConfidenceBadge value={detail.confidence} /></div>
           </div>
@@ -335,7 +347,9 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         {detail.change_summary && <div className="mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] font-semibold text-amber-800"><b>Update available.</b> {detail.change_summary}</div>}
         {detail.acceptance_status === 'unclear' && <div className="mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] font-semibold text-amber-800"><b>Not verified as accepting.</b> The official pages don't clearly show an open submission route. Check before adding.</div>}
         {detail.acceptance_status === 'closed' && <div className="mx-6 mt-4 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[14px] font-semibold text-muted"><b>Closed to submissions.</b> It can't be added while closed; the daily check will update it if it reopens.</div>}
-        {detail.last_error && <div className="mx-6 mt-4 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[13px] font-semibold text-muted">Last re-check could not complete: {detail.last_error}. Showing the last successful check.</div>}
+        {detail.last_error && <div className="mx-6 mt-4 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[13px] font-semibold text-muted">
+          {detail.last_error === INCONCLUSIVE ? INCONCLUSIVE : <>The latest re-check could not complete ({detail.last_error}). Showing the previous verified result.</>}
+        </div>}
 
         <div className="grid gap-3 px-6 pt-4 lg:grid-cols-2">
           <KvTable title="Venue" rows={[
