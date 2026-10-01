@@ -6,6 +6,7 @@ import AdminPage from './pages/Admin.jsx'
 import AuthorDashboard from './pages/AuthorDashboard.jsx'
 import AuthorLogin from './pages/AuthorLogin.jsx'
 import AuthorSignup from './pages/AuthorSignup.jsx'
+import { AuthorForgotPassword, AuthorResetPassword } from './pages/AuthorPasswordReset.jsx'
 import AuthorNewSubmission from './pages/AuthorNewSubmission.jsx'
 import AuthorReadiness from './pages/AuthorReadiness.jsx'
 import AuthorVenueMatches from './pages/AuthorVenueMatches.jsx'
@@ -68,6 +69,8 @@ export default function App() {
 
   if (path === '/author/login') return <AuthorTheme><AuthorLogin /></AuthorTheme>
   if (path === '/author/signup') return <AuthorTheme><AuthorSignup /></AuthorTheme>
+  if (path === '/author/forgot-password') return <AuthorTheme><AuthorForgotPassword /></AuthorTheme>
+  if (path === '/author/reset-password') return <AuthorTheme><AuthorResetPassword /></AuthorTheme>
   if (path === '/author') return <AuthorTheme><RequireAuthor><AuthorDashboard /></RequireAuthor></AuthorTheme>
   if (path === '/author/new') return <AuthorTheme><RequireAuthor><AuthorNewSubmission /></RequireAuthor></AuthorTheme>
   if (path === '/author/manuscript') return <AuthorTheme><RequireAuthor><AuthorNewSubmission mode="edit" /></RequireAuthor></AuthorTheme>
