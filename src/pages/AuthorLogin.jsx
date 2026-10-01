@@ -7,7 +7,9 @@ export default function AuthorLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const justReset = new URLSearchParams(window.location.search).get('reset') === '1'
+  const params = new URLSearchParams(window.location.search)
+  const justReset = params.get('reset') === '1'
+  const justChanged = params.get('changed') === '1'
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -50,6 +52,7 @@ export default function AuthorLogin() {
 
             <form className="author-auth-form" onSubmit={handleSubmit}>
               {justReset && !error && <div className="author-prototype-notice author-reset-success" role="status">Your password has been reset. Sign in with your new password.</div>}
+              {justChanged && !error && <div className="author-prototype-notice author-reset-success" role="status">Your password has been changed. Sign in with your new password.</div>}
               {error && <div className="author-prototype-notice author-error-banner" role="alert">{error}</div>}
 
               <label htmlFor="email">

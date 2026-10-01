@@ -12,11 +12,11 @@ function AuthShell({ crumb, eyebrow, title, lede, children }) {
         <div className="author-auth-intro">
           <p className="kicker">Author workspace</p>
           <h1>Get back into your manuscript workspace.</h1>
-          <p className="author-auth-lede">Reset links are sent only to the email on your author account, expire after 30 minutes, and work once.</p>
-          <div className="author-auth-benefits" aria-label="How reset works">
-            <div><span>01</span><p><b>Request a link</b><small>Enter the email you use to sign in.</small></p></div>
-            <div><span>02</span><p><b>Open the email</b><small>Use the link within 30 minutes; it works once.</small></p></div>
-            <div><span>03</span><p><b>Choose a new password</b><small>Other devices are signed out, then you sign in again.</small></p></div>
+          <p className="author-auth-lede">Change your password right here if you know your current one, or have a one-time reset link emailed to you if you don't.</p>
+          <div className="author-auth-benefits" aria-label="How it works">
+            <div><span>01</span><p><b>Know your current password?</b><small>Enter it with a new one and the change is instant.</small></p></div>
+            <div><span>02</span><p><b>Don't remember it?</b><small>Get a reset link by email; it expires in 30 minutes and works once.</small></p></div>
+            <div><span>03</span><p><b>Sign in again</b><small>Other devices are signed out after any password change.</small></p></div>
           </div>
         </div>
         <div className="author-auth-card">
@@ -34,7 +34,75 @@ function AuthShell({ crumb, eyebrow, title, lede, children }) {
   </PublicationShell>
 }
 
-export function AuthorForgotPassword() {
+function ChangeWithCurrentPassword({ onUseEmail }) {
+  const [email, setEmail] = useState('')
+  const [current, setCurrent] = useState('')
+  const [password, setPassword] = useState('')
+  const [confirm, setConfirm] = useState('')
+  const [show, setShow] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState('')
+  const mismatch = confirm.length > 0 && password !== confirm
+
+  async function submit(e) {
+    e.preventDefault()
+    setError('')
+    if (password !== confirm) { setError('The new password and the confirmation do not match.'); return }
+    if (password.length < MIN_LENGTH) { setError(`The new password must be at least ${MIN_LENGTH} characters.`); return }
+    setBusy(true)
+    try {
+      await api('/api/author/password-change/', {
+        method: 'POST',
+        body: JSON.stringify({ email, current_password: current, new_password: password, confirm_password: confirm }),
+      })
+      window.history.replaceState({}, '', '/author/login?changed=1')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    } catch (err) {
+      setError(err.message || 'The password could not be changed. Try again.')
+      setBusy(false)
+    }
+  }
+
+  return <>
+    <form className="author-auth-form" onSubmit={submit}>
+      {error && <div className="author-prototype-notice author-error-banner" role="alert">{error}</div>}
+      <label htmlFor="change-email">
+        <span>Email address</span>
+        <input id="change-email" type="email" autoComplete="email" value={email} onChange={e => setEmail(e.target.value)}
+          placeholder="name@example.com" required autoFocus />
+      </label>
+      <label htmlFor="change-current-password">
+        <span>Current password</span>
+        <input id="change-current-password" type={show ? 'text' : 'password'} autoComplete="current-password" value={current}
+          onChange={e => setCurrent(e.target.value)} placeholder="Your current password" required />
+      </label>
+      <label htmlFor="change-new-password">
+        <span>New password</span>
+        <input id="change-new-password" type={show ? 'text' : 'password'} autoComplete="new-password" value={password}
+          onChange={e => setPassword(e.target.value)} placeholder={`At least ${MIN_LENGTH} characters`} required />
+      </label>
+      <label htmlFor="change-confirm-password">
+        <span>Confirm new password</span>
+        <input id="change-confirm-password" type={show ? 'text' : 'password'} autoComplete="new-password" value={confirm}
+          onChange={e => setConfirm(e.target.value)} placeholder="Type it again" required
+          className={mismatch ? 'author-account-invalid' : ''} />
+        {mismatch && <small className="author-reset-hint">Does not match the new password.</small>}
+      </label>
+      <label className="author-account-show author-reset-show">
+        <input type="checkbox" checked={show} onChange={e => setShow(e.target.checked)} /> Show passwords
+      </label>
+      <button type="submit" className="copper-button author-auth-submit" disabled={busy || !email || !current || !password || !confirm}>
+        {busy ? 'Changing…' : 'Change password'}
+      </button>
+    </form>
+    <p className="author-auth-note author-reset-alt">
+      Don't remember your current password?{' '}
+      <button type="button" className="author-reset-again" onClick={onUseEmail}>Email me a reset link</button>
+    </p>
+  </>
+}
+
+function EmailResetLink({ onUseCurrent }) {
   const [email, setEmail] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
@@ -54,8 +122,7 @@ export function AuthorForgotPassword() {
     }
   }
 
-  return <AuthShell crumb="Forgot password" eyebrow="Forgot password" title="Reset your password"
-    lede="Enter the email address for your author account and we'll send you a link to choose a new password.">
+  return <>
     {sent ? <div className="author-auth-form">
       <div className="author-prototype-notice author-reset-success" role="status"><b>Check your email.</b> {sent}</div>
       <p className="author-auth-note">Didn't get it? Check your spam folder, or wait a minute and request another link.</p>
@@ -69,7 +136,24 @@ export function AuthorForgotPassword() {
       </label>
       <button type="submit" className="copper-button author-auth-submit" disabled={busy}>{busy ? 'Sending…' : 'Send reset link'}</button>
     </form>}
-  </AuthShell>
+    <p className="author-auth-note author-reset-alt">
+      Remember your current password?{' '}
+      <button type="button" className="author-reset-again" onClick={onUseCurrent}>Change it here instead</button>
+    </p>
+  </>
+}
+
+export function AuthorForgotPassword() {
+  const [mode, setMode] = useState('current')
+  return mode === 'current'
+    ? <AuthShell crumb="Forgot password" eyebrow="Forgot password" title="Change your password"
+        lede="Enter your email, your current password, and a new password. The change takes effect immediately.">
+        <ChangeWithCurrentPassword onUseEmail={() => setMode('email')} />
+      </AuthShell>
+    : <AuthShell crumb="Forgot password" eyebrow="Forgot password" title="Email me a reset link"
+        lede="Enter the email address for your author account and we'll send you a link to choose a new password.">
+        <EmailResetLink onUseCurrent={() => setMode('current')} />
+      </AuthShell>
 }
 
 export function AuthorResetPassword() {
