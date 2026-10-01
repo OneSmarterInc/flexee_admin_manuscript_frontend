@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api.js'
 import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
@@ -6,6 +6,9 @@ import EditorWorkspacePanel from '../components/admin/EditorWorkspacePanel.jsx'
 import AuditLogPanel from '../components/admin/AuditLogPanel.jsx'
 import AdminAccountMenu from '../components/admin/AdminAccountMenu.jsx'
 import '../admin-professional.css'
+
+// Loaded on demand: only platform superusers open Venue Discovery.
+const VenueDiscoveryPanel = lazy(() => import('../components/admin/VenueDiscoveryPanel.jsx'))
 
 const decisions = {
   PASS_TO_HUMAN: 'Pass to human',
@@ -634,6 +637,11 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   const [emailActionId, setEmailActionId] = useState(null)
   const [zipViewItem, setZipViewItem] = useState(null)
   const [currentView, setCurrentView] = useState('editor')
+  const [openVenueId, setOpenVenueId] = useState('')
+
+  useEffect(() => {
+    if (currentView !== 'venues') setOpenVenueId('')
+  }, [currentView])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const mainRef = useRef(null)
 
@@ -709,6 +717,21 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
             Venue Agents
           </button>
 
+          {platformSuperuser && <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'discovery' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('discovery'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+                <circle cx="11" cy="11" r="7"/>
+                <path d="m20 20-3.4-3.4"/>
+                <path d="M11 8v6M8 11h6"/>
+              </svg>
+            </span>
+            Venue Discovery
+          </button>}
+
           <button
             className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'audit' ? 'active' : ''}`}
             type="button"
@@ -770,7 +793,11 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
     {currentView === 'smtp' ? (
       <SMTPSettingsPage />
     ) : currentView === 'venues' ? (
-      <VenueAgentsPanel platformSuperuser={platformSuperuser} memberships={memberships} />
+      <VenueAgentsPanel key={openVenueId || 'venues'} platformSuperuser={platformSuperuser} memberships={memberships} initialVenueId={openVenueId} />
+    ) : currentView === 'discovery' && platformSuperuser ? (
+      <Suspense fallback={<div className="premium-card rounded-[22px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Discovery…</div>}>
+        <VenueDiscoveryPanel onOpenVenue={id => { setOpenVenueId(id); setCurrentView('venues') }} />
+      </Suspense>
     ) : currentView === 'editor' ? (
       <EditorWorkspacePanel platformSuperuser={platformSuperuser} memberships={memberships} />
     ) : currentView === 'audit' ? (
