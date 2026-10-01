@@ -71,6 +71,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const [justAdded, setJustAdded] = useState({})
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [showSkipped, setShowSkipped] = useState(false)
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
 
@@ -233,8 +234,21 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
       {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b></div>}
       {run && !runActive && <div className="text-[14px]"><span className="text-muted">Found</span> <b className="ml-1">{run.candidates_created} new · {run.candidates_updated} updated · {run.candidates_changed} changed</b></div>}
       {run && !runActive && <div className="text-[14px]"><span className="text-muted">Searches · pages read</span> <b className="ml-1">{run.queries_run} · {run.official_pages_checked}</b></div>}
-      {run && !runActive && <div className="text-[14px]"><span className="text-muted">Skipped</span> <b className="ml-1">{run.error_count}</b></div>}
+      {run && !runActive && <div className="text-[14px]"><span className="text-muted">Skipped</span>{' '}
+        {run.error_count > 0
+          ? <button type="button" onClick={() => setShowSkipped(v => !v)} className="ml-1 font-extrabold text-flexee-700 underline decoration-flexee-200 underline-offset-2">{run.error_count} · {showSkipped ? 'hide' : 'why?'}</button>
+          : <b className="ml-1">0</b>}
+      </div>}
       {run?.status === 'failed' && <div className="text-[13px] font-semibold text-red-700">{run.summary}</div>}
+      {showSkipped && run?.errors?.length > 0 && <div className="basis-full rounded-xl border border-line bg-[#fcfaf8] px-3 py-2">
+        <div className="mb-1 text-[11px] font-extrabold uppercase tracking-[.07em] text-muted">Skipped in the last run</div>
+        <ul className="space-y-1 text-[13px]">
+          {run.errors.map((entry, index) => <li key={index} className="break-words">
+            <span className="mr-1.5 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-extrabold uppercase text-muted">{entry.stage}</span>
+            {entry.url && <span className="font-semibold">{entry.url}: </span>}<span className="text-muted">{entry.message}</span>
+          </li>)}
+        </ul>
+      </div>}
       <div className="ml-auto text-[13px] font-semibold text-muted">Runs daily · {settings.mode === 'claude_agent' ? 'agent' : 'search'}: {settings.search_provider || '—'}</div>
     </div>
 
