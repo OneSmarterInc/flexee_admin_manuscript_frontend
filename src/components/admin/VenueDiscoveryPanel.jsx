@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
+import DiscoveryScheduleCard from './DiscoveryScheduleCard.jsx'
 
 const INCONCLUSIVE = 'Latest check was inconclusive; showing the previous verified result.'
 const TABS = [['new', 'New'], ['added', 'Added'], ['changed', 'Changed'], ['ignored', 'Ignored']]
@@ -253,7 +254,8 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         : <>The discovery agent can't run yet: set <code>{settings.missing_key || 'ANTHROPIC_API_KEY'}</code> on the server.</>}
     </div>}
 
-    <div className="premium-card mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-[18px] px-4 py-3">
+    <div className="mb-3 grid gap-3 xl:grid-cols-[1.4fr_1fr]">
+    <div className="premium-card flex flex-wrap content-start items-center gap-x-6 gap-y-2 rounded-[18px] px-4 py-3">
       <div className="flex items-center gap-2">
         <span className={`status-dot ${run?.status === 'failed' ? 'bg-red-500' : runActive ? 'bg-amber-500' : run ? 'bg-green-500' : 'bg-stone-400'}`}></span>
         <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Last run</span>
@@ -278,7 +280,9 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
           </li>)}
         </ul>
       </div>}
-      <div className="ml-auto text-[13px] font-semibold text-muted">Runs daily · {settings.mode === 'claude_agent' ? 'agent' : 'search'}: {settings.search_provider || '—'}</div>
+      <div className="ml-auto text-[13px] font-semibold text-muted">{settings.mode === 'claude_agent' ? 'agent' : 'search'}: {settings.search_provider || '—'}</div>
+    </div>
+    <DiscoveryScheduleCard onToast={message => showToast(message)} />
     </div>
 
     <div className="mb-3 flex flex-wrap gap-2">

@@ -880,3 +880,48 @@
   margin-top: 14px;
   text-align: center;
 }
+
+/* ---------- 18. Venue matches table with match score ---------- */
+.author-admin-theme .author-mtable-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 12px 0; }
+.author-admin-theme .author-mtable-tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+.author-admin-theme.author-admin-theme .author-mtable-tabs button {
+  padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: #fff;
+  color: var(--ink); font: 800 13px/1.2 var(--sans); cursor: pointer;
+}
+.author-admin-theme.author-admin-theme .author-mtable-tabs button.active { border-color: #efc7ae; background: #fff1e8; color: var(--accent-600); }
+.author-admin-theme.author-admin-theme .author-mtable-sort {
+  min-height: 40px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 12px; background: #fff;
+  font: 600 14px/1.2 var(--sans); color: var(--ink);
+}
+.author-admin-theme .author-mtable-table-wrap {
+  overflow-x: auto; border: 1px solid rgba(232,220,211,.94); border-radius: 22px;
+  background: linear-gradient(145deg, rgba(255,255,255,.97), rgba(255,252,249,.91));
+  box-shadow: 0 10px 32px rgba(66,38,23,.065);
+}
+.author-admin-theme .author-mtable-table { width: 100%; min-width: 1040px; border-collapse: collapse; }
+.author-admin-theme .author-mtable-table th {
+  padding: 11px 14px; background: #faf7f4; border-bottom: 1px solid var(--line); text-align: left;
+  color: var(--muted); font: 800 12px/1.2 var(--sans); letter-spacing: .06em; text-transform: uppercase; white-space: nowrap;
+}
+.author-admin-theme .author-mtable-table td { padding: 13px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; font-size: 14px; }
+.author-admin-theme .author-mtable-table tbody tr:last-child td { border-bottom: 0; }
+.author-admin-theme .author-mtable-table tbody tr:hover { background: #fffaf6; }
+.author-admin-theme .author-mtable-table tbody tr:hover td:first-child { box-shadow: inset 3px 0 0 var(--copper); }
+.author-admin-theme .author-mtable-table .right { text-align: right; white-space: nowrap; }
+.author-admin-theme .author-mtable-venue { display: block; font-size: 15px; font-weight: 800; line-height: 1.3; }
+.author-admin-theme .author-mtable-meta { display: block; color: var(--muted); font-size: 12px; font-weight: 500; text-transform: capitalize; }
+.author-admin-theme .author-mtable-help { cursor: help; border-bottom: 1px dotted var(--muted); }
+.author-admin-theme .author-mtable-score { width: 190px; }
+.author-admin-theme .author-mtable-score strong { font: 400 26px/1 Georgia, serif; letter-spacing: -.04em; margin-right: 8px; }
+.author-admin-theme .author-mtable-score em { font-style: normal; font-size: 12px; font-weight: 800; }
+.author-admin-theme .author-mtable-bar { height: 8px; margin-top: 6px; border-radius: 999px; background: #f1e7df; overflow: hidden; }
+.author-admin-theme .author-mtable-bar span { display: block; height: 100%; border-radius: 999px; }
+.author-admin-theme .author-mtable-score.strong { color: #16a34a; } .author-admin-theme .author-mtable-score.strong .author-mtable-bar span { background: #16a34a; }
+.author-admin-theme .author-mtable-score.good { color: #c7662d; } .author-admin-theme .author-mtable-score.good .author-mtable-bar span { background: #c7662d; }
+.author-admin-theme .author-mtable-score.partial { color: #d97706; } .author-admin-theme .author-mtable-score.partial .author-mtable-bar span { background: #d97706; }
+.author-admin-theme .author-mtable-score.low { color: #a8a29e; } .author-admin-theme .author-mtable-score.low .author-mtable-bar span { background: #a8a29e; }
+.author-admin-theme .author-mtable-list ul { margin: 0; padding-left: 16px; font-size: 13px; line-height: 1.45; }
+.author-admin-theme .author-mtable-list { max-width: 300px; }
+.author-admin-theme .author-mtable-list.gaps li { color: #92400e; }
+.author-admin-theme .author-mtable-none { color: #15803d; font-size: 13px; font-weight: 700; }
+.author-admin-theme .author-mtable-footnote { margin: 10px 2px 0; color: var(--muted); font-size: 13px; }
