@@ -133,6 +133,20 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     }
   }
 
+  async function stopRun() {
+    if (!window.confirm('Stop the current discovery run? Venues already found are kept.')) return
+    setBusy(b => ({ ...b, stop: true }))
+    try {
+      await api('/api/admin/venue-discovery/stop/', { method: 'POST', body: '{}' })
+      showToast('Discovery stopped. Venues found so far were kept.', 'info')
+      await load()
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
+      setBusy(b => ({ ...b, stop: false }))
+    }
+  }
+
   async function openDetails(id) {
     setDetail(null)
     setDetailLoading(true)
@@ -216,11 +230,18 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
     <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <h2 className="serif text-[32px] leading-none md:text-[36px]">Venue Discovery</h2>
+      <div className="flex flex-wrap items-center gap-2">
+      {runActive && <button type="button" onClick={stopRun} disabled={busy.stop}
+        className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-[13px] font-extrabold text-red-700 shadow-sm hover:bg-red-50 disabled:opacity-60">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2" /></svg>
+        {busy.stop ? 'Stopping…' : 'Stop run'}
+      </button>}
       <button type="button" onClick={runNow} disabled={busy.run || runActive}
         className="shine inline-flex items-center gap-2 rounded-xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange hover:bg-flexee-600 disabled:cursor-not-allowed disabled:opacity-70">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.4-3.4" /></svg>
         {runActive ? 'Discovery running…' : busy.run ? 'Starting…' : 'Run discovery now'}
       </button>
+      </div>
     </div>
     <p className="mb-3 mt-1 max-w-[900px] text-[14px] leading-6 text-muted">
       Each day an AI agent searches the public web for journals, publishers and conferences, reads their official author pages, and every claim is checked against those pages. Nothing here is visible to authors until you add it to Venue Agents.
@@ -247,6 +268,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
           : <b className="ml-1">0</b>}
       </div>}
       {run?.status === 'failed' && <div className="text-[13px] font-semibold text-red-700">{run.summary}</div>}
+      {runActive && run?.summary && <div className="text-[14px] font-semibold text-amber-800">{run.summary}{run.candidates_created ? ` · ${run.candidates_created} new so far` : ''}</div>}
       {showSkipped && run?.errors?.length > 0 && <div className="basis-full rounded-xl border border-line bg-[#fcfaf8] px-3 py-2">
         <div className="mb-1 text-[11px] font-extrabold uppercase tracking-[.07em] text-muted">Skipped in the last run</div>
         <ul className="space-y-1 text-[13px]">
