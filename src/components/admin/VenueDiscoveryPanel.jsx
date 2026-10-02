@@ -69,7 +69,7 @@ function Toast({ toast }) {
 
 export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const [tab, setTab] = useState('new')
-  const [filters, setFilters] = useState({ q: '', type: '', acceptance: 'accepting', sort: 'newest', calls: false })
+  const [filters, setFilters] = useState({ q: '', type: '', acceptance: 'verified', sort: 'newest', calls: false })
   const [data, setData] = useState({ items: [], counts: {}, last_run: null, settings: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -283,7 +283,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         <option value="">All types</option><option value="journal">Journal</option><option value="publisher">Publisher</option><option value="conference">Conference</option>
       </select>
       <select className="field field-compact" value={filters.acceptance} onChange={e => setFilters({ ...filters, acceptance: e.target.value })}>
-        <option value="accepting">Accepting</option><option value="">All statuses</option><option value="unclear">Unclear</option><option value="closed">Closed</option>
+        <option value="verified">Verified only</option><option value="accepting">Accepting</option><option value="closed">Closed</option><option value="unclear">Unclear (not verified)</option><option value="">All statuses</option>
       </select>
       <select className="field field-compact" value={filters.sort} onChange={e => setFilters({ ...filters, sort: e.target.value })} aria-label="Sort">
         <option value="newest">Sort: newest found</option><option value="confidence">Sort: highest confidence</option><option value="verified">Sort: recently verified</option>
@@ -296,7 +296,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
       <div className="flex items-center justify-between border-b border-line px-5 py-3">
         <div>
           <div className="text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-600">
-            {TABS.find(([key]) => key === tab)?.[1]}{filters.acceptance ? ` · ${filters.acceptance}` : ''}
+            {TABS.find(([key]) => key === tab)?.[1]}{filters.acceptance ? ` · ${filters.acceptance === 'verified' ? 'verified only' : filters.acceptance}` : ''}
           </div>
           <h3 className="serif mt-0.5 text-[24px] leading-none">Discovered venues</h3>
         </div>
@@ -353,7 +353,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         </table>
       </div>
       {hidden > 0 && <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-[#fffaf6] px-5 py-2.5 text-[13px] font-semibold text-ink">
-        <span>{hidden} more {TABS.find(([key]) => key === tab)?.[1].toLowerCase()} venue{hidden === 1 ? ' is' : 's are'} not {filters.acceptance} (unclear or closed).</span>
+        <span>{hidden} more {TABS.find(([key]) => key === tab)?.[1].toLowerCase()} venue{hidden === 1 ? ' is' : 's are'} hidden by the "{filters.acceptance === 'verified' ? 'Verified only' : filters.acceptance}" filter{filters.acceptance === 'verified' ? ' (status not proven on the official site)' : ''}.</span>
         <button type="button" onClick={() => setFilters({ ...filters, acceptance: '' })}
           className="rounded-xl border border-line bg-white px-3 py-1.5 text-[12px] font-extrabold shadow-sm hover:shadow-card">Show all statuses</button>
       </div>}
