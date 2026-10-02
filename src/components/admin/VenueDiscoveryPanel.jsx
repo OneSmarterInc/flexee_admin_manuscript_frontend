@@ -18,6 +18,11 @@ function formatChecked(value) {
   return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
 }
 
+function formatDate(value) {
+  const date = new Date(`${value}T00:00:00`)
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+
 function StatusBadge({ value }) {
   const map = {
     accepting: ['Accepting', 'border-green-200 bg-green-50 text-green-700', 'bg-green-500'],
@@ -49,9 +54,10 @@ function List({ items }) {
   return items && items.length ? <ul className="list-disc space-y-0.5 pl-5">{items.map(item => <li key={item}>{item}</li>)}</ul> : notStated
 }
 function Pairs({ value }) {
-  const entries = Object.entries(value || {})
+  // Open calls have their own section; nested objects are shown by their title.
+  const entries = Object.entries(value || {}).filter(([key]) => key !== 'calls_for_papers')
   return entries.length ? <div className="space-y-0.5">{entries.map(([key, item]) => <div key={key}>
-    <span className="text-muted">{key.replaceAll('_', ' ')}:</span> {Array.isArray(item) ? item.join(', ') : typeof item === 'object' && item ? JSON.stringify(item) : String(item)}
+    <span className="text-muted">{key.replaceAll('_', ' ')}:</span> {Array.isArray(item) ? item.map(entry => (entry && typeof entry === 'object' ? entry.title || entry.name || JSON.stringify(entry) : entry)).join(', ') : typeof item === 'object' && item ? JSON.stringify(item) : String(item)}
   </div>)}</div> : notStated
 }
 
@@ -63,7 +69,7 @@ function Toast({ toast }) {
 
 export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const [tab, setTab] = useState('new')
-  const [filters, setFilters] = useState({ q: '', type: '', acceptance: 'accepting', sort: 'newest' })
+  const [filters, setFilters] = useState({ q: '', type: '', acceptance: 'accepting', sort: 'newest', calls: false })
   const [data, setData] = useState({ items: [], counts: {}, last_run: null, settings: {} })
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -87,6 +93,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     if (filters.type) params.set('type', filters.type)
     if (filters.q.trim()) params.set('q', filters.q.trim())
     if (filters.sort) params.set('sort', filters.sort)
+    if (filters.calls) params.set('calls', '1')
     try {
       const payload = await api(`/api/admin/venue-discovery/?${params}`)
       setData(payload)
@@ -253,6 +260,12 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     </div>
 
     <div className="mb-3 flex flex-wrap gap-2">
+      <button type="button" onClick={() => setFilters({ ...filters, calls: !filters.calls })}
+        className={`order-last inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] font-extrabold uppercase tracking-[.06em] transition ${filters.calls ? 'border-flexee-300 bg-flexee-50 text-flexee-700' : 'border-line bg-white/90 text-muted hover:text-ink'}`}
+        aria-pressed={filters.calls} title="Only venues with an open call for papers / special issue">
+        <span className={`h-2 w-2 rounded-full ${filters.calls ? 'bg-flexee-500' : 'bg-stone-300'}`}></span>
+        Open calls only
+      </button>
       {TABS.map(([key, label]) => <button key={key} type="button" onClick={() => { setTab(key); setLoading(true) }}
         className={`metric-chip inline-flex items-center gap-2 rounded-full border border-line bg-white/90 px-3.5 py-1.5 ${tab === key ? 'active' : ''}`}>
         <span className="serif text-[20px] leading-none">{counts[key] || 0}</span>
@@ -310,6 +323,10 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
                       <div className="text-[15px] font-extrabold leading-snug">{item.name}</div>
                       <div className="text-[12px] font-medium text-muted">{item.organization_name || 'Organization not stated'}{item.source_domain && <> · <span className="text-flexee-700">{item.source_domain}</span></>}</div>
                       {item.discovery_status === 'changed' && <div className="mt-1 inline-flex rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-extrabold text-amber-700">Update available</div>}
+                      {item.open_calls?.length > 0 && <div className="mt-1 inline-flex max-w-[460px] items-center gap-1.5 rounded-full border border-flexee-200 bg-flexee-50 px-2 py-0.5 text-[11px] font-extrabold text-flexee-700" title={item.open_calls.map(call => `${call.title} — ${formatDate(call.deadline)}`).join('\n')}>
+                        <span className="truncate">Open call{item.open_calls.length > 1 ? `s (${item.open_calls.length})` : ''} · deadline {formatDate(item.open_calls[0].deadline)}</span>
+                      </div>}
+                      {item.last_error && item.last_error.startsWith('Publisher site blocks') && <div className="mt-1 text-[11px] font-semibold text-muted">Site blocks automated reading · from catalogue</div>}
                     </div>
                   </div>
                 </td>
@@ -366,7 +383,9 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         {detail.acceptance_status === 'unclear' && <div className="mx-6 mt-4 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-[14px] font-semibold text-amber-800"><b>Not verified as accepting.</b> The official pages don't clearly show an open submission route. Check before adding.</div>}
         {detail.acceptance_status === 'closed' && <div className="mx-6 mt-4 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[14px] font-semibold text-muted"><b>Closed to submissions.</b> It can't be added while closed; the daily check will update it if it reopens.</div>}
         {detail.last_error && <div className="mx-6 mt-4 rounded-2xl border border-line bg-[#fcfaf8] px-4 py-3 text-[13px] font-semibold text-muted">
-          {detail.last_error === INCONCLUSIVE ? INCONCLUSIVE : <>The latest re-check could not complete ({detail.last_error}). Showing the previous verified result.</>}
+          {detail.last_error === INCONCLUSIVE || detail.last_error.startsWith('Publisher site blocks')
+            ? detail.last_error
+            : <>The latest re-check could not complete ({detail.last_error}). Showing the previous verified result.</>}
         </div>}
 
         <div className="grid gap-3 px-6 pt-4 lg:grid-cols-2">
@@ -404,6 +423,18 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
             ['Current demand', <Pairs value={detail.current_demand} />],
           ]} />
         </div>
+        {detail.open_calls?.length > 0 && <div className="px-6 pt-3">
+          <div className="overflow-hidden rounded-2xl border border-flexee-200 bg-white">
+            <div className="border-b border-flexee-100 bg-flexee-50 px-4 py-2 text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-700">Open calls for papers</div>
+            {detail.open_calls.map((call, index) => <div key={index} className="flex flex-col gap-1 border-b border-line px-4 py-2.5 last:border-0 md:flex-row md:items-center md:justify-between">
+              <div className="min-w-0">
+                <div className="text-[14px] font-extrabold">{call.title}</div>
+                <div className="text-[12px] font-semibold"><ExternalLink href={call.url} /></div>
+              </div>
+              <span className="shrink-0 rounded-full border border-flexee-200 bg-flexee-50 px-2.5 py-0.5 text-[12px] font-extrabold text-flexee-700">Deadline {formatDate(call.deadline)}</span>
+            </div>)}
+          </div>
+        </div>}
         <div className="px-6 py-4">
           <div className="overflow-hidden rounded-2xl border border-line bg-white">
             <div className="border-b border-line bg-[#faf7f4] px-4 py-2 text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Source evidence</div>
