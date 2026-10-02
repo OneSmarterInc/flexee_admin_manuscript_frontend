@@ -9,6 +9,38 @@ function toneForEligibility(value) {
   return 'neutral'
 }
 
+function scoreTone(score) {
+  if (score >= 75) return 'strong'
+  if (score >= 55) return 'good'
+  if (score >= 35) return 'partial'
+  return 'low'
+}
+
+const SCORE_HELP = 'How the match score is built from your manuscript: scope fit with the venue\'s aims and topics (40%), accepted article type (25%), venue requirements met such as length and sections (20%), methods and quality signals (15%). It explains fit only; it is not a quality ranking.'
+
+// Template text a small model sometimes copies instead of a real finding.
+const PLACEHOLDER_PATTERNS = [
+  /^(why )?the manuscript aligns( with the venue)?\.?$/i,
+  /^specific missing or conflicting requirement\.?$/i,
+  /^(text|reason|gap|plain-language explanation)\.?$/i,
+]
+
+function cleanItems(items) {
+  const seen = new Set()
+  return (items || [])
+    .map(item => String(item || '').trim())
+    .filter(item => item.length > 3 && !PLACEHOLDER_PATTERNS.some(pattern => pattern.test(item)))
+    .map(item => item.charAt(0).toUpperCase() + item.slice(1))
+    .filter(item => {
+      const key = item.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+}
+
+const VISIBLE_ITEMS = 2
+
 function labelForEligibility(value) {
   if (value === 'eligible') return 'Eligible'
   if (value === 'needs_changes') return 'Needs changes'
@@ -23,6 +55,9 @@ export default function AuthorVenueMatches() {
   const [agentBusy, setAgentBusy] = useState(false)
   const [error, setError] = useState('')
   const [agentWarning, setAgentWarning] = useState('')
+  const [filter, setFilter] = useState('all')
+  const [sort, setSort] = useState('score')
+  const [expanded, setExpanded] = useState({})
 
   async function loadMatches() {
     const session = getAuthorSession()
@@ -94,76 +129,128 @@ export default function AuthorVenueMatches() {
     go(`/author/venue-assessment/${match.venue.slug}`)
   }
 
+  const counts = {
+    all: matches.length,
+    eligible: matches.filter(m => m.eligibility === 'eligible').length,
+    needs_changes: matches.filter(m => m.eligibility === 'needs_changes').length,
+    ineligible: matches.filter(m => m.eligibility === 'ineligible').length,
+  }
+  const rows = matches
+    .filter(match => filter === 'all' || match.eligibility === filter)
+    .slice()
+    .sort((a, b) => sort === 'name'
+      ? a.venue.name.localeCompare(b.venue.name)
+      : (b.match_score?.score ?? -1) - (a.match_score?.score ?? -1))
+
+  function itemList(match, kind) {
+    const items = cleanItems(kind === 'fit' ? match.reasons : match.gaps)
+    if (!items.length) {
+      return kind === 'gap'
+        ? <span className="author-mt-none ok">Nothing required</span>
+        : <span className="author-mt-none">—</span>
+    }
+    const key = `${match.id}-${kind}`
+    const open = Boolean(expanded[key])
+    const shown = open ? items : items.slice(0, VISIBLE_ITEMS)
+    return <>
+      <ul className={`author-mt-items ${kind}`}>{shown.map((item, index) => <li key={index}>{item}</li>)}</ul>
+      {items.length > VISIBLE_ITEMS && <button type="button" className="author-mt-more"
+        onClick={() => setExpanded(state => ({ ...state, [key]: !open }))}>
+        {open ? 'Show less' : `+${items.length - VISIBLE_ITEMS} more`}
+      </button>}
+    </>
+  }
+
   return <PublicationShell>
-    <div className="wrap author-flow-page">
+    <div className="wrap author-flow-page author-matches-page">
       <div className="crumb"><button className="author-text-link" type="button" onClick={() => go('/author')}>Author workspace</button> / Venue matches</div>
       <AuthorFlowNav active="venues" />
       <AuthorPrototypeNotice />
 
       {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Venue matching unavailable.</b> {error}</div>}
 
-      <section className="author-venues-hero">
-        <div>
+      <section className="author-mt-head">
+        <div className="author-mt-head-copy">
           <p className="kicker">Venue matching</p>
-          <h1 className="publication-title">Compare fit before you choose.</h1>
-          <p className="publication-lede">Each participating venue is checked against the manuscript independently. The system explains alignment and gaps; it does not rank destinations or choose one for you.</p>
+          <h1>Compare fit before you choose.</h1>
+          <p>Each venue is checked independently. The match score explains fit and what to change; you choose the destination.</p>
         </div>
-        <div className="author-venues-summary" aria-label="Venue matching summary">
-          <div><span>Venues</span><b>{matches.length}</b></div>
-          <div><span>Eligible</span><b>{matches.filter(item => item.eligibility === 'eligible').length}</b></div>
-          <div><span>Needs changes</span><b>{matches.filter(item => item.eligibility === 'needs_changes').length}</b></div>
+        <div className="author-mt-chips" aria-label="Venue matching summary">
+          <div className="author-mt-chip"><b>{counts.all}</b><span>Venues</span></div>
+          <div className="author-mt-chip ok"><b>{counts.eligible}</b><span>Eligible</span></div>
+          <div className="author-mt-chip warn"><b>{counts.needs_changes}</b><span>Needs changes</span></div>
+          <div className="author-mt-chip no"><b>{counts.ineligible}</b><span>Not eligible</span></div>
         </div>
       </section>
 
-      {agentBusy && <div className="author-prototype-notice" role="status"><b>Semantic matching is running.</b> The agent is evaluating each configured venue independently.</div>}
-      {agentWarning && <div className="author-prototype-notice author-error-banner" role="note"><b>Matching note.</b> {agentWarning} {!agentBusy && manuscript?.parsed_profile?.semantic && <button className="author-text-link author-inline-action" type="button" onClick={runSemanticMatching}>Retry semantic matching</button>}</div>}
+      {agentBusy && <div className="author-mt-note" role="status"><b>Semantic matching is running.</b> The agent is evaluating each configured venue independently.</div>}
+      {agentWarning && <div className="author-mt-note" role="note"><b>Note:</b> {agentWarning} {!agentBusy && manuscript?.parsed_profile?.semantic && <button className="author-text-link author-inline-action" type="button" onClick={runSemanticMatching}>Retry semantic matching</button>}</div>}
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Venue matching</p><h2>Loading participating venues…</h2></section> :
-        matches.length ? <section className="author-venue-card-section">
-          <div className="author-venue-card-section-head">
-            <div>
-              <p className="kicker">Participating venues</p>
-              <h2>Venue comparison</h2>
+        matches.length ? <section>
+          <div className="author-mt-bar">
+            <h2>Venue comparison</h2>
+            <div className="author-mt-tabs" role="tablist" aria-label="Filter venues">
+              {[['all', 'All'], ['eligible', 'Eligible'], ['needs_changes', 'Needs changes'], ['ineligible', 'Not eligible']]
+                .map(([key, label]) => <button key={key} type="button" role="tab" aria-selected={filter === key}
+                  className={filter === key ? 'active' : ''} onClick={() => setFilter(key)}>{label} · {counts[key]}</button>)}
             </div>
-            <span>{matches.length} venue{matches.length === 1 ? '' : 's'}</span>
+            <span className="author-mt-spacer"></span>
+            <span className="author-mt-count">{rows.length} venue{rows.length === 1 ? '' : 's'}</span>
+            <select className="author-mt-sort" value={sort} onChange={e => setSort(e.target.value)} aria-label="Sort venues">
+              <option value="score">Sort: highest match</option>
+              <option value="name">Sort: venue name</option>
+            </select>
           </div>
 
-          <div className="author-venue-card-grid">
-            {matches.map((match, index) => <article className="author-venue-pro-card" key={match.id}>
-              <div className="author-venue-pro-head">
-                <div className="author-venue-pro-identity">
-                  <span className="author-venue-row-index">{String(index + 1).padStart(2, '0')}</span>
-                  <div>
-                    <span className="author-venue-type">{match.venue.venue_type}</span>
-                    <h3>{match.venue.name}</h3>
-                  </div>
-                </div>
-                <AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill>
-              </div>
-
-              <p className="author-venue-pro-summary">{match.fit_summary || 'Venue configuration is available for review.'}</p>
-
-              <div className="author-venue-pro-details">
-                <section>
-                  <span className="author-venue-pro-label">Why it may fit</span>
-                  <div className="author-venue-pro-scroll">
-                    {match.reasons?.length ? <ul>{match.reasons.map((reason, reasonIndex) => <li key={`${match.id}-reason-${reasonIndex}`}>{reason}</li>)}</ul> : <p>No positive alignment recorded.</p>}
-                  </div>
-                </section>
-
-                <section>
-                  <span className="author-venue-pro-label">Before submission</span>
-                  <div className="author-venue-pro-scroll">
-                    {match.gaps?.length ? <ul className="gaps">{match.gaps.map((gap, gapIndex) => <li key={`${match.id}-gap-${gapIndex}`}>{gap}</li>)}</ul> : <p>No venue-specific gaps.</p>}
-                  </div>
-                </section>
-              </div>
-
-              <div className="author-venue-pro-footer">
-                <span>{match.reasons?.length || 0} fit signal{match.reasons?.length === 1 ? '' : 's'} · {match.gaps?.length || 0} gap{match.gaps?.length === 1 ? '' : 's'}</span>
-                <button className="author-secondary-button" type="button" onClick={() => openVenue(match)}>Review venue</button>
-              </div>
-            </article>)}
+          <div className="author-mt-card">
+            <div className="author-mt-scroll">
+              <table className="author-mt-table">
+                <colgroup>
+                  <col className="c-venue" /><col className="c-match" /><col className="c-status" />
+                  <col className="c-fit" /><col className="c-gap" /><col className="c-act" />
+                </colgroup>
+                <thead>
+                  <tr>
+                    <th>Venue</th>
+                    <th><span className="author-mt-help" tabIndex={0} title={SCORE_HELP} aria-label={SCORE_HELP}>Match ⓘ</span></th>
+                    <th>Status</th>
+                    <th>Why it may fit</th>
+                    <th>Before submission</th>
+                    <th className="right">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map(match => {
+                    const score = match.match_score?.score ?? null
+                    const tone = score === null ? 'low' : scoreTone(score)
+                    const meta = `${match.venue.venue_type}${match.venue.organization?.name ? ` · ${match.venue.organization.name}` : ''}`
+                    return <tr key={match.id}>
+                      <td>
+                        <div className="author-mt-name" title={match.venue.name}>{match.venue.name}</div>
+                        <div className="author-mt-meta" title={meta}>{meta}</div>
+                      </td>
+                      <td className={`author-mt-score ${tone}`}
+                        title={match.match_score ? `Scope ${match.match_score.breakdown.scope}/40 · Type ${match.match_score.breakdown.type}/25 · Requirements ${match.match_score.breakdown.requirements}/20 · Methods ${match.match_score.breakdown.methods}/15` : ''}>
+                        {score === null ? <span className="author-mt-meta">Not scored</span> : <>
+                          <div className="author-mt-score-line"><strong>{score}%</strong><em>{match.match_score.label}</em></div>
+                          <div className="author-mt-bar-track"><span style={{ width: `${score}%` }}></span></div>
+                        </>}
+                      </td>
+                      <td><AuthorStatusPill tone={toneForEligibility(match.eligibility)}>{labelForEligibility(match.eligibility)}</AuthorStatusPill></td>
+                      <td>{itemList(match, 'fit')}</td>
+                      <td>{itemList(match, 'gap')}</td>
+                      <td className="right">
+                        <button className={match.eligibility === 'eligible' ? 'copper-button author-mt-btn' : 'author-secondary-button author-mt-btn'} type="button" onClick={() => openVenue(match)}>
+                          {match.eligibility === 'ineligible' ? 'View details' : 'Review venue'}
+                        </button>
+                      </td>
+                    </tr>
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div className="author-mt-foot">Match scores compare your current manuscript with each venue's configured rules (scope 40 · article type 25 · requirements 20 · methods 15). They explain fit; you choose the destination.</div>
           </div>
         </section> : !error && <section className="author-panel author-live-state">
           <p className="kicker">No matches yet</p>

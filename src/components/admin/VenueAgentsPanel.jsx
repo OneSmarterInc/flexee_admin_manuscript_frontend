@@ -251,7 +251,7 @@ const configFieldHelp = {
   }
 }
 
-export default function VenueAgentsPanel({ platformSuperuser = false, memberships = [] }) {
+export default function VenueAgentsPanel({ platformSuperuser = false, memberships = [], initialVenueId = '' }) {
   const ownerMemberships = useMemo(() => memberships.filter(item => item.role === 'owner'), [memberships])
   const defaultOwnerOrgId = String(ownerMemberships[0]?.organization_id || '')
   const [venues, setVenues] = useState([])
@@ -307,6 +307,15 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   }
 
   useEffect(() => {
+    // Opened from Venue Discovery ("Open Venue Agent"): show that venue straight away.
+    if (initialVenueId) {
+      setDetailOpen(true)
+      loadVenues(initialVenueId).catch(err => {
+        setError(err.message)
+        setLoading(false)
+      })
+      return
+    }
     loadVenues().catch(err => {
       setError(err.message)
       setLoading(false)
