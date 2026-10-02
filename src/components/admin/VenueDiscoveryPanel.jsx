@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
-import DiscoveryScheduleCard from './DiscoveryScheduleCard.jsx'
+import DiscoveryScheduleCard, { scheduleSummary } from './DiscoveryScheduleCard.jsx'
 
 const INCONCLUSIVE = 'Latest check was inconclusive; showing the previous verified result.'
 const TABS = [['new', 'New'], ['added', 'Added'], ['changed', 'Changed'], ['ignored', 'Ignored']]
@@ -79,6 +79,12 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [showSkipped, setShowSkipped] = useState(false)
+  const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [schedule, setSchedule] = useState(null)
+
+  useEffect(() => {
+    api('/api/admin/venue-discovery/schedule/').then(result => setSchedule(result.schedule)).catch(() => {})
+  }, [])
   const [toast, setToast] = useState(null)
   const toastTimer = useRef(null)
 
@@ -232,6 +238,12 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
       <h2 className="serif text-[32px] leading-none md:text-[36px]">Venue Discovery</h2>
       <div className="flex flex-wrap items-center gap-2">
+      <button type="button" onClick={() => setScheduleOpen(true)} title="Set the daily run time"
+        className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+        {scheduleSummary(schedule)}
+        {schedule?.enabled && <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true"></span>}
+      </button>
       {runActive && <button type="button" onClick={stopRun} disabled={busy.stop}
         className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-white px-4 py-2.5 text-[13px] font-extrabold text-red-700 shadow-sm hover:bg-red-50 disabled:opacity-60">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="2" /></svg>
@@ -254,8 +266,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         : <>The discovery agent can't run yet: set <code>{settings.missing_key || 'ANTHROPIC_API_KEY'}</code> on the server.</>}
     </div>}
 
-    <div className="mb-3 grid gap-3 xl:grid-cols-[1.4fr_1fr]">
-    <div className="premium-card flex flex-wrap content-start items-center gap-x-6 gap-y-2 rounded-[18px] px-4 py-3">
+    <div className="premium-card mb-3 flex flex-wrap items-center gap-x-6 gap-y-2 rounded-[18px] px-4 py-3">
       <div className="flex items-center gap-2">
         <span className={`status-dot ${run?.status === 'failed' ? 'bg-red-500' : runActive ? 'bg-amber-500' : run ? 'bg-green-500' : 'bg-stone-400'}`}></span>
         <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Last run</span>
@@ -282,8 +293,8 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
       </div>}
       <div className="ml-auto text-[13px] font-semibold text-muted">{settings.mode === 'claude_agent' ? 'agent' : 'search'}: {settings.search_provider || '—'}</div>
     </div>
-    <DiscoveryScheduleCard onToast={message => showToast(message)} />
-    </div>
+    <DiscoveryScheduleCard open={scheduleOpen} onClose={() => setScheduleOpen(false)}
+      onToast={message => showToast(message)} onSaved={setSchedule} />
 
     <div className="mb-3 flex flex-wrap gap-2">
       <button type="button" onClick={() => setFilters({ ...filters, calls: !filters.calls })}

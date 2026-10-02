@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react'
 import { api } from '../../api.js'
+import AdminModal from './AdminModal.jsx'
 
 function formatTime(value) {
   const [h, m] = String(value || '02:00').split(':').map(Number)
   const ampm = h >= 12 ? 'PM' : 'AM'
   return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
+}
+
+export function scheduleSummary(schedule) {
+  if (!schedule) return 'Schedule'
+  return schedule.enabled ? `Daily ${formatTime(schedule.time)}` : 'Schedule off'
 }
 
 function describeNextRun(iso, tz) {
@@ -18,18 +24,20 @@ function describeNextRun(iso, tz) {
   }
 }
 
-/* Daily schedule for venue discovery: on/off, time and time zone. */
-export default function DiscoveryScheduleCard({ onToast }) {
+/* Daily schedule for venue discovery, shown in a pop-up: on/off, time and time zone. */
+export default function DiscoveryScheduleCard({ open, onClose, onToast, onSaved }) {
   const [saved, setSaved] = useState(null)
   const [form, setForm] = useState({ enabled: false, time: '02:00', timezone: 'UTC' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
+    if (!open) return
+    setError('')
     api('/api/admin/venue-discovery/schedule/')
       .then(result => { setSaved(result.schedule); setForm({ enabled: result.schedule.enabled, time: result.schedule.time, timezone: result.schedule.timezone }) })
       .catch(err => setError(err.message))
-  }, [])
+  }, [open])
 
   const dirty = saved && (saved.enabled !== form.enabled || saved.time !== form.time || saved.timezone !== form.timezone)
 
@@ -40,6 +48,8 @@ export default function DiscoveryScheduleCard({ onToast }) {
       const result = await api('/api/admin/venue-discovery/schedule/', { method: 'POST', body: JSON.stringify(form) })
       setSaved(result.schedule)
       setForm({ enabled: result.schedule.enabled, time: result.schedule.time, timezone: result.schedule.timezone })
+      onSaved?.(result.schedule)
+      onClose?.()
       onToast?.(result.schedule.enabled
         ? `✓ Schedule saved: discovery runs daily at ${formatTime(result.schedule.time)} (${result.schedule.timezone}).`
         : '✓ Daily run turned off. Discovery now runs only when you click "Run discovery now".')
@@ -50,12 +60,17 @@ export default function DiscoveryScheduleCard({ onToast }) {
     }
   }
 
-  return <div className="premium-card rounded-[18px] px-4 py-3">
-    <div className="flex items-start justify-between gap-3">
+  return <AdminModal open={open} onClose={onClose} labelledBy="discovery-schedule-title" maxWidth="max-w-[560px]">
+    <div className="border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">
+      <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Daily schedule</div>
+      <h3 id="discovery-schedule-title" className="serif mt-0.5 text-[28px] leading-none">Run discovery automatically</h3>
+      <div className="mt-1 text-[13px] text-muted">The background worker runs it once a day at this time.</div>
+    </div>
+    <div className="px-6 py-5">
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-line bg-white px-4 py-3">
       <div>
-        <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Daily schedule</div>
-        <div className="mt-0.5 text-[15px] font-extrabold">Run discovery automatically</div>
-        <div className="text-[13px] text-muted">The background worker runs it once a day at this time.</div>
+        <div className="text-[14px] font-extrabold">{form.enabled ? 'Daily run is on' : 'Daily run is off'}</div>
+        <div className="text-[12px] text-muted">{form.enabled ? 'Discovery runs every day at the time below.' : 'Discovery runs only when you click “Run discovery now”.'}</div>
       </div>
       <button type="button" role="switch" aria-checked={form.enabled} aria-label="Run discovery automatically every day"
         onClick={() => setForm({ ...form, enabled: !form.enabled })}
@@ -95,6 +110,7 @@ export default function DiscoveryScheduleCard({ onToast }) {
         </button>
       </div>
     </div>
-    <div className="mt-1.5 text-[12px] text-muted">Each run stops after about 25 minutes; venues it didn't reach are tried the next day. "Run discovery now" still works any time.</div>
-  </div>
+    <div className="mt-2 text-[12px] text-muted">Each run stops after about 25 minutes; venues it didn't reach are tried the next day. "Run discovery now" still works any time.</div>
+    </div>
+  </AdminModal>
 }
