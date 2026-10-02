@@ -4,6 +4,21 @@ import AdminModal, { KvTable } from './AdminModal.jsx'
 import DiscoveryScheduleCard, { scheduleSummary } from './DiscoveryScheduleCard.jsx'
 
 const INCONCLUSIVE = 'Latest check was inconclusive; showing the previous verified result.'
+const PAGE_SIZE = 10
+
+// Page numbers to show: all when few, otherwise first, last and neighbours of the current page.
+function pageButtons(current, pages) {
+  if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1)
+  const set = new Set([1, pages, current - 1, current, current + 1].filter(n => n >= 1 && n <= pages))
+  const sorted = [...set].sort((a, b) => a - b)
+  const out = []
+  sorted.forEach((n, i) => {
+    if (i && n - sorted[i - 1] > 1) out.push(`gap-${n}`)
+    out.push(n)
+  })
+  return out
+}
+
 const TABS = [['new', 'New'], ['added', 'Added'], ['changed', 'Changed'], ['ignored', 'Ignored']]
 const TYPE_LABEL = { journal: 'Journal', publisher: 'Publisher', conference: 'Conference' }
 
@@ -80,6 +95,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const [detailLoading, setDetailLoading] = useState(false)
   const [showSkipped, setShowSkipped] = useState(false)
   const [scheduleOpen, setScheduleOpen] = useState(false)
+  const [page, setPage] = useState(1)
   const [schedule, setSchedule] = useState(null)
 
   useEffect(() => {
@@ -94,8 +110,11 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     toastTimer.current = setTimeout(() => setToast(null), 3800)
   }, [])
 
+  // Back to page 1 whenever the tab or a filter changes.
+  useEffect(() => { setPage(1) }, [tab, filters])
+
   const load = useCallback(async () => {
-    const params = new URLSearchParams({ status: tab })
+    const params = new URLSearchParams({ status: tab, page: String(page), page_size: String(PAGE_SIZE) })
     if (filters.acceptance) params.set('acceptance', filters.acceptance)
     if (filters.type) params.set('type', filters.type)
     if (filters.q.trim()) params.set('q', filters.q.trim())
@@ -103,6 +122,8 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     if (filters.calls) params.set('calls', '1')
     try {
       const payload = await api(`/api/admin/venue-discovery/?${params}`)
+      // The server snaps an out-of-range page (e.g. after the last venue on a page was added) to the last page.
+      if (payload.pagination && payload.pagination.page !== page) setPage(payload.pagination.page)
       setData(payload)
       setError('')
     } catch (err) {
@@ -110,7 +131,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     } finally {
       setLoading(false)
     }
-  }, [tab, filters])
+  }, [tab, filters, page])
 
   useEffect(() => {
     const timer = setTimeout(load, filters.q ? 250 : 0)
@@ -231,6 +252,9 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
   const settings = data.settings || {}
   const counts = data.counts || {}
   const items = data.items || []
+  const pagination = data.pagination || { page: 1, page_size: PAGE_SIZE, total: items.length, pages: 1 }
+  const shownStart = pagination.total ? (pagination.page - 1) * pagination.page_size + 1 : 0
+  const shownEnd = Math.min(pagination.total, pagination.page * pagination.page_size)
   const hidden = data.hidden_by_status_filter || 0
 
   return <div>
@@ -337,7 +361,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
           </div>
           <h3 className="serif mt-0.5 text-[24px] leading-none">Discovered venues</h3>
         </div>
-        <div className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-1 text-[12px] font-extrabold text-flexee-700">{items.length} venue{items.length === 1 ? '' : 's'}</div>
+        <div className="rounded-full border border-flexee-100 bg-flexee-50 px-3 py-1 text-[12px] font-extrabold text-flexee-700">{pagination.total} venue{pagination.total === 1 ? '' : 's'}</div>
       </div>
       <div className="thin-scroll overflow-x-auto">
         <table className="data-table w-full min-w-[1180px] border-collapse">
@@ -389,6 +413,23 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
           </tbody>
         </table>
       </div>
+      {pagination.total > 0 && <div className="flex flex-col gap-3 border-t border-line px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="text-[13px] font-medium text-muted">
+          Showing {shownStart.toLocaleString()}–{shownEnd.toLocaleString()} of {pagination.total.toLocaleString()} venue{pagination.total === 1 ? '' : 's'}
+        </div>
+        {pagination.pages > 1 && <div className="flex flex-wrap gap-2">
+          <button type="button" disabled={pagination.page <= 1} onClick={() => setPage(pagination.page - 1)}
+            className="rounded-xl border border-line bg-white px-4 py-1.5 text-[13px] font-extrabold text-muted disabled:cursor-not-allowed disabled:opacity-45">Previous</button>
+          {pageButtons(pagination.page, pagination.pages).map(entry => typeof entry === 'string'
+            ? <span key={entry} className="px-1 py-1.5 text-[13px] font-extrabold text-muted">…</span>
+            : <button key={entry} type="button" onClick={() => setPage(entry)} aria-current={entry === pagination.page ? 'page' : undefined}
+              className={entry === pagination.page
+                ? 'rounded-xl bg-ink px-4 py-1.5 text-[13px] font-extrabold text-white'
+                : 'rounded-xl border border-line bg-white px-4 py-1.5 text-[13px] font-extrabold'}>{entry}</button>)}
+          <button type="button" disabled={pagination.page >= pagination.pages} onClick={() => setPage(pagination.page + 1)}
+            className="rounded-xl border border-line bg-white px-4 py-1.5 text-[13px] font-extrabold disabled:cursor-not-allowed disabled:opacity-45">Next</button>
+        </div>}
+      </div>}
       {hidden > 0 && <div className="flex flex-wrap items-center justify-between gap-2 border-t border-line bg-[#fffaf6] px-5 py-2.5 text-[13px] font-semibold text-ink">
         <span>{hidden} more {TABS.find(([key]) => key === tab)?.[1].toLowerCase()} venue{hidden === 1 ? ' is' : 's are'} hidden by the "{filters.acceptance === 'verified' ? 'Verified only' : filters.acceptance}" filter{filters.acceptance === 'verified' ? ' (status not proven on the official site)' : ''}.</span>
         <button type="button" onClick={() => setFilters({ ...filters, acceptance: '' })}
