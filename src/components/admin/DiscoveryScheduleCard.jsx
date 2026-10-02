@@ -89,7 +89,8 @@ export default function DiscoveryScheduleCard({ open, onClose, onToast, onSaved 
         <span className="mb-1 block text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Time zone</span>
         <select className="field field-compact" value={form.timezone} disabled={!form.enabled}
           onChange={e => setForm({ ...form, timezone: e.target.value })}>
-          {(saved?.timezones || [form.timezone]).map(tz => <option key={tz} value={tz}>{tz}</option>)}
+          {(saved?.timezone_options || (saved?.timezones || [form.timezone]).map(value => ({ value, label: value })))
+            .map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>
     </div>
@@ -110,7 +111,11 @@ export default function DiscoveryScheduleCard({ open, onClose, onToast, onSaved 
         </button>
       </div>
     </div>
-    <div className="mt-2 text-[12px] text-muted">Each run stops after about 25 minutes; venues it didn't reach are tried the next day. "Run discovery now" still works any time.</div>
+    {saved?.last_scheduled_run && <div className="mt-2 text-[12px] text-muted">
+      Last scheduled run: <b className="text-ink">{describeNextRun(saved.last_scheduled_run.started_at, saved.timezone)}</b>
+      {' · '}{saved.last_scheduled_run.status}
+    </div>}
+    <div className="mt-2 text-[12px] text-muted">The background worker (qcluster) must be running for the schedule to fire. Each run stops after about 25 minutes; venues it didn't reach are tried the next day. "Run discovery now" still works any time.</div>
     </div>
   </AdminModal>
 }
