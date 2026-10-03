@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { api, apiBlob } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
-import ManuscriptViewer from './ManuscriptViewer.jsx'
+// Loaded only when a manuscript is opened (keeps PDF/Word/ZIP libraries out of the main bundle).
+const ManuscriptViewer = lazy(() => import('./ManuscriptViewer.jsx'))
 
 const statusLabels = {
   submitted: 'Submitted',
@@ -116,16 +117,6 @@ function saveBlob(blob, disposition, fallback) {
   link.click()
   link.remove()
   URL.revokeObjectURL(url)
-}
-
-function BriefBlock({ label, value }) {
-  if (!value) return null
-  const summary = typeof value === 'string' ? value : value.summary || value.detail || ''
-  if (!summary) return null
-  return <article className="editor-brief-block">
-    <span>{label}</span>
-    <p>{summary}</p>
-  </article>
 }
 
 export default function EditorWorkspacePanel({ platformSuperuser = false, memberships = [] }) {
@@ -756,7 +747,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
             </div>}
           </div>
         </>}
-        {detail && <ManuscriptViewer
+        {detail && viewerOpen && <Suspense fallback={null}><ManuscriptViewer
           open={viewerOpen}
           onClose={() => setViewerOpen(false)}
           submissionId={selectedId}
@@ -764,7 +755,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
           fileBytes={detail.manuscript?.manuscript_bytes}
           onDownload={downloadManuscript}
           downloading={busy === 'download'}
-        />}
+        /></Suspense>}
     </AdminModal>
   </div>
 }

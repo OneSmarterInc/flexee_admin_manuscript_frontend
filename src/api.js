@@ -46,7 +46,7 @@ export async function api(path, options = {}) {
     headers,
   })
   const text = await response.text()
-  let payload = {}
+  let payload
   try { payload = text ? JSON.parse(text) : {} } catch { payload = { detail: text } }
   if (!response.ok) {
     const error = new Error(payload.detail || `Request failed (${response.status})`)

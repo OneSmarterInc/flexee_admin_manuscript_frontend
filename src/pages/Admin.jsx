@@ -656,7 +656,6 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   useEffect(() => {
     mainRef.current?.scrollTo?.({ top: 0, behavior: 'smooth' })
   }, [currentView])
-  const setKindFilter = (k) => { if (!platformSuperuser) return; const nf = {...filters, kind: k}; setFilters(nf); setApplied(nf); setCurrentView('dashboard'); }
   
   const query = useMemo(() => new URLSearchParams(Object.entries(applied).filter(([,v]) => v)).toString(), [applied])
   function load() { if (platformSuperuser && currentView === 'dashboard') { setError(''); api(`/api/admin/submissions/?${query}`).then(setData).catch(e => setError(e.message)) } }

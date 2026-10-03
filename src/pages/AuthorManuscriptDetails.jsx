@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorPageError, AuthorStatusPill } from '../components/AuthorFlow.jsx'
-import ManuscriptViewer from '../components/admin/ManuscriptViewer.jsx'
+// Loaded only when View is clicked (keeps PDF/Word/ZIP libraries out of the main bundle).
+const ManuscriptViewer = lazy(() => import('../components/admin/ManuscriptViewer.jsx'))
 import { apiBlob } from '../api.js'
 import {
   authorApi,
@@ -366,7 +367,7 @@ export default function AuthorManuscriptDetails() {
     </div>
 
     <div className="admin-demo-root" />
-    {manuscript && <ManuscriptViewer
+    {manuscript && viewing && <Suspense fallback={null}><ManuscriptViewer
       open={viewing}
       onClose={() => setViewing(false)}
       submissionId={manuscript.id}
@@ -375,6 +376,6 @@ export default function AuthorManuscriptDetails() {
       loadBlob={async () => (await loadAuthorFile(manuscript.id)).blob}
       onDownload={downloadFile}
       downloading={downloading}
-    />}
+    /></Suspense>}
   </PublicationShell>
 }

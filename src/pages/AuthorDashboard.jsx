@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import AdminModal from '../components/admin/AdminModal.jsx'
-import ManuscriptViewer from '../components/admin/ManuscriptViewer.jsx'
+// Loaded only when View is clicked (keeps PDF/Word/ZIP libraries out of the main bundle).
+const ManuscriptViewer = lazy(() => import('../components/admin/ManuscriptViewer.jsx'))
 import { apiBlob } from '../api.js'
 import { AuthorProfileMenu } from '../components/AuthorAccountMenu.jsx'
 import {
@@ -432,7 +433,7 @@ export default function AuthorDashboard() {
     {/* Host for pop-ups: admin pop-up styles are scoped to this class. */}
     <div className="admin-demo-root author-dash-modal-host" />
 
-    <ManuscriptViewer
+    {viewing && <Suspense fallback={null}><ManuscriptViewer
       open={Boolean(viewing)}
       onClose={() => setViewing(null)}
       submissionId={viewing?.id}
@@ -441,7 +442,7 @@ export default function AuthorDashboard() {
       loadBlob={viewing ? async () => (await loadAuthorFile(viewing.id)).blob : null}
       onDownload={() => viewing && downloadManuscript(viewing)}
       downloading={Boolean(viewing && downloadingId === viewing.id)}
-    />
+    /></Suspense>}
 
     <AdminModal open={Boolean(matchesFor)} onClose={() => setMatchesFor(null)} labelledBy="author-matches-title" maxWidth="max-w-[1040px]">
       <div className="border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, lazy, useEffect, useState } from 'react'
 import Home from './pages/Home.jsx'
 import SubmitBook from './pages/SubmitBook.jsx'
 import SubmitArticle from './pages/SubmitArticle.jsx'
-import AdminPage from './pages/Admin.jsx'
+// The admin portal is a separate bundle, so authors and visitors never download it.
+const AdminPage = lazy(() => import('./pages/Admin.jsx'))
 import AuthorDashboard from './pages/AuthorDashboard.jsx'
 import AuthorLogin from './pages/AuthorLogin.jsx'
 import AuthorSignup from './pages/AuthorSignup.jsx'
@@ -81,6 +82,6 @@ export default function App() {
   if (path === '/author/status') return <AuthorTheme><RequireAuthor><AuthorSubmissionStatus /></RequireAuthor></AuthorTheme>
   if (path === '/author/transfer') return <AuthorTheme><RequireAuthor><AuthorTransfer /></RequireAuthor></AuthorTheme>
 
-  if (path.startsWith('/admin')) return <AdminPage path={path} />
+  if (path.startsWith('/admin')) return <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#746c66', fontFamily: 'Inter, system-ui, sans-serif' }}>Loading admin…</div>}><AdminPage path={path} /></Suspense>
   return <Home />
 }
