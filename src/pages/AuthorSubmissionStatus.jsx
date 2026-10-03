@@ -37,7 +37,6 @@ function DecisionBanner({ decision, status }) {
     : isRejected
     ? 'linear-gradient(135deg, rgba(239,68,68,0.08) 0%, rgba(239,68,68,0.03) 100%)'
     : 'linear-gradient(135deg, rgba(245,158,11,0.08) 0%, rgba(245,158,11,0.03) 100%)'
-  const borderStyle = `1px solid ${isAccepted ? 'rgba(16,185,129,0.2)' : isRejected ? 'rgba(239,68,68,0.2)' : 'rgba(245,158,11,0.2)'}`
 
   const icon = isAccepted ? '✓' : isRejected ? '✕' : '↩'
   const headline = isAccepted

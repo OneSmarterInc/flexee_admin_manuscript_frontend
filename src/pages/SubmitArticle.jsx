@@ -5,7 +5,7 @@ import { PublicationShell } from '../components/SiteChrome.jsx'
 export default function SubmitArticle() {
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
-  const [result, setResult] = useState(null)
+  const [, setResult] = useState(null)
   const [success, setSuccess] = useState(false)
   const [processing, setProcessing] = useState(false)
   const [timeoutMsg, setTimeoutMsg] = useState(false)
