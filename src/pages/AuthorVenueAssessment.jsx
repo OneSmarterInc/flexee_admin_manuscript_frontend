@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../api.js'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
-import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
+import { AuthorFlowNav, AuthorPageError, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import {
   authorApi,
   currentManuscriptPath,
@@ -169,12 +169,12 @@ export default function AuthorVenueAssessment() {
       <AuthorFlowNav active="assessment" />
       <AuthorPrototypeNotice />
 
-      {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Venue assessment could not finish.</b> {error}</div>}
+      <AuthorPageError title="Venue assessment could not finish." message={error} />
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Venue review</p><h2>Loading venue configuration…</h2></section> :
         !match || !venue ? <section className="author-panel author-live-state">
           <p className="kicker">Venue unavailable</p>
-          <h2>This venue is not in the current manuscript match set.</h2>
+          <h1>This venue is not in the current manuscript match set.</h1>
           <button className="author-secondary-button" type="button" onClick={() => go('/author/venues')}>Back to venue matches</button>
         </section> : <>
           <div className="author-page-heading author-heading-row">

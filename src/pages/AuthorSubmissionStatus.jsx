@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
-import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
+import { AuthorFlowNav, AuthorPageError, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import { authorApi, currentSubmissionPath, friendlyAuthorError, getAuthorSession } from '../authorApi.js'
 
 function statusLabel(status) {
@@ -187,17 +187,19 @@ export default function AuthorSubmissionStatus() {
       <AuthorFlowNav active="status" />
       <AuthorPrototypeNotice />
 
-      {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Submission unavailable.</b> {error}</div>}
+      <AuthorPageError title="Submission unavailable." message={error} empty={!submission} />
 
       {loading ? <section className="author-panel author-live-state"><p className="kicker">Submission</p><h2>Loading your venue submission…</h2></section> :
         submission && <>
           <div className="author-page-heading author-heading-row">
             <div>
-              <p className="kicker">Submission status</p>
+              <div className="author-status-kicker-row">
+                <p className="kicker">Submission status</p>
+                <AuthorStatusPill tone={statusTone(submission.status)}>{statusLabel(submission.status)}</AuthorStatusPill>
+              </div>
               <h1 className="publication-title">{submitted ? `Submitted to ${venue?.name}.` : `Your packet for ${venue?.name}.`}</h1>
               <p className="publication-lede">{brief.editor_summary || 'The manuscript, venue configuration, assessment, and evidence stay attached to this venue-specific submission.'}</p>
             </div>
-            <AuthorStatusPill tone={statusTone(submission.status)}>{statusLabel(submission.status)}</AuthorStatusPill>
           </div>
 
           {/* Editorial Decision Banner – shown prominently when a human decision exists */}

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
-import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
+import { AuthorFlowNav, AuthorPageError, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession, saveAuthorSession, pollAuthorJob } from '../authorApi.js'
 
 function toneForEligibility(value) {
@@ -167,7 +167,7 @@ export default function AuthorVenueMatches() {
       <AuthorFlowNav active="venues" />
       <AuthorPrototypeNotice />
 
-      {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Venue matching unavailable.</b> {error}</div>}
+      <AuthorPageError title="Venue matching unavailable." message={error} empty={!manuscript && !matches.length} />
 
       <section className="author-mt-head">
         <div className="author-mt-head-copy">

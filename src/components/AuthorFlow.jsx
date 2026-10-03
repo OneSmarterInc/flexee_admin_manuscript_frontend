@@ -40,10 +40,31 @@ export function AuthorFlowNav({ active }) {
 
 export function AuthorPrototypeNotice() {
   return <div className="author-prototype-notice" role="note">
-    <b>Live author workflow.</b> Readiness, venue matching, assessment, and submission data on these pages now come from the backend. AI findings support preparation; the author chooses the destination and human editors retain the publication decision.
+    <b>How this works.</b> AI checks help you prepare your manuscript and compare venues. You choose where to submit, and editors make the final decision.
   </div>
 }
 
 export function AuthorStatusPill({ tone = 'neutral', children }) {
   return <span className={`author-status-pill ${tone}`}>{children}</span>
+}
+
+
+/* Error banner with a way out; when the page has nothing else to show, also an empty-state card. */
+export function AuthorPageError({ title, message, empty = false }) {
+  if (!message) return null
+  return <>
+    <div className="author-prototype-notice author-error-banner author-page-error" role="alert">
+      <span><b>{title}</b> {message}</span>
+      <button type="button" className="author-secondary-button author-page-error-action" onClick={() => go('/author')}>Back to workspace</button>
+    </div>
+    {empty && <section className="author-panel author-empty-state">
+      <p className="kicker">Nothing to show yet</p>
+      <h1>Choose a manuscript in your workspace.</h1>
+      <p>Open a manuscript from the author workspace to see its readiness, venue matches and submission status here.</p>
+      <div className="author-empty-state-actions">
+        <button type="button" className="copper-button" onClick={() => go('/author')}>Back to workspace</button>
+        <button type="button" className="author-secondary-button" onClick={() => go('/author/new')}>Start a new submission</button>
+      </div>
+    </section>}
+  </>
 }

@@ -352,9 +352,9 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
 
   return <div>
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <h2 className="serif text-[32px] leading-none md:text-[36px]">
+      <h1 className="serif text-[32px] leading-none md:text-[36px]">
         Editorial review
-      </h2>
+      </h1>
 
       <div className="flex shrink-0 flex-wrap gap-2">
         <button
@@ -416,12 +416,12 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
         />
       </div>
 
-      <select className="field field-compact" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
+      <select className="field field-compact" aria-label="Filter by venue" value={filters.venue_id} onChange={e => setFilters({...filters, venue_id:e.target.value})}>
         <option value="">All venues</option>
         {venues.map(venue => <option value={venue.id} key={venue.id}>{venue.name}</option>)}
       </select>
 
-      <select className="field field-compact" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
+      <select className="field field-compact" aria-label="Filter by editorial status" value={filters.status} onChange={e => setFilters({...filters, status:e.target.value})}>
         <option value="">All editorial statuses</option>
         {Object.entries(statusLabels).map(([value,label]) => <option value={value} key={value}>{label}</option>)}
       </select>
@@ -450,7 +450,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Author</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Submitted</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Editorial status</th>
-              <th className="w-12 px-5 py-2.5"><span className="sr-only">Open</span></th>
+              <th className="relative w-12 px-5 py-2.5"><span className="sr-only">Open</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -690,7 +690,7 @@ export default function EditorWorkspacePanel({ platformSuperuser = false, member
               {canEditSelected ? <form className="mt-5 grid gap-4" onSubmit={recordFeedback}>
                 <label>
                   <span className="mb-1.5 block text-[14px] font-extrabold">Assessment field</span>
-                  <select className="field" value={feedbackField} onChange={e => setFeedbackField(e.target.value)}>
+                  <select className="field" aria-label="Feedback field" value={feedbackField} onChange={e => setFeedbackField(e.target.value)}>
                     <option value="outlet_fit">Outlet fit</option>
                     <option value="policy_compliance">Policy compliance</option>
                     <option value="contribution">Contribution</option>

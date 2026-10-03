@@ -59,3 +59,13 @@
 @media(max-width:900px){
   .author-auth-page{max-width:100%}
 }
+
+/* Mobile: the two columns must stack; the later desktop rule set a 380px card column. */
+@media (max-width: 900px) {
+  .author-auth-shell { grid-template-columns: minmax(0, 1fr) !important; gap: 22px; }
+  .author-auth-card { min-width: 0; max-width: 620px; width: 100%; }
+  .author-auth-intro { min-width: 0; }
+}
+@media (max-width: 560px) {
+  .author-auth-intro h1 { font-size: 34px; line-height: 1.05; }
+}

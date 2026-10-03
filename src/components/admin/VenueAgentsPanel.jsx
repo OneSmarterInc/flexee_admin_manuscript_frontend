@@ -513,7 +513,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
   return <div>
     <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
     <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <h2 className="serif text-[32px] leading-none md:text-[36px]">Venue Agents</h2>
+      <h1 className="serif text-[32px] leading-none md:text-[36px]">Venue Agents</h1>
       {canCreateVenue && <button className="shine rounded-xl bg-flexee-500 px-4 py-2.5 text-[13px] font-extrabold text-white shadow-orange hover:bg-flexee-600" type="button" onClick={openCreate}>
         + Create venue
       </button>}
@@ -559,7 +559,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Status</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Active config</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Last updated</th>
-              <th className="w-12 px-5 py-2.5"><span className="sr-only">Open</span></th>
+              <th className="relative w-12 px-5 py-2.5"><span className="sr-only">Open</span></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
@@ -639,7 +639,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[14px] font-extrabold">Venue type</span>
-                  <select className="field" value={venueForm?.venue_type || 'journal'} onChange={e => setVenueForm({...venueForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
+                  <select className="field" aria-label="Venue type" value={venueForm?.venue_type || 'journal'} onChange={e => setVenueForm({...venueForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
                 </label>
                 <label className="block">
                   <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
@@ -756,7 +756,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
             </label>
             <label className="block">
               <span className="mb-1.5 block text-[14px] font-extrabold">Venue type</span>
-              <select className="field" value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
+              <select className="field" aria-label="Venue type" value={createForm.venue_type} onChange={e => setCreateForm({...createForm, venue_type:e.target.value})}><option value="journal">Journal</option><option value="conference">Conference</option><option value="publisher">Publisher</option></select>
             </label>
             {platformSuperuser
               ? <label className="block">
@@ -765,7 +765,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                 </label>
               : <label className="block">
                   <span className="mb-1.5 block text-[14px] font-extrabold">Organization</span>
-                  <select className="field" value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select>
+                  <select className="field" aria-label="Owner organization" value={createForm.organization_id || defaultOwnerOrgId} onChange={e => setCreateForm({...createForm, organization_id:e.target.value})} required>{ownerMemberships.map(item => <option key={String(item.organization_id)} value={String(item.organization_id)}>{item.organization__name}</option>)}</select>
                 </label>}
             <label className="block">
               <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>

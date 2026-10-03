@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
-import { AuthorStatusPill } from '../components/AuthorFlow.jsx'
+import { AuthorPageError, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import ManuscriptViewer from '../components/admin/ManuscriptViewer.jsx'
 import { apiBlob } from '../api.js'
 import {
@@ -185,7 +185,7 @@ export default function AuthorManuscriptDetails() {
     <div className="wrap author-flow-page manuscript-detail-page md2">
       <div className="crumb"><button className="author-text-link" type="button" onClick={() => go('/author')}>Author workspace</button> / Manuscript details</div>
 
-      {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Manuscript unavailable.</b> {error}</div>}
+      <AuthorPageError title="Manuscript unavailable." message={error} empty={!manuscript} />
       {fileError && <div className="author-prototype-notice author-error-banner" role="alert">{fileError}</div>}
 
       {manuscript && <>
@@ -260,7 +260,7 @@ export default function AuthorManuscriptDetails() {
                   </div>}
                 </div>
               </div>
-              {checksView === 'checks' || !semantic ? (findings.length ? <table className="md2-table">
+              {checksView === 'checks' || !semantic ? (findings.length ? <div className="md2-scroll"><table className="md2-table">
                 <thead><tr><th>Check</th><th>Result</th><th>Finding</th><th>Source</th></tr></thead>
                 <tbody>
                   {findings.map((finding, index) => <tr key={finding.code || index}>
@@ -270,9 +270,9 @@ export default function AuthorManuscriptDetails() {
                     <td className="src">{finding.source?.locator || '—'}</td>
                   </tr>)}
                 </tbody>
-              </table> : <p className="md2-empty">No deterministic readiness findings are stored yet.</p>) : <>
+              </table></div> : <p className="md2-empty">No deterministic readiness findings are stored yet.</p>) : <>
                 {semantic.summary?.model && <div className="md2-model">Model: {semantic.summary.model} · advisory only; editors make the decision.</div>}
-                {semanticFindings.length ? <table className="md2-table">
+                {semanticFindings.length ? <div className="md2-scroll"><table className="md2-table">
                   <thead><tr><th>Area</th><th>Result</th><th>Observation</th></tr></thead>
                   <tbody>
                     {semanticFindings.map((finding, index) => <tr key={finding.code || index}>
@@ -281,7 +281,7 @@ export default function AuthorManuscriptDetails() {
                       <td>{finding.detail || finding.summary || finding.claim || JSON.stringify(finding)}</td>
                     </tr>)}
                   </tbody>
-                </table> : <p className="md2-empty" style={{ whiteSpace: 'pre-wrap' }}>{semantic.summary?.note || semantic.summary?.summary || 'Semantic readiness data is stored.'}</p>}
+                </table></div> : <p className="md2-empty" style={{ whiteSpace: 'pre-wrap' }}>{semantic.summary?.note || semantic.summary?.summary || 'Semantic readiness data is stored.'}</p>}
               </>}
             </section>
 
@@ -292,7 +292,7 @@ export default function AuthorManuscriptDetails() {
                 {matches.length > 0 && <button type="button" className="md2-link" onClick={() => go('/author/venues')}>Open full comparison →</button>}
               </div>
               {matches.length ? <>
-                <table className="md2-table">
+                <div className="md2-scroll"><table className="md2-table">
                   <thead><tr><th>Venue</th><th>Match</th><th>Status</th><th>Before submission</th></tr></thead>
                   <tbody>
                     {visibleMatches.map(match => {
@@ -306,7 +306,7 @@ export default function AuthorManuscriptDetails() {
                       </tr>
                     })}
                   </tbody>
-                </table>
+                </table></div>
                 {sortedMatches.length > 5 && <button type="button" className="md2-more" onClick={() => setShowAllMatches(v => !v)}>
                   {showAllMatches ? 'Show fewer' : `Show all ${sortedMatches.length} venues`}
                 </button>}

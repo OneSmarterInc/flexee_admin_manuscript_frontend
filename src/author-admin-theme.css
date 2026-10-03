@@ -1323,3 +1323,67 @@
   .author-admin-theme .md2-metrics, .author-admin-theme dl.md2-kv { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .author-admin-theme .md2-texts { grid-template-columns: 1fr; }
 }
+
+/* ---------- 22. UI audit fixes ---------- */
+/* Manuscript details: tables scroll sideways on narrow screens instead of being cut off */
+.author-admin-theme .md2-scroll { overflow-x: auto; }
+.author-admin-theme .md2-scroll .md2-table { min-width: 560px; }
+/* Readable label sizes (were 10-10.5px) */
+.author-admin-theme .md2 .kicker,
+.author-admin-theme .md2-metrics span,
+.author-admin-theme .md2 dt,
+.author-admin-theme .md2-table th,
+.author-admin-theme .md2-note > b,
+.author-admin-theme .author-flow-page .kicker,
+.author-admin-theme .author-dash .kicker { font-size: 11px; }
+/* Larger tap targets for breadcrumb and footer links */
+.author-admin-theme .crumb a,
+.author-admin-theme .crumb .author-text-link { display: inline-flex; align-items: center; min-height: 24px; }
+.author-admin-theme footer a,
+.author-admin-theme .site-footer a { display: inline-block; padding: 3px 0; min-height: 24px; }
+/* Submission status: pill sits beside the kicker, inside the heading */
+.author-admin-theme .author-status-kicker-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.author-admin-theme .author-status-kicker-row .kicker { margin: 0; }
+/* Error banner with a way out, and the empty state */
+.author-admin-theme .author-page-error { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.author-admin-theme.author-admin-theme .author-page-error-action { min-height: 34px; padding: 0 14px; font-size: 13px; white-space: nowrap; }
+.author-admin-theme .author-empty-state { margin-top: 12px; padding: 28px 24px; text-align: center; }
+.author-admin-theme.author-admin-theme .author-empty-state h1 { margin: 6px 0 6px; font: 400 26px/1.1 Georgia, serif; letter-spacing: -.045em; }
+.author-admin-theme .author-empty-state p:not(.kicker) { max-width: 520px; margin: 0 auto; color: var(--muted); font-size: 14px; }
+.author-admin-theme .author-empty-state-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 16px; }
+.author-admin-theme .author-warning-banner { border-color: #fde68a; background: #fffbeb; color: #92400e; }
+
+@media (max-width: 700px) {
+  /* Dashboard: the welcome line wraps instead of running past the card */
+  .author-admin-theme.author-admin-theme .author-dash-bar h1 { font-size: 20px; white-space: normal; }
+  .author-admin-theme .author-dash-bar .author-dash-sub { white-space: normal; }
+  .author-admin-theme .author-dash-bar-actions { width: 100%; }
+  .author-admin-theme .author-dash-bar-actions .author-dash-btn.primary { flex: 1; justify-content: center; }
+  /* Manuscript details: section titles above their chips and switch */
+  .author-admin-theme .md2-sec-head { flex-direction: column; align-items: flex-start; }
+  .author-admin-theme.author-admin-theme .md2-sec-head h2 { white-space: normal; }
+  .author-admin-theme.author-admin-theme .md2-head h1 { font-size: 22px; white-space: normal; }
+  .author-admin-theme .md2-head-actions { width: 100%; }
+  .author-admin-theme .md2-head-actions .md2-btn { flex: 1; justify-content: center; }
+}
+/* Minimum readable text size (11px) on author pages; these rules were 8.5-10.75px */
+.author-admin-theme .author-flow-page :is(
+  .author-flow-number, .author-flow-step > span:last-child, .author-status-pill, .author-human-pill,
+  .author-form-section-head > span, .author-mini-note b, .author-mini-note span, .author-check-list > div > span,
+  .author-check-list small, .author-readiness-score > span, .author-readiness-score small, .author-check-icon,
+  .author-definition-list dt, .author-definition-list dd, .author-venue-type, .author-match-columns h3,
+  .author-match-columns ul, .author-assessment-choice small, .author-venue-context span, .author-venue-context p,
+  .author-assessment-list b, .author-assessment-list p, .author-evidence-list p, .author-reuse-grid > div,
+  .author-transfer-option p, .author-transfer-meta > span:last-child, .author-check-row p, .author-evidence-locator
+) { font-size: 11px; }
+.author-admin-theme .author-flow-page > .crumb { font-size: 12px; }
+.author-admin-theme :is(.author-check-list-compact small, .author-dash small) { font-size: 11px; }
+.author-admin-theme .author-flow-page :is(
+  .author-status-header > div > p, .author-packet-list > div > span, .author-packet-list small,
+  .author-submit-callout p, .author-timeline small, .author-sidebar .author-transfer-card > p,
+  .complete > p > small, .current > p > small
+) { font-size: 11px; }
+.author-admin-theme.author-admin-theme .author-flow-page .author-live-state h1 { margin: 6px 0 10px; font: 400 26px/1.1 Georgia, serif; letter-spacing: -.045em; }
+.author-admin-theme .site-header .nav-links a { display: inline-flex; align-items: center; min-height: 28px; }
+.author-admin-theme .author-text-link { min-height: 24px; }
+.author-admin-theme.author-admin-theme .author-dash-btn { white-space: nowrap; }
