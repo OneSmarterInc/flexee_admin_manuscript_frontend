@@ -4,6 +4,7 @@ import { AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import AdminModal from '../components/admin/AdminModal.jsx'
 import ManuscriptViewer from '../components/admin/ManuscriptViewer.jsx'
 import { apiBlob } from '../api.js'
+import { AuthorProfileMenu } from '../components/AuthorAccountMenu.jsx'
 import {
   authorApi,
   clearAuthorSession,
@@ -286,27 +287,37 @@ export default function AuthorDashboard() {
   const firstName = authorUser?.name ? String(authorUser.name).trim().split(/\s+/)[0] : ''
   const initials = authorUser?.name ? String(authorUser.name).trim().split(/\s+/).slice(0, 2).map(part => part[0]).join('').toUpperCase() : 'A'
   const lastActivity = manuscriptsList.length ? formatUpdated(manuscriptsList.map(ms => ms.updated_at).sort().slice(-1)[0]) : ''
+  const summaryLine = manuscriptsList.length
+    ? `${manuscriptsList.length} manuscript${manuscriptsList.length === 1 ? '' : 's'}${acceptedCount ? ` · ${acceptedCount} accepted` : ''}${lastActivity ? ` · last activity ${lastActivity.startsWith('Today') ? lastActivity.replace('Today,', 'today at') : lastActivity}` : ''}`
+    : 'Manage manuscripts, readiness, venue submissions and decisions from one workspace.'
 
   return <PublicationShell>
     <div className="wrap author-dashboard author-dashboard-compact author-dash">
       <div className="crumb author-dash-crumb"><a href="https://www.flexee.org/">Flexee</a> / Author workspace</div>
 
-      <section className="author-dash-hero">
+      <section className="author-dash-bar">
         <div className="author-dash-id">
           <div className="author-dash-monogram" aria-hidden="true">{initials}</div>
-          <div>
-            <p className="kicker">Author workspace</p>
+          <div className="author-dash-id-copy">
             <h1>{authorUser ? `Welcome back, ${firstName || authorUser.name}` : 'Your manuscript workspace.'}</h1>
-            <p className="author-dash-sub">
-              {manuscriptsList.length
-                ? `${manuscriptsList.length} manuscript${manuscriptsList.length === 1 ? '' : 's'}${acceptedCount ? ` · ${acceptedCount} accepted` : ''}${lastActivity ? ` · last activity ${lastActivity.toLowerCase().startsWith('today') ? lastActivity.replace('Today', 'today at').replace(',', '') : lastActivity}` : ''}`
-                : 'Manage manuscripts, readiness, venue submissions, and editorial decisions from one workspace.'}
-            </p>
+            <p className="author-dash-sub" title={summaryLine}>{summaryLine}</p>
           </div>
         </div>
-        <div className="author-dash-hero-actions">
-          <button className="author-dash-btn" type="button" onClick={handleLogout}>Log out</button>
+        <div className="author-dash-chips" aria-label="Submission overview">
+          {[['drafts', 'Drafts', 'Not yet submitted', 'i-draft', Icon.draft],
+            ['attention', 'Needs attention', 'Fix before submitting', 'i-attn', Icon.attention],
+            ['submitted', 'Submitted', 'With a venue now', 'i-sub', Icon.submitted],
+            ['decisions', 'Decisions', 'Accepted or returned', 'i-dec', Icon.decision]].map(([key, label, hint, tone, icon]) =>
+            <button key={key} type="button" className={`author-dash-chip ${quickFilter === key ? 'active' : ''}`}
+              onClick={() => setQuickFilter(value => value === key ? '' : key)} aria-pressed={quickFilter === key}
+              data-tip={quickFilter === key ? 'Show all manuscripts' : hint}>
+              <span className={`author-dash-chip-icon ${tone}`}>{icon}</span>
+              <b>{stats[key]}</b>{label}
+            </button>)}
+        </div>
+        <div className="author-dash-bar-actions">
           <button className="author-dash-btn primary" type="button" onClick={() => go('/author/new')}>{Icon.plus}New submission</button>
+          <AuthorProfileMenu onLogout={handleLogout} />
         </div>
       </section>
 
@@ -317,19 +328,6 @@ export default function AuthorDashboard() {
         <button className="author-secondary-button" type="button" onClick={handleResendVerification} disabled={verifyBusy}>{verifyBusy ? 'Sending…' : 'Resend email'}</button>
         {verifyMessage && <span>{verifyMessage}</span>}
       </div>}
-
-      <section className="author-dash-stats" aria-label="Submission overview">
-        {[['drafts', 'Drafts', 'Not yet submitted', 'i-draft', Icon.draft],
-          ['attention', 'Needs attention', 'Fix before submitting', 'i-attn', Icon.attention],
-          ['submitted', 'Submitted', 'With a venue now', 'i-sub', Icon.submitted],
-          ['decisions', 'Decisions', 'Accepted or returned', 'i-dec', Icon.decision]].map(([key, label, hint, tone, icon]) =>
-          <button key={key} type="button" className={`author-dash-stat ${quickFilter === key ? 'active' : ''}`}
-            onClick={() => setQuickFilter(value => value === key ? '' : key)} aria-pressed={quickFilter === key}
-            title={quickFilter === key ? 'Show all manuscripts' : `Show ${label.toLowerCase()} only`}>
-            <span className={`author-dash-stat-icon ${tone}`}>{icon}</span>
-            <span className="author-dash-stat-copy"><b>{stats[key]}</b><span>{label}</span><small>{hint}</small></span>
-          </button>)}
-      </section>
 
       <section className="author-dash-card">
         <div className="author-dash-table-head">
