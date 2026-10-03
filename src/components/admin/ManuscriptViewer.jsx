@@ -132,7 +132,7 @@ function FileView({ view }) {
 
 /* ---------------- Viewer modal ---------------- */
 
-export default function ManuscriptViewer({ open, onClose, submissionId, filename, fileBytes, onDownload, downloading = false }) {
+export default function ManuscriptViewer({ open, onClose, submissionId, filename, fileBytes, onDownload, downloading = false, loadBlob = null }) {
   const isZip = extensionOf(filename) === '.zip'
   const [entries, setEntries] = useState([])
   const [activeEntry, setActiveEntry] = useState('')
@@ -152,7 +152,8 @@ export default function ManuscriptViewer({ open, onClose, submissionId, filename
 
     async function load() {
       try {
-        const { blob } = await apiBlob(`/api/admin/venue-submissions/${submissionId}/view/`)
+        // Admin portal by default; the author portal passes its own loader for the author's file.
+        const blob = loadBlob ? await loadBlob() : (await apiBlob(`/api/admin/venue-submissions/${submissionId}/view/`)).blob
         if (isZip) {
           const { default: JSZip } = await import('jszip')
           const zip = await JSZip.loadAsync(await blob.arrayBuffer())
