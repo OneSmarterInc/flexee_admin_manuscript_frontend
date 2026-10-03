@@ -326,9 +326,9 @@ export default function AuditLogPanel() {
       Production controls
     </div>
     <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <h2 className="serif text-[32px] leading-none md:text-[36px]">
+      <h1 className="serif text-[32px] leading-none md:text-[36px]">
         Audit log
-      </h2>
+      </h1>
 
       <div className="inline-flex shrink-0 items-center gap-2 rounded-full border border-line bg-white/90 px-4 py-1.5 shadow-sm">
         <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Recorded events</span>
@@ -368,6 +368,7 @@ export default function AuditLogPanel() {
 
       <select
         className="field field-compact"
+        aria-label="Filter by action"
         value={filters.action}
         onChange={e => setFilters({ ...filters, action: e.target.value })}
       >
@@ -379,6 +380,7 @@ export default function AuditLogPanel() {
 
       <select
         className="field field-compact"
+        aria-label="Filter by severity"
         value={filters.severity}
         onChange={e => setFilters({ ...filters, severity: e.target.value })}
       >

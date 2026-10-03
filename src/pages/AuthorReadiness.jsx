@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
-import { AuthorFlowNav, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
+import { AuthorFlowNav, AuthorPageError, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession, pollAuthorJob } from '../authorApi.js'
 
 function prettyType(value) {
@@ -12,6 +12,7 @@ export default function AuthorReadiness() {
   const [bundle, setBundle] = useState(null)
   const [loading, setLoading] = useState(true)
   const [semanticBusy, setSemanticBusy] = useState(false)
+  const [workerWaiting, setWorkerWaiting] = useState(false)
   const [error, setError] = useState('')
   const [semanticError, setSemanticError] = useState('')
 
@@ -51,9 +52,14 @@ export default function AuthorReadiness() {
   async function runSemantic() {
     setSemanticBusy(true)
     setSemanticError('')
+    setWorkerWaiting(false)
+    const startedAt = Date.now()
     try {
       const resp = await authorApi(currentManuscriptPath('/readiness/semantic/'), { method: 'POST' })
-      if (resp.job_id) await pollAuthorJob(resp.job_id)
+      // Still "queued" after a minute usually means the background worker is not running.
+      if (resp.job_id) await pollAuthorJob(resp.job_id, status => {
+        setWorkerWaiting(status?.status === 'queued' && Date.now() - startedAt > 60000)
+      })
       const refreshed = await authorApi(currentManuscriptPath('/readiness/'))
       setBundle(refreshed)
     } catch (err) {
@@ -66,6 +72,7 @@ export default function AuthorReadiness() {
       }
     } finally {
       setSemanticBusy(false)
+      setWorkerWaiting(false)
     }
   }
 
@@ -92,7 +99,7 @@ export default function AuthorReadiness() {
       <AuthorFlowNav active="readiness" />
       <AuthorPrototypeNotice />
 
-      {error && <div className="author-prototype-notice author-error-banner" role="alert"><b>Readiness unavailable.</b> {error}</div>}
+      <AuthorPageError title="Readiness unavailable." message={error} empty={!manuscript} />
 
       {loading ? <section className="author-panel author-live-state">
         <p className="kicker">Readiness</p>
@@ -126,7 +133,8 @@ export default function AuthorReadiness() {
           <button className="author-text-link author-inline-action" type="button" onClick={runSemantic} disabled={semanticBusy}>Retry semantic analysis</button>
         </div>}
 
-        {semanticBusy && <div className="author-prototype-notice" role="status"><b>AI readiness is running.</b> Longer manuscripts are analyzed in bounded chunks, so this can take a little while.</div>}
+        {semanticBusy && !workerWaiting && <div className="author-prototype-notice" role="status"><b>AI readiness is running.</b> Longer manuscripts are analyzed in bounded chunks, so this can take a little while.</div>}
+        {semanticBusy && workerWaiting && <div className="author-prototype-notice author-warning-banner" role="status"><b>Still waiting to start.</b> The background worker has not picked this up yet, so the AI review may be delayed. The checks shown above are final; you can continue to venue matches now.</div>}
 
         <div className="author-report-grid">
           <section className="author-panel author-report-panel">

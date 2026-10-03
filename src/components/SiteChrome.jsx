@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import { AuthorAccountButton } from './AuthorAccountMenu.jsx'
 
 const external = {
   home: 'https://www.flexee.org/',
@@ -34,7 +33,6 @@ export function SiteHeader() {
         <nav className="nav-links" aria-label="Primary">
           {links.map(([href, label]) => <a key={href} href={href}>{label}</a>)}
         </nav>
-        <AuthorAccountButton />
         <button className="hamburger" type="button" aria-label="Open menu" aria-expanded={open} onClick={() => setOpen(true)}>☰</button>
       </div>
     </header>

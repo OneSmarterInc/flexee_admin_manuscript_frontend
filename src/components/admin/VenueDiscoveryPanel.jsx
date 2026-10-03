@@ -138,6 +138,12 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
     return () => clearTimeout(timer)
   }, [load, filters.q])
 
+  // Check for runs started in the background (the daily schedule) once a minute while the page is open.
+  useEffect(() => {
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') load() }, 60000)
+    return () => clearInterval(timer)
+  }, [load])
+
   // While a run is queued or processing, refresh every 5 seconds.
   const runActive = ['queued', 'processing'].includes(data.last_run?.status)
   useEffect(() => {
@@ -260,7 +266,7 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
   return <div>
     <div className="text-[12px] font-extrabold uppercase tracking-[.15em] text-flexee-600">Editorial intelligence</div>
     <div className="mt-0.5 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      <h2 className="serif text-[32px] leading-none md:text-[36px]">Venue Discovery</h2>
+      <h1 className="serif text-[32px] leading-none md:text-[36px]">Venue Discovery</h1>
       <div className="flex flex-wrap items-center gap-2">
       <button type="button" onClick={() => setScheduleOpen(true)} title="Set the daily run time"
         className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card">
@@ -340,10 +346,10 @@ export default function VenueDiscoveryPanel({ onOpenVenue }) {
         <input className="field field-compact field-search" value={filters.q} onChange={e => setFilters({ ...filters, q: e.target.value })}
           placeholder="Search venue, publisher, or subject..." />
       </div>
-      <select className="field field-compact" value={filters.type} onChange={e => setFilters({ ...filters, type: e.target.value })}>
+      <select className="field field-compact" aria-label="Filter by venue type" value={filters.type} onChange={e => setFilters({ ...filters, type: e.target.value })}>
         <option value="">All types</option><option value="journal">Journal</option><option value="publisher">Publisher</option><option value="conference">Conference</option>
       </select>
-      <select className="field field-compact" value={filters.acceptance} onChange={e => setFilters({ ...filters, acceptance: e.target.value })}>
+      <select className="field field-compact" aria-label="Filter by submission status" value={filters.acceptance} onChange={e => setFilters({ ...filters, acceptance: e.target.value })}>
         <option value="verified">Verified only</option><option value="accepting">Accepting</option><option value="closed">Closed</option><option value="unclear">Unclear (not verified)</option><option value="">All statuses</option>
       </select>
       <select className="field field-compact" value={filters.sort} onChange={e => setFilters({ ...filters, sort: e.target.value })} aria-label="Sort">
