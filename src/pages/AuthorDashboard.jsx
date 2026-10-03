@@ -332,7 +332,6 @@ export default function AuthorDashboard() {
       <section className="author-dash-card">
         <div className="author-dash-table-head">
           <div>
-            <p className="kicker">Your account</p>
             <h2>Manuscripts</h2>
             <p className="author-dash-sub">View, download and see matching venues for every manuscript.</p>
           </div>
