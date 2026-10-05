@@ -2175,3 +2175,60 @@
   min-height:34px!important;
   padding:6px 9px!important;
 }
+
+/* ---------- Admin sign in (professional design) ---------- */
+.al-page {
+  --al-bg: #f7f4f0; --al-text: #1d1b19; --al-muted: #746f69; --al-border: #e5ded7;
+  --al-accent: #b76234; --al-accent-hover: #9f512b; --al-focus: rgba(183,98,52,.14);
+  min-height: 100vh; display: grid; place-items: center; padding: 24px;
+  font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--al-text);
+  background:
+    radial-gradient(circle at 20% 10%, rgba(183,98,52,.07), transparent 32%),
+    radial-gradient(circle at 85% 90%, rgba(105,115,96,.05), transparent 30%),
+    linear-gradient(180deg, #fbf9f7 0%, var(--al-bg) 100%);
+}
+.al-page *, .al-page *::before, .al-page *::after { box-sizing: border-box; }
+.al-wrap { width: 100%; max-width: 440px; }
+.al-brand { margin-bottom: 22px; text-align: center; font-family: Georgia, "Times New Roman", serif; font-size: 34px; letter-spacing: -.04em; }
+.al-card {
+  padding: 34px; border: 1px solid var(--al-border); border-radius: 24px;
+  background: rgba(255,255,255,.96); box-shadow: 0 24px 70px rgba(43,33,26,.11);
+}
+.al-card h1 { margin: 0; text-align: center; font-family: Georgia, "Times New Roman", serif; font-size: 38px; font-weight: 400; letter-spacing: -.035em; color: var(--al-text); }
+.al-subtitle { margin: 10px 0 28px; text-align: center; color: var(--al-muted); font-size: 14px; line-height: 1.55; }
+.al-field { margin-bottom: 17px; }
+.al-field label { display: block; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: #4e4944; }
+.al-field input {
+  width: 100%; height: 50px; padding: 0 14px; border: 1px solid var(--al-border); border-radius: 12px; background: #fff;
+  font-size: 14px; color: var(--al-text); outline: none; transition: border-color .18s ease, box-shadow .18s ease;
+}
+.al-field input::placeholder { color: #aaa39d; }
+.al-field input:focus { border-color: var(--al-accent); box-shadow: 0 0 0 4px var(--al-focus); }
+.al-field input.al-code { text-align: center; font-size: 20px; font-weight: 700; letter-spacing: .35em; }
+.al-error {
+  margin: 0 0 14px; padding: 10px 12px; border: 1px solid #fecaca; border-radius: 12px; background: #fef2f2;
+  color: #b42318; font-size: 13px; line-height: 1.45;
+}
+.al-btn {
+  width: 100%; height: 50px; margin-top: 5px; border: 0; border-radius: 12px; background: var(--al-accent); color: #fff;
+  font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer; box-shadow: 0 10px 22px rgba(183,98,52,.18);
+  transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+}
+.al-btn:hover:not(:disabled) { background: var(--al-accent-hover); transform: translateY(-1px); }
+.al-btn:active:not(:disabled) { transform: translateY(0); }
+.al-btn:disabled { cursor: wait; opacity: .7; }
+.al-btn:focus-visible { outline: 3px solid var(--al-focus); outline-offset: 2px; }
+.al-note { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; color: var(--al-muted); font-size: 12px; text-align: center; }
+.al-note svg { flex: 0 0 auto; }
+.al-qr { margin-bottom: 20px; text-align: center; }
+.al-qr p { margin: 0 0 14px; color: var(--al-muted); font-size: 13px; line-height: 1.55; }
+.al-qr-box { display: inline-block; padding: 14px; border: 1px solid var(--al-border); border-radius: 14px; background: #fff; }
+.al-back { margin-top: 20px; text-align: center; }
+.al-back button { padding: 4px 6px; border: 0; background: none; color: var(--al-muted); font-family: inherit; font-size: 13px; cursor: pointer; }
+.al-back button:hover { color: var(--al-text); }
+@media (max-width: 520px) {
+  .al-page { padding: 16px; }
+  .al-card { padding: 28px 22px; border-radius: 20px; }
+  .al-card h1 { font-size: 33px; }
+  .al-brand { font-size: 30px; }
+}

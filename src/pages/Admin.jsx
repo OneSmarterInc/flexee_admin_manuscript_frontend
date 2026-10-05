@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api.js'
 import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
@@ -131,45 +131,64 @@ function AdminLogin({ onLogin }) {
     finally { setBusy(false) }
   }
 
+  const lockIcon = <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+    <rect x="5" y="10" width="14" height="10" rx="2" /><path d="M8 10V7a4 4 0 0 1 8 0v3" />
+  </svg>
+
   return (
-    <div className="admin-login-page">
-      <div className="admin-login-wrapper" style={{ transition: 'all 0.3s ease' }}>
-        <div className="admin-login-header">
-          <h1 style={{fontFamily:"'Instrument Serif', Georgia, serif", fontSize: '42px', margin: '0 0 8px 0', color: 'var(--ink)'}}>Flexee Admin</h1>
-          <p style={{color: 'var(--muted)', margin: 0, fontSize: '15px'}}>{step === 1 ? 'Sign in to manage manuscript submissions.' : 'Enter your authenticator code.'}</p>
-        </div>
-        
-        {step === 1 ? (
-          <form onSubmit={handleStep1} className="admin-login-form">
-            <Field label="Username"><input name="username" autoComplete="username" required autoFocus /></Field>
-            <Field label="Password"><input name="password" type="password" autoComplete="current-password" required /></Field>
-            {error && <div className="admin-error" role="alert" style={{margin: 0}}>{error}</div>}
-            <button className="admin-btn login-btn" type="submit" disabled={busy}>{busy ? 'Verifying...' : 'Continue'}</button>
-          </form>
-        ) : (
-          <form onSubmit={handleStep2} className="admin-login-form">
-            <input type="text" name="username" style={{ display: 'none' }} autoComplete="username" defaultValue={creds.username} />
-            <input type="password" name="password" style={{ display: 'none' }} autoComplete="current-password" defaultValue={creds.password} />
-            
-            {totpUri && (
-              <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                <p style={{ margin: '0 0 16px 0', fontSize: '15px', color: 'var(--ink)' }}>Scan this QR code with your authenticator app (e.g. Google Authenticator) to set up two-factor authentication.</p>
-                <div style={{ display: 'inline-block', padding: '16px', background: '#fff', borderRadius: '12px', border: '1px solid #e5e5e5' }}>
-                  <QRCodeSVG value={totpUri} size={180} />
-                </div>
+    <div className="al-page">
+      <div className="al-wrap">
+        <div className="al-brand">flexee</div>
+
+        <section className="al-card">
+          <h1>{step === 1 ? 'Admin sign in' : 'Two-factor check'}</h1>
+          <p className="al-subtitle">
+            {step === 1
+              ? 'Enter your credentials to continue.'
+              : totpUri ? 'Set up your authenticator app, then enter the 6-digit code.' : 'Enter the 6-digit code from your authenticator app.'}
+          </p>
+
+          {step === 1 ? (
+            <form onSubmit={handleStep1}>
+              <div className="al-field">
+                <label htmlFor="al-username">Username</label>
+                <input id="al-username" name="username" type="text" autoComplete="username" placeholder="Enter username" required autoFocus />
               </div>
-            )}
+              <div className="al-field">
+                <label htmlFor="al-password">Password</label>
+                <input id="al-password" name="password" type="password" autoComplete="current-password" placeholder="Enter password" required />
+              </div>
+              {error && <div className="al-error" role="alert">{error}</div>}
+              <button className="al-btn" type="submit" disabled={busy}>{busy ? 'Verifying…' : 'Continue'}</button>
+            </form>
+          ) : (
+            <form onSubmit={handleStep2}>
+              <input type="text" name="username" style={{ display: 'none' }} autoComplete="username" defaultValue={creds.username} />
+              <input type="password" name="password" style={{ display: 'none' }} autoComplete="current-password" defaultValue={creds.password} />
 
-            <Field label="Authenticator code"><input name="totp" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength="6" autoComplete="one-time-code" required placeholder="000000" autoFocus /></Field>
-            {error && <div className="admin-error" role="alert" style={{margin: 0}}>{error}</div>}
-            <button className="admin-btn login-btn" type="submit" disabled={busy}>{busy ? 'Signing in...' : 'Sign in'}</button>
+              {totpUri && (
+                <div className="al-qr">
+                  <p>Scan this QR code with your authenticator app (for example Google Authenticator) to set up two-factor authentication.</p>
+                  <div className="al-qr-box"><QRCodeSVG value={totpUri} size={168} /></div>
+                </div>
+              )}
 
-          </form>
-        )}
-        
-        <div style={{textAlign: 'center', marginTop: '28px'}}>
-          <button type="button" onClick={() => step === 2 ? setStep(1) : go('/')} style={{background: 'none', border: 'none', color: 'var(--muted)', cursor: 'pointer', fontSize: '14px'}}>
-            &larr; {step === 2 ? 'Back' : 'Return to public site'}
+              <div className="al-field">
+                <label htmlFor="al-totp">Authenticator code</label>
+                <input id="al-totp" name="totp" type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength="6"
+                  autoComplete="one-time-code" required placeholder="000000" autoFocus className="al-code" />
+              </div>
+              {error && <div className="al-error" role="alert">{error}</div>}
+              <button className="al-btn" type="submit" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
+            </form>
+          )}
+
+          <div className="al-note">{lockIcon}Two-factor authentication required</div>
+        </section>
+
+        <div className="al-back">
+          <button type="button" onClick={() => step === 2 ? (setStep(1), setError('')) : go('/')}>
+            &larr; {step === 2 ? 'Back to sign in' : 'Return to public site'}
           </button>
         </div>
       </div>
@@ -627,7 +646,23 @@ function ZipContentsModal({ item, onClose }) {
   )
 }
 
-function AdminDashboard({ username, onLogout, platformSuperuser = false, memberships = [] }) {
+// Each admin page has its own address, so refresh, links and Back/Forward keep the page.
+const ADMIN_VIEW_PATHS = {
+  editor: '/admin',
+  venues: '/admin/venue-agents',
+  discovery: '/admin/venue-discovery',
+  audit: '/admin/audit-log',
+  smtp: '/admin/email-settings',
+}
+const SUPERUSER_VIEWS = new Set(['discovery', 'smtp'])
+
+export function adminViewFromPath(path, platformSuperuser = false) {
+  const clean = String(path || '/admin').replace(/\/+$/, '') || '/admin'
+  const view = Object.keys(ADMIN_VIEW_PATHS).find(key => ADMIN_VIEW_PATHS[key] === clean) || 'editor'
+  return SUPERUSER_VIEWS.has(view) && !platformSuperuser ? 'editor' : view
+}
+
+function AdminDashboard({ path = '/admin', username, onLogout, platformSuperuser = false, memberships = [] }) {
   const [filters, setFilters] = useState({ q: '', kind: '', status: '', decision: '' })
   const [applied, setApplied] = useState(filters)
   const [data, setData] = useState({ counts: {}, items: [] })
@@ -636,7 +671,23 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   const [inlineAction, setInlineAction] = useState(null)
   const [emailActionId, setEmailActionId] = useState(null)
   const [zipViewItem, setZipViewItem] = useState(null)
-  const [currentView, setCurrentView] = useState('editor')
+  const currentView = adminViewFromPath(path, platformSuperuser)
+  const setCurrentView = useCallback(view => {
+    const target = ADMIN_VIEW_PATHS[view] || '/admin'
+    if (window.location.pathname.replace(/\/+$/, '') !== target) {
+      window.history.pushState({}, '', target)
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+  }, [])
+
+  // An address the account cannot use, or an unknown one, is shown as the default page.
+  useEffect(() => {
+    const clean = String(path || '/admin').replace(/\/+$/, '') || '/admin'
+    const expected = ADMIN_VIEW_PATHS[currentView]
+    if (clean !== expected && !/^\/admin\/submissions\//.test(clean)) {
+      window.history.replaceState({}, '', expected)
+    }
+  }, [path, currentView])
   const [openVenueId, setOpenVenueId] = useState('')
 
   useEffect(() => {
@@ -1047,5 +1098,5 @@ export default function AdminPage({ path }) {
     }} />
   }
 
-  return <AdminDashboard username={state.username} platformSuperuser={state.platformSuperuser} memberships={state.memberships} onLogout={() => setState({mode:'out',username:'',platformSuperuser:false,memberships:[]})} />
+  return <AdminDashboard path={path} username={state.username} platformSuperuser={state.platformSuperuser} memberships={state.memberships} onLogout={() => setState({mode:'out',username:'',platformSuperuser:false,memberships:[]})} />
 }
