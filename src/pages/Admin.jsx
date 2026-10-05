@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react'
+import React, { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api.js'
 import { go } from '../components/SiteChrome.jsx'
 import VenueAgentsPanel from '../components/admin/VenueAgentsPanel.jsx'
@@ -646,7 +646,23 @@ function ZipContentsModal({ item, onClose }) {
   )
 }
 
-function AdminDashboard({ username, onLogout, platformSuperuser = false, memberships = [] }) {
+// Each admin page has its own address, so refresh, links and Back/Forward keep the page.
+const ADMIN_VIEW_PATHS = {
+  editor: '/admin',
+  venues: '/admin/venue-agents',
+  discovery: '/admin/venue-discovery',
+  audit: '/admin/audit-log',
+  smtp: '/admin/email-settings',
+}
+const SUPERUSER_VIEWS = new Set(['discovery', 'smtp'])
+
+export function adminViewFromPath(path, platformSuperuser = false) {
+  const clean = String(path || '/admin').replace(/\/+$/, '') || '/admin'
+  const view = Object.keys(ADMIN_VIEW_PATHS).find(key => ADMIN_VIEW_PATHS[key] === clean) || 'editor'
+  return SUPERUSER_VIEWS.has(view) && !platformSuperuser ? 'editor' : view
+}
+
+function AdminDashboard({ path = '/admin', username, onLogout, platformSuperuser = false, memberships = [] }) {
   const [filters, setFilters] = useState({ q: '', kind: '', status: '', decision: '' })
   const [applied, setApplied] = useState(filters)
   const [data, setData] = useState({ counts: {}, items: [] })
@@ -655,7 +671,23 @@ function AdminDashboard({ username, onLogout, platformSuperuser = false, members
   const [inlineAction, setInlineAction] = useState(null)
   const [emailActionId, setEmailActionId] = useState(null)
   const [zipViewItem, setZipViewItem] = useState(null)
-  const [currentView, setCurrentView] = useState('editor')
+  const currentView = adminViewFromPath(path, platformSuperuser)
+  const setCurrentView = useCallback(view => {
+    const target = ADMIN_VIEW_PATHS[view] || '/admin'
+    if (window.location.pathname.replace(/\/+$/, '') !== target) {
+      window.history.pushState({}, '', target)
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+  }, [])
+
+  // An address the account cannot use, or an unknown one, is shown as the default page.
+  useEffect(() => {
+    const clean = String(path || '/admin').replace(/\/+$/, '') || '/admin'
+    const expected = ADMIN_VIEW_PATHS[currentView]
+    if (clean !== expected && !/^\/admin\/submissions\//.test(clean)) {
+      window.history.replaceState({}, '', expected)
+    }
+  }, [path, currentView])
   const [openVenueId, setOpenVenueId] = useState('')
 
   useEffect(() => {
@@ -1066,5 +1098,5 @@ export default function AdminPage({ path }) {
     }} />
   }
 
-  return <AdminDashboard username={state.username} platformSuperuser={state.platformSuperuser} memberships={state.memberships} onLogout={() => setState({mode:'out',username:'',platformSuperuser:false,memberships:[]})} />
+  return <AdminDashboard path={path} username={state.username} platformSuperuser={state.platformSuperuser} memberships={state.memberships} onLogout={() => setState({mode:'out',username:'',platformSuperuser:false,memberships:[]})} />
 }
