@@ -819,6 +819,7 @@ const CRITERIA_LABELS = {
   templated_site: 'Copied or templated site shared across many titles',
   invented_metrics: 'Metrics from unrecognised ranking bodies',
   internal_blocklist: 'Publisher is on the internal blocklist',
+  not_peer_reviewed: 'Not a peer-reviewed journal (magazine, newsletter or trade title)',
 }
 
 function ExclusionNotice({ reason }) {
