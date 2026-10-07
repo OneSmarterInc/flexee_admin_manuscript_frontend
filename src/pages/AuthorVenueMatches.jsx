@@ -141,7 +141,10 @@ export default function AuthorVenueMatches() {
     .slice()
     .sort((a, b) => sort === 'name'
       ? a.venue.name.localeCompare(b.venue.name)
-      : (b.match_score?.score ?? -1) - (a.match_score?.score ?? -1))
+      : sort === 'topic'
+        ? (a.shortlist_rank ?? Infinity) - (b.shortlist_rank ?? Infinity)
+        : (b.match_score?.score ?? -1) - (a.match_score?.score ?? -1))
+  const hasTopicRank = matches.some(m => m.shortlist_rank != null)
 
   function itemList(match, kind) {
     const items = cleanItems(kind === 'fit' ? match.reasons : match.gaps)
@@ -200,6 +203,7 @@ export default function AuthorVenueMatches() {
             <span className="author-mt-count">{rows.length} venue{rows.length === 1 ? '' : 's'}</span>
             <select className="author-mt-sort" value={sort} onChange={e => setSort(e.target.value)} aria-label="Sort venues">
               <option value="score">Sort: highest match</option>
+              {hasTopicRank && <option value="topic">Sort: closest topic</option>}
               <option value="name">Sort: venue name</option>
             </select>
           </div>
