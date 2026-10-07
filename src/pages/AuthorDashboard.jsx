@@ -318,6 +318,7 @@ export default function AuthorDashboard() {
             </button>)}
         </div>
         <div className="author-dash-bar-actions">
+          <button className="author-dash-btn" type="button" onClick={() => go('/journals')}>Journal index</button>
           <button className="author-dash-btn primary" type="button" onClick={() => go('/author/new')}>{Icon.plus}New submission</button>
           <AuthorProfileMenu onLogout={handleLogout} />
         </div>
