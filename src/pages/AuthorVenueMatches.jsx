@@ -232,7 +232,8 @@ export default function AuthorVenueMatches() {
                     const meta = `${match.venue.venue_type}${match.venue.organization?.name ? ` · ${match.venue.organization.name}` : ''}`
                     return <tr key={match.id}>
                       <td>
-                        <div className="author-mt-name" title={match.venue.name}>{match.venue.name}</div>
+                        <a className="author-mt-name block hover:underline" title={`${match.venue.name}: open its page in the journal index`}
+                          href={`/journals/v/${match.venue.slug}`} onClick={e => { e.preventDefault(); go(`/journals/v/${match.venue.slug}`) }}>{match.venue.name}</a>
                         <div className="author-mt-meta" title={meta}>{meta}</div>
                         <VenueTrustBadge venue={match.venue} className="mt-1" />
                       </td>
