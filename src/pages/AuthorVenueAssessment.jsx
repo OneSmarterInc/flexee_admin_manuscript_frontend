@@ -199,6 +199,12 @@ export default function AuthorVenueAssessment() {
             <div><span>Scope</span><p>{venue.config?.aims_scope || venue.description || 'Not configured'}</p></div>
             <div><span>Article types</span><p>{displayJson(venue.config?.article_types)}</p></div>
             <div><span>Current demand</span><p>{displayJson(venue.config?.current_demand)}</p></div>
+            {venue.config?.open_calls?.length > 0 && <div><span>Open calls</span>
+              <ul className="space-y-1">{venue.config.open_calls.map(c => <li key={c.title + c.deadline}>
+                <b>{c.title}</b> · deadline {new Date(c.deadline + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                {c.confirmed_at && <small className="block text-muted">Confirmed on the official pages {new Date(c.confirmed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</small>}
+              </li>)}</ul>
+            </div>}
           </section>
 
           <div className="author-report-grid">

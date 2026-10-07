@@ -3,7 +3,7 @@ import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
 import VenueTrustBadge from '../VenueTrust.jsx'
 import ScreeningSection, { ScreeningPill } from './IndexScreening.jsx'
-import RulesSection, { EscalationCard, RulesPill } from './IndexRules.jsx'
+import RulesSection, { EscalationCard, FreshnessCard, RulesPill } from './IndexRules.jsx'
 
 // Venue index, layer 1 (build plan step 2): the journal catalogue built from OpenAlex,
 // Crossref and DOAJ. No AI. Records are "Listed" until their rules are read (step 4).
@@ -23,6 +23,7 @@ const FILTERS = [
   ['kept', 'Kept'],
   ['rules_ready', 'Rules ready'],
   ['rules_missing', 'Rules not found'],
+  ['rules_changed', 'Pages changed'],
 ]
 const FILTER_HELP = {
   crossref: 'Registers DOIs with Crossref',
@@ -36,6 +37,7 @@ const FILTER_HELP = {
   kept: 'Reviewed and kept',
   rules_ready: 'Rules read from the official pages, waiting for you to publish',
   rules_missing: 'The AI could not find quoted rules, the pages could not be read, or the site blocks automated reading',
+  rules_changed: 'Live journals whose official pages now say something different: apply the changes or leave the live rules',
 }
 
 function pageButtons(current, pages) {
@@ -222,6 +224,11 @@ export default function VenueIndexPanel() {
           className="inline-flex items-center gap-2 rounded-xl border border-flexee-200 bg-flexee-50 px-4 py-2.5 text-[13px] font-extrabold text-flexee-800 shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60">
           {busy === 'rules' ? 'Starting…' : `Read rules${data.rules_field ? ` · ${count(data.rules_field.due)} due` : ''}`}
         </button>
+        <button type="button" onClick={() => startRun('calls')} disabled={Boolean(busy) || runActive || !(data.freshness?.calls_due > 0)}
+          title="Re-read the official pages of live journals for open calls for papers (no AI). Calls not re-confirmed in time are hidden from authors."
+          className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60">
+          {busy === 'calls' ? 'Starting…' : `Check open calls${data.freshness ? ` · ${count(data.freshness.calls_due)} due` : ''}`}
+        </button>
         <button type="button" onClick={() => startRun('screen')} disabled={Boolean(busy) || runActive}
           title="Re-screen every journal, then read the official pages of journals with concerns for evidence"
           className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60">
@@ -264,11 +271,12 @@ export default function VenueIndexPanel() {
         <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Last run</span>
         <span className="text-[14px] font-bold">{run ? when(run.started_at || run.created_at) : 'Never'}</span>
       </div>
-      {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}{run.mode === 'rules' && <span className="ml-1 text-muted">(reading rules)</span>}</div>}
+      {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}{run.mode === 'rules' && <span className="ml-1 text-muted">(reading rules)</span>}{run.mode === 'calls' && <span className="ml-1 text-muted">(open calls)</span>}</div>}
+      {run && run.mode === 'calls' && <div className="text-[14px]"><span className="text-muted">Open calls</span> <b className="ml-1">{count(run.calls_open)} found</b> <span className="text-muted">· {count(run.calls_checked)} venues re-confirmed{run.calls_failed > 0 ? ` · ${count(run.calls_failed)} could not be read` : ''}</span></div>}
       {run && run.mode === 'rules' && <div className="text-[14px]"><span className="text-muted">Rules</span> <b className="ml-1">{count(run.rules_ready)} ready</b> <span className="text-muted">· {count(run.rules_failed)} not found, unreadable or blocked · {count(run.rules_attempted)} read</span>{(run.rules_retried > 0 || run.rules_escalated > 0) && <span className="text-muted"> · {count(run.rules_retried)} local retr{run.rules_retried === 1 ? 'y' : 'ies'} · {count(run.rules_escalated)} sent to the cloud</span>}</div>}
       {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b>{run.removed > 0 && <b> · {count(run.removed)} removed (no longer in scope)</b>} <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
       {run && run.screened > 0 && <div className="text-[14px]"><span className="text-muted">Screening</span> <b className="ml-1">{count(run.flagged)} need review</b>{run.pages_checked > 0 && <span className="text-muted"> · pages read for {count(run.pages_checked)}</span>}</div>}
-      {run && !['screen', 'rules'].includes(run.mode) && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
+      {run && !['screen', 'rules', 'calls'].includes(run.mode) && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
       {run?.errors?.length > 0 && <button type="button" onClick={() => setShowErrors(v => !v)} className="text-[14px] font-extrabold text-flexee-700 underline decoration-flexee-200 underline-offset-2">{run.errors.length} problem{run.errors.length === 1 ? '' : 's'} · {showErrors ? 'hide' : 'show'}</button>}
       {run?.status === 'failed' && run.summary && <div className="basis-full text-[13px] font-semibold text-red-700">{run.summary}</div>}
       {run?.size_cutoff != null && <div className="text-[14px]"><span className="text-muted">Size cutoff</span> <b className="ml-1" title="The index keeps the most-published journals in your fields, up to VENUE_INDEX_MAX_RECORDS">{count(run.size_cutoff)}+ works</b></div>}
@@ -290,6 +298,7 @@ export default function VenueIndexPanel() {
       <button type="button" onClick={() => setFilter('rules_ready')} className="shrink-0 rounded-xl bg-flexee-500 px-4 py-2 text-[13px] font-extrabold text-white shadow-sm hover:bg-flexee-600">Check and publish</button>
     </div>}
 
+    {data.freshness?.live_verified > 0 && <FreshnessCard stats={data.freshness} onChanges={() => setFilter('rules_changed')} changes={data.filter_counts?.rules_changed || 0} />}
     {data.escalation?.reads > 0 && <EscalationCard stats={data.escalation} />}
 
     <div className="mb-3 flex flex-wrap gap-2">
@@ -412,6 +421,11 @@ export default function VenueIndexPanel() {
             load()
           }} />
         <RulesSection item={detail} onError={message => showToast(message, 'error')}
+          onChangesApplied={updated => {
+            setDetail(updated)
+            showToast(`Changes applied. ${updated.title} has a new rules version from its latest page check.`)
+            load()
+          }}
           onPublished={updated => {
             setDetail(updated)
             showToast(`Published. ${updated.title} is live for authors as "Checked from official pages".`)
