@@ -13,6 +13,13 @@ const TABS = [
 ]
 const TIER = { claimed: 'Editor-confirmed', verified_index: 'Checked from official pages', listed: 'Listed only' }
 
+// A server crash returns an HTML error page; show a short message instead.
+function readable(err) {
+  const text = err?.payload?.detail || err?.message || ''
+  return !text || /<!doctype|<html/i.test(text) || text.length > 400
+    ? 'The server hit a problem. Check the backend terminal for the error, then try again.' : text
+}
+
 function when(value) {
   const d = new Date(value)
   return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -40,7 +47,7 @@ function ClaimCard({ claim, onDone }) {
         ? `Approved. ${claim.claimant.email} now owns ${claim.journal.name}${result.new_account ? ' and was sent a link to set a password' : ''}.`
         : `Rejected. ${claim.claimant.name} was told why.`)
     } catch (err) {
-      setError(err.message)
+      setError(readable(err))
     } finally {
       setBusy('')
     }
@@ -97,7 +104,7 @@ export default function VenueClaimsPanel() {
       setData(await api(`/api/admin/claims/?status=${status}`))
       setError('')
     } catch (err) {
-      setError(err.message)
+      setError(readable(err))
     }
   }, [status])
   useEffect(() => { load() }, [load])
