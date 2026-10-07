@@ -3,6 +3,7 @@ import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
 import VenueTrustBadge from '../VenueTrust.jsx'
 import ScreeningSection, { ScreeningPill } from './IndexScreening.jsx'
+import RulesSection, { RulesPill } from './IndexRules.jsx'
 
 // Venue index, layer 1 (build plan step 2): the journal catalogue built from OpenAlex,
 // Crossref and DOAJ. No AI. Records are "Listed" until their rules are read (step 4).
@@ -20,6 +21,8 @@ const FILTERS = [
   ['missing', 'Missing'],
   ['excluded', 'Excluded'],
   ['kept', 'Kept'],
+  ['rules_ready', 'Rules ready'],
+  ['rules_missing', 'Rules not found'],
 ]
 const FILTER_HELP = {
   crossref: 'Registers DOIs with Crossref',
@@ -31,6 +34,8 @@ const FILTER_HELP = {
   review: 'Flagged by screening (or excluded with re-review suggested): a person decides',
   excluded: 'Excluded after review: hidden from authors, never listed publicly',
   kept: 'Reviewed and kept',
+  rules_ready: 'Rules read from the official pages, waiting for you to publish',
+  rules_missing: 'The AI could not find quoted rules, or the pages could not be read',
 }
 
 function pageButtons(current, pages) {
@@ -145,6 +150,7 @@ export default function VenueIndexPanel() {
       showToast(result.already_running ? 'An index run is already in progress.'
         : mode === 'enrich' ? 'Checking journals against Crossref and DOAJ in the background.'
           : mode === 'screen' ? 'Screening started in the background. Flagged journals appear under "Needs review".'
+            : mode === 'rules' ? 'Reading rules in the background (local AI). Results appear under "Rules ready" for your approval.'
           : 'Index refresh started in the background. You can keep working.', 'info')
       await load()
     } catch (err) {
@@ -211,6 +217,11 @@ export default function VenueIndexPanel() {
           Monthly refresh: {schedule.enabled ? 'On' : 'Off'}
           {schedule.enabled && <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true"></span>}
         </button>
+        <button type="button" onClick={() => startRun('rules')} disabled={Boolean(busy) || runActive || !(data.rules_field?.due > 0)}
+          title={data.rules_field ? `Read the rules of ${data.rules_field.label} journals from their official pages with the AI (results wait for your approval)` : ''}
+          className="inline-flex items-center gap-2 rounded-xl border border-flexee-200 bg-flexee-50 px-4 py-2.5 text-[13px] font-extrabold text-flexee-800 shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60">
+          {busy === 'rules' ? 'Starting…' : `Read rules${data.rules_field ? ` · ${count(data.rules_field.due)} due` : ''}`}
+        </button>
         <button type="button" onClick={() => startRun('screen')} disabled={Boolean(busy) || runActive}
           title="Re-screen every journal, then read the official pages of journals with concerns for evidence"
           className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60">
@@ -253,10 +264,11 @@ export default function VenueIndexPanel() {
         <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Last run</span>
         <span className="text-[14px] font-bold">{run ? when(run.started_at || run.created_at) : 'Never'}</span>
       </div>
-      {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}</div>}
+      {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}{run.mode === 'rules' && <span className="ml-1 text-muted">(reading rules)</span>}</div>}
+      {run && run.mode === 'rules' && <div className="text-[14px]"><span className="text-muted">Rules</span> <b className="ml-1">{count(run.rules_ready)} ready</b> <span className="text-muted">· {count(run.rules_failed)} not found or unreadable · {count(run.rules_attempted)} read</span></div>}
       {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b>{run.removed > 0 && <b> · {count(run.removed)} removed (no longer in scope)</b>} <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
       {run && run.screened > 0 && <div className="text-[14px]"><span className="text-muted">Screening</span> <b className="ml-1">{count(run.flagged)} need review</b>{run.pages_checked > 0 && <span className="text-muted"> · pages read for {count(run.pages_checked)}</span>}</div>}
-      {run && run.mode !== 'screen' && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
+      {run && !['screen', 'rules'].includes(run.mode) && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
       {run?.errors?.length > 0 && <button type="button" onClick={() => setShowErrors(v => !v)} className="text-[14px] font-extrabold text-flexee-700 underline decoration-flexee-200 underline-offset-2">{run.errors.length} problem{run.errors.length === 1 ? '' : 's'} · {showErrors ? 'hide' : 'show'}</button>}
       {run?.status === 'failed' && run.summary && <div className="basis-full text-[13px] font-semibold text-red-700">{run.summary}</div>}
       {run?.size_cutoff != null && <div className="text-[14px]"><span className="text-muted">Size cutoff</span> <b className="ml-1" title="The index keeps the most-published journals in your fields, up to VENUE_INDEX_MAX_RECORDS">{count(run.size_cutoff)}+ works</b></div>}
@@ -271,6 +283,11 @@ export default function VenueIndexPanel() {
     {(data.filter_counts?.review || 0) > 0 && filter !== 'review' && <div className="mb-3 flex flex-col gap-2 rounded-[18px] border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="text-[14px] text-amber-900"><b>{count(data.filter_counts.review)} journal{data.filter_counts.review === 1 ? '' : 's'} need a decision.</b> Screening only flags concerns; you decide whether to exclude or keep each one.</div>
       <button type="button" onClick={() => setFilter('review')} className="shrink-0 rounded-xl bg-amber-600 px-4 py-2 text-[13px] font-extrabold text-white shadow-sm hover:bg-amber-700">Review now</button>
+    </div>}
+
+    {(data.filter_counts?.rules_ready || 0) > 0 && filter !== 'rules_ready' && <div className="mb-3 flex flex-col gap-2 rounded-[18px] border border-flexee-200 bg-flexee-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="text-[14px] text-flexee-900"><b>{count(data.filter_counts.rules_ready)} journal{data.filter_counts.rules_ready === 1 ? ' has' : 's have'} rules ready.</b> Check the quoted rules and publish the ones that are right.</div>
+      <button type="button" onClick={() => setFilter('rules_ready')} className="shrink-0 rounded-xl bg-flexee-500 px-4 py-2 text-[13px] font-extrabold text-white shadow-sm hover:bg-flexee-600">Check and publish</button>
     </div>}
 
     <div className="mb-3 flex flex-wrap gap-2">
@@ -313,7 +330,10 @@ export default function VenueIndexPanel() {
                   <div className="text-[15px] font-extrabold leading-snug">{item.title}</div>
                   <div className="text-[12px] font-medium text-muted">{item.publisher || 'Publisher not stated'}{item.issn_l ? ` · ISSN ${item.issn_l}` : ''}{item.country_code ? ` · ${item.country_code}` : ''}</div>
                   {item.missing_since && <div className="mt-1"><Pill tone="warn" title="No longer returned by OpenAlex. Kept and flagged.">Missing since {when(item.missing_since)}</Pill></div>}
-                  {(item.excluded || ['flagged', 'kept'].includes(item.screening?.status)) && <div className="mt-1"><ScreeningPill screening={item.screening} excluded={item.excluded} /></div>}
+                  {(item.excluded || ['flagged', 'kept'].includes(item.screening?.status) || ['ready', 'incomplete', 'failed'].includes(item.rules?.status)) && <div className="mt-1 flex flex-wrap gap-1">
+                    <ScreeningPill screening={item.screening} excluded={item.excluded} />
+                    <RulesPill rules={item.rules} published={Boolean(item.venue)} />
+                  </div>}
                 </td>
                 <td className="px-4 py-2.5 align-middle text-[13px]">
                   <div className="font-bold">{item.primary_subfield || '—'}</div>
@@ -387,6 +407,12 @@ export default function VenueIndexPanel() {
           onDecided={(updated, mode) => {
             setDetail(updated)
             showToast(mode === 'exclude' ? `Excluded. ${updated.title} is hidden from authors.` : mode === 'keep' ? 'Kept. It leaves the review queue.' : 'Restored to the index.')
+            load()
+          }} />
+        <RulesSection item={detail} onError={message => showToast(message, 'error')}
+          onPublished={updated => {
+            setDetail(updated)
+            showToast(`Published. ${updated.title} is live for authors as "Checked from official pages".`)
             load()
           }} />
         <div className="grid gap-4 p-6 lg:grid-cols-2">
