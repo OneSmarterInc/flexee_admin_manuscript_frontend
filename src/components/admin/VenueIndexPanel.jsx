@@ -230,7 +230,7 @@ export default function VenueIndexPanel() {
         <span className="text-[14px] font-bold">{run ? when(run.started_at || run.created_at) : 'Never'}</span>
       </div>
       {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}</div>}
-      {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b> <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
+      {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b>{run.removed > 0 && <b> · {count(run.removed)} removed (no longer in scope)</b>} <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
       {run && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
       {run?.errors?.length > 0 && <button type="button" onClick={() => setShowErrors(v => !v)} className="text-[14px] font-extrabold text-flexee-700 underline decoration-flexee-200 underline-offset-2">{run.errors.length} problem{run.errors.length === 1 ? '' : 's'} · {showErrors ? 'hide' : 'show'}</button>}
       {run?.status === 'failed' && run.summary && <div className="basis-full text-[13px] font-semibold text-red-700">{run.summary}</div>}
@@ -298,7 +298,7 @@ export default function VenueIndexPanel() {
                     {item.doaj_listed && <Pill tone="good" title="Listed in the Directory of Open Access Journals">DOAJ</Pill>}
                   </div>
                 </td>
-                <td className="px-4 py-2.5 align-middle">
+                <td className="whitespace-nowrap px-4 py-2.5 align-middle">
                   <VenueTrustBadge venue={asVenue(item)} />
                   {item.venue && <div className="mt-0.5 text-[11.5px] font-semibold text-muted">Linked: {item.venue.name}</div>}
                 </td>
