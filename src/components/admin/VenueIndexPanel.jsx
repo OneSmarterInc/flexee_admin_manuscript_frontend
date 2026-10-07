@@ -3,7 +3,7 @@ import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
 import VenueTrustBadge from '../VenueTrust.jsx'
 import ScreeningSection, { ScreeningPill } from './IndexScreening.jsx'
-import RulesSection, { RulesPill } from './IndexRules.jsx'
+import RulesSection, { EscalationCard, RulesPill } from './IndexRules.jsx'
 
 // Venue index, layer 1 (build plan step 2): the journal catalogue built from OpenAlex,
 // Crossref and DOAJ. No AI. Records are "Listed" until their rules are read (step 4).
@@ -265,7 +265,7 @@ export default function VenueIndexPanel() {
         <span className="text-[14px] font-bold">{run ? when(run.started_at || run.created_at) : 'Never'}</span>
       </div>
       {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}{run.mode === 'rules' && <span className="ml-1 text-muted">(reading rules)</span>}</div>}
-      {run && run.mode === 'rules' && <div className="text-[14px]"><span className="text-muted">Rules</span> <b className="ml-1">{count(run.rules_ready)} ready</b> <span className="text-muted">· {count(run.rules_failed)} not found, unreadable or blocked · {count(run.rules_attempted)} read</span></div>}
+      {run && run.mode === 'rules' && <div className="text-[14px]"><span className="text-muted">Rules</span> <b className="ml-1">{count(run.rules_ready)} ready</b> <span className="text-muted">· {count(run.rules_failed)} not found, unreadable or blocked · {count(run.rules_attempted)} read</span>{(run.rules_retried > 0 || run.rules_escalated > 0) && <span className="text-muted"> · {count(run.rules_retried)} local retr{run.rules_retried === 1 ? 'y' : 'ies'} · {count(run.rules_escalated)} sent to the cloud</span>}</div>}
       {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b>{run.removed > 0 && <b> · {count(run.removed)} removed (no longer in scope)</b>} <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
       {run && run.screened > 0 && <div className="text-[14px]"><span className="text-muted">Screening</span> <b className="ml-1">{count(run.flagged)} need review</b>{run.pages_checked > 0 && <span className="text-muted"> · pages read for {count(run.pages_checked)}</span>}</div>}
       {run && !['screen', 'rules'].includes(run.mode) && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
@@ -289,6 +289,8 @@ export default function VenueIndexPanel() {
       <div className="text-[14px] text-flexee-900"><b>{count(data.filter_counts.rules_ready)} journal{data.filter_counts.rules_ready === 1 ? ' has' : 's have'} rules ready.</b> Check the quoted rules and publish the ones that are right.</div>
       <button type="button" onClick={() => setFilter('rules_ready')} className="shrink-0 rounded-xl bg-flexee-500 px-4 py-2 text-[13px] font-extrabold text-white shadow-sm hover:bg-flexee-600">Check and publish</button>
     </div>}
+
+    {data.escalation?.reads > 0 && <EscalationCard stats={data.escalation} />}
 
     <div className="mb-3 flex flex-wrap gap-2">
       {FILTERS.map(([key, label]) => <button key={key} type="button" onClick={() => setFilter(key)} title={FILTER_HELP[key]}
