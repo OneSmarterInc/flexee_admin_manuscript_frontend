@@ -150,7 +150,12 @@ export function friendlyAuthorError(error) {
     return 'This manuscript session is no longer available. Return to your author workspace to select the manuscript again, or start a new submission.'
   }
 
-  return error?.payload?.detail || error.message || 'Something went wrong.'
+  const message = error?.payload?.detail || error.message || ''
+  // A server crash returns an HTML error page; never show that markup to an author.
+  if (!message || /<!doctype|<html/i.test(message) || message.length > 400) {
+    return 'The server hit a problem. Please try again in a moment.'
+  }
+  return message
 }
 
 export async function fetchAuthorJobStatus(jobId) {

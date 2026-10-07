@@ -52,6 +52,34 @@ export function EscalationCard({ stats }) {
   </div>
 }
 
+// Build plan step 7: how fresh is what authors see? Calls not re-confirmed in time are hidden.
+export function FreshnessCard({ stats, changes, onChanges }) {
+  const age = d => d == null ? '—' : `${d} day${d === 1 ? '' : 's'}`
+  return <div className="premium-card mb-3 rounded-[18px] px-4 py-3">
+    <div className="flex flex-wrap items-baseline justify-between gap-2">
+      <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Freshness · live journals checked from official pages</span>
+      {changes > 0 && <button type="button" onClick={onChanges} className="text-[13px] font-extrabold text-amber-800 underline decoration-amber-300 underline-offset-2">{changes} with changed pages · review</button>}
+    </div>
+    <div className="mt-1 flex flex-wrap gap-x-6 gap-y-1 text-[14px]">
+      <span><b>{stats.live_verified}</b> live · median age <b>{age(stats.median_age_days)}</b> · oldest {age(stats.oldest_age_days)}</span>
+      <span title={`Rules of live journals are re-read every ${stats.rules_refresh_days} days`}><b>{stats.rules_refresh_due}</b> due for the {stats.rules_refresh_days}-day re-read</span>
+      <span title={`A call is shown only if its deadline is ahead and it was re-confirmed within ${stats.calls_confirm_days} days`}>
+        Open calls: <b>{stats.calls_shown}</b> shown · <b className={stats.calls_hidden ? 'text-amber-800' : ''}>{stats.calls_hidden}</b> hidden (expired or unconfirmed)
+      </span>
+      {stats.calls_failing > 0 && <span className="text-amber-800">{stats.calls_failing} journal{stats.calls_failing === 1 ? '' : 's'} could not be re-checked</span>}
+    </div>
+  </div>
+}
+
+function Calls({ calls }) {
+  if (!calls) return null
+  return <div className="mt-3 rounded-xl border border-line bg-[#fcfaf8] px-3 py-2 text-[13px]">
+    <div className="font-extrabold">Open calls shown to authors: {calls.shown.length}{calls.hidden > 0 && <span className="font-semibold text-amber-800"> · {calls.hidden} hidden (expired or not re-confirmed)</span>}</div>
+    {calls.shown.map(c => <div key={c.title + c.deadline} className="mt-0.5">{c.title} · deadline {c.deadline}</div>)}
+    <div className="mt-0.5 text-muted">{calls.checked_at ? `Last checked ${when(calls.checked_at)}` : 'Not checked by the weekly job yet'}{calls.error ? ` · ${calls.error}` : ''}</div>
+  </div>
+}
+
 function Attempts({ attempts }) {
   if (!attempts?.length) return null
   return <div className="mt-3">
@@ -78,7 +106,7 @@ function Row({ label, children }) {
   </div>
 }
 
-export default function RulesSection({ item, onPublished, onError }) {
+export default function RulesSection({ item, onPublished, onChangesApplied, onError }) {
   const [busy, setBusy] = useState(false)
   const status = item.rules?.status || 'not_read'
   const read = item.rules_read
@@ -87,6 +115,18 @@ export default function RulesSection({ item, onPublished, onError }) {
   const published = Boolean(item.venue)
   const blockedReason = item.excluded ? 'Excluded journals cannot be published. Restore it first.'
     : item.screening?.status === 'flagged' ? 'Decide the exclusion review above first (Keep or Exclude).' : ''
+
+  async function applyChanges() {
+    setBusy(true)
+    try {
+      const result = await api(`/api/admin/venue-index/${item.id}/apply-changes/`, { method: 'POST', body: '{}' })
+      ;(onChangesApplied || onPublished)?.(result.item)
+    } catch (err) {
+      onError?.(err.message)
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function publish() {
     setBusy(true)
@@ -149,6 +189,16 @@ export default function RulesSection({ item, onPublished, onError }) {
         </ul>
       </div>}
     </div>}
+
+    {published && item.rules?.changes && <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-900">
+      <b>The official pages changed since this journal was published.</b> {item.rules.changes}
+      <div className="mt-2 flex flex-wrap items-center gap-3">
+        <button type="button" onClick={applyChanges} disabled={busy}
+          className="rounded-xl bg-amber-600 px-3.5 py-1.5 text-[13px] font-extrabold text-white hover:bg-amber-700 disabled:opacity-50">{busy ? 'Applying…' : 'Apply changes'}</button>
+        <span className="text-[12.5px]">Creates a new rules version for the live venue. Until then authors see the earlier rules, with their check date.</span>
+      </div>
+    </div>}
+    {published && <Calls calls={item.calls} />}
 
     <Attempts attempts={item.rules_attempts} />
 
