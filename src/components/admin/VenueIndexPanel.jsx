@@ -234,6 +234,7 @@ export default function VenueIndexPanel() {
       {run && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
       {run?.errors?.length > 0 && <button type="button" onClick={() => setShowErrors(v => !v)} className="text-[14px] font-extrabold text-flexee-700 underline decoration-flexee-200 underline-offset-2">{run.errors.length} problem{run.errors.length === 1 ? '' : 's'} · {showErrors ? 'hide' : 'show'}</button>}
       {run?.status === 'failed' && run.summary && <div className="basis-full text-[13px] font-semibold text-red-700">{run.summary}</div>}
+      {run?.size_cutoff != null && <div className="text-[14px]"><span className="text-muted">Size cutoff</span> <b className="ml-1" title="The index keeps the most-published journals in your fields, up to VENUE_INDEX_MAX_RECORDS">{count(run.size_cutoff)}+ works</b></div>}
       {run?.catalogue_method === 'keyword_search' && <div className="basis-full text-[13px] font-semibold text-amber-800">OpenAlex did not accept the subject filter, so this run used keyword searches with the same scope check. Missing journals are only flagged after a complete subject-filter pass.</div>}
       {showErrors && run?.errors?.length > 0 && <ul className="basis-full space-y-1 rounded-xl border border-line bg-[#fcfaf8] px-3 py-2 text-[13px]">
         {run.errors.map((entry, index) => <li key={index} className="break-words">
