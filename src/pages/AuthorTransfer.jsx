@@ -10,6 +10,7 @@ import {
   saveAuthorSession,
   pollAuthorJob,
 } from '../authorApi.js'
+import VenueTrustBadge, { trustTier } from '../components/VenueTrust.jsx'
 
 export default function AuthorTransfer() {
   const [submission, setSubmission] = useState(null)
@@ -33,7 +34,8 @@ export default function AuthorTransfer() {
           api('/api/author/venues/'),
         ])
         setSubmission(submissionPayload.submission)
-        const alternatives = (venuePayload.venues || []).filter(item => item.id !== submissionPayload.submission.venue?.id)
+        // Listed-only venues have no rules read yet, so a packet cannot be transferred to them.
+        const alternatives = (venuePayload.venues || []).filter(item => item.id !== submissionPayload.submission.venue?.id && trustTier(item) !== 'listed')
         setVenues(alternatives)
         setChoice(alternatives[0]?.id || '')
       } catch (err) {
@@ -123,6 +125,7 @@ export default function AuthorTransfer() {
                 <div>
                   <span className="author-venue-type">{venue.venue_type}</span>
                   <h3>{venue.name}</h3>
+                  <VenueTrustBadge venue={venue} className="mb-1.5" />
                   <p>{venue.config?.aims_scope || venue.description || 'Venue configuration available for matching.'}</p>
                   <div className="author-transfer-meta">
                     <AuthorStatusPill tone="neutral">Config v{venue.config?.version || '—'}</AuthorStatusPill>

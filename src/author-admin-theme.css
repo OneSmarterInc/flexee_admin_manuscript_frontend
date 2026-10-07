@@ -1387,3 +1387,27 @@
 .author-admin-theme .site-header .nav-links a { display: inline-flex; align-items: center; min-height: 28px; }
 .author-admin-theme .author-text-link { min-height: 24px; }
 .author-admin-theme.author-admin-theme .author-dash-btn { white-space: nowrap; }
+
+/* ---------- 23. Venue trust badge (who stands behind a venue record) ---------- */
+.venue-trust-wrap { display: inline-flex; flex-direction: column; align-items: flex-start; gap: 3px; max-width: 100%; }
+.venue-trust {
+  display: inline-flex; align-items: center; gap: 5px; max-width: 100%;
+  padding: 2px 8px 2px 6px; border-radius: 999px; border: 1px solid;
+  font-size: 11.5px; font-weight: 800; line-height: 1.45; cursor: help;
+}
+.venue-trust-date { font-size: 11.5px; font-weight: 600; color: #746c66; padding-left: 2px; }
+.venue-trust i { flex: none; width: 13px; height: 13px; border-radius: 50%; display: grid; place-items: center; }
+/* Editor-confirmed: solid green, check mark */
+.venue-trust-claimed { border-color: #bbf7d0; background: #f0fdf4; color: #166534; }
+.venue-trust-claimed i { background: #16a34a; }
+.venue-trust-claimed i::after { content: ''; width: 5px; height: 3px; margin-top: -1px; border: solid #fff; border-width: 0 0 1.6px 1.6px; transform: rotate(-45deg); }
+/* Checked from official pages: copper outline, ring */
+.venue-trust-verified_index { border-color: #efc9ae; background: #fff; color: #9c4f24; }
+.venue-trust-verified_index i { border: 2px solid #c7662d; width: 11px; height: 11px; }
+.venue-trust-verified_index i::after { content: ''; width: 3px; height: 3px; border-radius: 50%; background: #c7662d; }
+/* Listed only: grey dashed */
+.venue-trust-listed { border-style: dashed; border-color: #d6d3d1; background: #fafaf9; color: #78716c; }
+.venue-trust-listed i { border: 1.5px dashed #a8a29e; width: 11px; height: 11px; }
+.venue-trust-sources { font-size: 12px; color: #6f6760; }
+.venue-trust-sources a { color: #9c4f24; font-weight: 700; text-decoration: none; }
+.venue-trust-sources a:hover { text-decoration: underline; }

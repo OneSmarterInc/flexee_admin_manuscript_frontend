@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPageError, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import { authorApi, currentSubmissionPath, friendlyAuthorError, getAuthorSession } from '../authorApi.js'
+import VenueTrustBadge from '../components/VenueTrust.jsx'
 
 function statusLabel(status) {
   const labels = {
@@ -210,6 +211,7 @@ export default function AuthorSubmissionStatus() {
                 <div>
                   <span className="author-venue-type">{venue?.venue_type}</span>
                   <h2>{venue?.name}</h2>
+                  <VenueTrustBadge venue={venue} />
                   <p>Venue configuration v{submission.venue_config_version || '—'}</p>
                 </div>
                 <AuthorStatusPill tone={statusTone(submission.status)}>{statusLabel(submission.status)}</AuthorStatusPill>

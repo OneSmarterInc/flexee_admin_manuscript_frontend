@@ -11,6 +11,7 @@ import {
   friendlyAuthorError,
   getAuthorSession,
 } from '../authorApi.js'
+import VenueTrustBadge from '../components/VenueTrust.jsx'
 
 function pretty(value) {
   return String(value || '—').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase())
@@ -300,7 +301,7 @@ export default function AuthorManuscriptDetails() {
                       const score = match.match_score?.score ?? null
                       const gap = (match.gaps || []).find(g => String(g || '').trim().length > 3)
                       return <tr key={match.id}>
-                        <td><b>{match.venue?.name}</b><div className="src">{pretty(match.venue?.venue_type)}</div></td>
+                        <td><b>{match.venue?.name}</b><div className="src">{pretty(match.venue?.venue_type)}</div><VenueTrustBadge venue={match.venue} className="mt-1" /></td>
                         <td className={`md2-score ${score === null ? 'low' : scoreTone(score)}`}>{score === null ? '—' : <><strong>{score}%</strong><em>{match.match_score.label}</em></>}</td>
                         <td><AuthorStatusPill tone={statusTone(match.eligibility)}>{pretty(match.eligibility)}</AuthorStatusPill></td>
                         <td className={gap ? 'gap' : 'okt'}>{gap ? `! ${gap}` : 'Nothing required'}</td>

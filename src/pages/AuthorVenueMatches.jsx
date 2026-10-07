@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { PublicationShell, go } from '../components/SiteChrome.jsx'
 import { AuthorFlowNav, AuthorPageError, AuthorPrototypeNotice, AuthorStatusPill } from '../components/AuthorFlow.jsx'
 import { authorApi, currentManuscriptPath, friendlyAuthorError, getAuthorSession, saveAuthorSession, pollAuthorJob } from '../authorApi.js'
+import VenueTrustBadge from '../components/VenueTrust.jsx'
 
 function toneForEligibility(value) {
   if (value === 'eligible') return 'good'
@@ -229,6 +230,7 @@ export default function AuthorVenueMatches() {
                       <td>
                         <div className="author-mt-name" title={match.venue.name}>{match.venue.name}</div>
                         <div className="author-mt-meta" title={meta}>{meta}</div>
+                        <VenueTrustBadge venue={match.venue} className="mt-1" />
                       </td>
                       <td className={`author-mt-score ${tone}`}
                         title={match.match_score ? `Scope ${match.match_score.breakdown.scope}/40 · Type ${match.match_score.breakdown.type}/25 · Requirements ${match.match_score.breakdown.requirements}/20 · Methods ${match.match_score.breakdown.methods}/15` : ''}>

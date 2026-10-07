@@ -19,6 +19,7 @@ import {
   resendAuthorVerification,
   saveAuthorSession
 } from '../authorApi.js'
+import VenueTrustBadge from '../components/VenueTrust.jsx'
 
 const SUBMITTED_STATUSES = ['submitted', 'under_review', 'revision_requested', 'accepted', 'rejected']
 const DECISION_STATUSES = ['accepted', 'rejected', 'revision_requested']
@@ -473,6 +474,7 @@ export default function AuthorDashboard() {
                 <td className="border-b border-[#f0e7e0] px-3 py-2.5">
                   <div className="font-extrabold">{match.venue?.name}{match.is_new && <span className="ml-1.5 rounded-full bg-flexee-500 px-2 py-0.5 align-[2px] text-[10.5px] font-extrabold text-white">New</span>}</div>
                   <div className="text-[12px] capitalize text-muted">{match.venue?.venue_type}{match.venue?.organization?.name ? ` · ${match.venue.organization.name}` : ''}</div>
+                  <VenueTrustBadge venue={match.venue} className="mt-1" />
                 </td>
                 <td className={`author-dash-score ${tone} border-b border-[#f0e7e0] px-3 py-2.5`}>
                   {score === null ? <span className="text-muted">Not scored</span> : <>

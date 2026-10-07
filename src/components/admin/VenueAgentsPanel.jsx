@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../../api.js'
 import AdminModal from './AdminModal.jsx'
+import VenueTrustBadge from '../VenueTrust.jsx'
 
 const emptyVenue = {
   name: '',
@@ -136,6 +137,7 @@ function Pill({ children, tone = 'neutral' }) {
     neutral: 'border-line bg-white text-muted',
     good: 'border-green-200 bg-green-50 text-green-700',
     warn: 'border-amber-200 bg-amber-50 text-amber-700',
+    bad: 'border-red-200 bg-red-50 text-red-700',
   }
   return <span className={`rounded-full border px-3 py-2 text-[13px] font-extrabold ${tones[tone] || tones.neutral}`}>{children}</span>
 }
@@ -300,6 +302,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
       venue_type: venue.venue_type || 'journal',
       description: venue.description || '',
       active: Boolean(venue.active),
+      ...(platformSuperuser ? { trust_tier: venue.trust?.tier || 'claimed' } : {}),
     })
     setConfigs(history)
     const active = history.find(item => item.active) || history[0] || venue.config
@@ -556,6 +559,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
             <tr className="border-b border-line">
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Venue name</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Type</th>
+              <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Trust</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Status</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Active config</th>
               <th className="px-5 py-2.5 text-left text-[12px] font-extrabold uppercase tracking-[.06em] text-muted">Last updated</th>
@@ -580,6 +584,10 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                 </td>
                 <td className="px-5 py-2.5 align-middle text-[14px] text-muted">{venueTypeLabel(venue.venue_type)}</td>
                 <td className="px-5 py-2.5 align-middle">
+                  <VenueTrustBadge venue={venue} />
+                  {venue.excluded && <div className="mt-1"><span className="rounded-full border border-red-200 bg-red-50 px-2 py-0.5 text-[11.5px] font-extrabold text-red-700">Excluded · hidden from authors</span></div>}
+                </td>
+                <td className="px-5 py-2.5 align-middle">
                   {venue.active
                     ? <span className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-0.5 text-[12px] font-extrabold text-green-700"><span className="status-dot !h-[7px] !w-[7px] bg-green-500"></span>Active</span>
                     : <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-white px-2.5 py-0.5 text-[12px] font-extrabold text-muted"><span className="status-dot !h-[7px] !w-[7px] bg-stone-400"></span>Inactive</span>}
@@ -593,7 +601,7 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                 <td className="px-5 py-2.5 text-right align-middle text-[18px] text-[#b9a597]">›</td>
               </tr>
             })}
-            {!venues.length && <tr><td colSpan="6" className="px-5 py-8 text-center text-[14px] font-semibold text-muted">No venues are configured yet.</td></tr>}
+            {!venues.length && <tr><td colSpan="7" className="px-5 py-8 text-center text-[14px] font-semibold text-muted">No venues are configured yet.</td></tr>}
           </tbody>
         </table>
       </div>
@@ -611,13 +619,16 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
               <div className="text-[12px] font-extrabold uppercase tracking-[.09em] text-flexee-600">Venue Agent · {venueTypeLabel(selectedVenue.venue_type)}</div>
               <h3 id="venue-modal-title" className="serif mt-0.5 break-words text-[32px] leading-none">{selectedVenue.name}</h3>
               <p className="mt-1.5 max-w-3xl text-[14px] leading-6 text-muted">{selectedVenue.description || 'No description yet.'}</p>
+              <VenueTrustBadge venue={selectedVenue} withSources className="mt-2" />
             </div>
             <div className="flex shrink-0 flex-wrap gap-2">
               <Pill tone={selectedVenue.active ? 'good' : 'warn'}>{selectedVenue.active ? 'Venue active' : 'Venue inactive'}</Pill>
               <Pill>{activeConfig ? `Config v${activeConfig.version}` : 'No config'}</Pill>
+              {selectedVenue.excluded && <Pill tone="bad">Excluded</Pill>}
               {!canManageSelected && <Pill>Read only</Pill>}
             </div>
           </div>
+          {selectedVenue.excluded && <ExclusionNotice reason={selectedVenue.exclusion_reason} />}
         </div>
 
         {(error || success) && <div className="space-y-2 px-6 pt-4">{messages}</div>}
@@ -645,6 +656,15 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
                   <span className="mb-1.5 block text-[14px] font-extrabold">Description</span>
                   <textarea className="field min-h-[90px]" value={venueForm?.description || ''} onChange={e => setVenueForm({...venueForm, description:e.target.value})} />
                 </label>
+                {platformSuperuser && <label className="block">
+                  <span className="mb-1.5 block text-[14px] font-extrabold">Trust tier</span>
+                  <select className="field" aria-label="Trust tier" value={venueForm?.trust_tier || 'claimed'} onChange={e => setVenueForm({...venueForm, trust_tier:e.target.value})}>
+                    <option value="claimed">Editor-confirmed (the venue’s editors configure it)</option>
+                    <option value="verified_index">Checked from official pages (read by Flexee)</option>
+                    <option value="listed">Listed only (no rules read; never matched)</option>
+                  </select>
+                  <span className="mt-1 block text-[12.5px] text-muted">Authors see this label next to the venue. Only platform administrators can change it.</span>
+                </label>}
                 <label className="flex items-center gap-3 rounded-2xl border border-green-100 bg-green-50/80 px-4 py-3">
                   <input type="checkbox" className="h-4 w-4 accent-[#c7662d]" checked={Boolean(venueForm?.active)} onChange={e => setVenueForm({...venueForm, active:e.target.checked})} />
                   <span className="text-[14px] font-bold text-green-800">Active and visible to authors for matching</span>
@@ -786,6 +806,29 @@ export default function VenueAgentsPanel({ platformSuperuser = false, membership
         </div>
       </form>
     </AdminModal>
+  </div>
+}
+
+const CRITERIA_LABELS = {
+  guaranteed_acceptance: 'Guaranteed or stated rapid acceptance',
+  rapid_review_promise: 'Review turnaround promised in days',
+  undisclosed_fees: 'Fees not disclosed before submission',
+  unverifiable_board: 'Editorial board without verifiable affiliations',
+  overbroad_scope: 'Scope covers unrelated disciplines',
+  unresolvable_address: 'Publisher address does not resolve',
+  templated_site: 'Copied or templated site shared across many titles',
+  invented_metrics: 'Metrics from unrecognised ranking bodies',
+  internal_blocklist: 'Publisher is on the internal blocklist',
+}
+
+function ExclusionNotice({ reason }) {
+  const criteria = reason?.criteria || []
+  const evidence = reason?.evidence_urls || []
+  return <div className="mt-3 rounded-2xl border border-red-200 bg-red-50/70 px-4 py-3 text-[13.5px] text-red-900">
+    <div className="font-extrabold">Excluded from the index. Authors do not see this venue.</div>
+    {criteria.length > 0 && <div className="mt-1">Criteria not met: {criteria.map(item => CRITERIA_LABELS[item] || item).join('; ')}.</div>}
+    {evidence.length > 0 && <div className="mt-1 break-all">Evidence: {evidence.map((url, i) => <span key={url}>{i > 0 && ', '}<a className="font-bold underline" href={url} target="_blank" rel="noopener noreferrer">{url}</a></span>)}</div>}
+    {(reason?.decided_by || reason?.decided_at) && <div className="mt-1 text-red-800/80">Decided{reason.decided_by ? ` by ${reason.decided_by}` : ''}{reason.decided_at ? ` on ${formatDate(reason.decided_at)}` : ''}.{reason.note ? ` ${reason.note}` : ''}</div>}
   </div>
 }
 
