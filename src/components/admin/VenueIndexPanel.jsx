@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { api } from '../../api.js'
 import AdminModal, { KvTable } from './AdminModal.jsx'
 import VenueTrustBadge from '../VenueTrust.jsx'
+import ScreeningSection, { ScreeningPill } from './IndexScreening.jsx'
 
 // Venue index, layer 1 (build plan step 2): the journal catalogue built from OpenAlex,
 // Crossref and DOAJ. No AI. Records are "Listed" until their rules are read (step 4).
@@ -9,6 +10,7 @@ import VenueTrustBadge from '../VenueTrust.jsx'
 const PAGE_SIZE = 20
 const FILTERS = [
   ['all', 'All'],
+  ['review', 'Needs review'],
   ['crossref', 'Crossref'],
   ['no_crossref', 'No Crossref'],
   ['open_access', 'Open access'],
@@ -16,6 +18,8 @@ const FILTERS = [
   ['linked', 'Linked'],
   ['not_checked', 'Not checked'],
   ['missing', 'Missing'],
+  ['excluded', 'Excluded'],
+  ['kept', 'Kept'],
 ]
 const FILTER_HELP = {
   crossref: 'Registers DOIs with Crossref',
@@ -24,6 +28,9 @@ const FILTER_HELP = {
   linked: 'Matched to a live venue in Venue Agents',
   not_checked: 'Not yet checked against Crossref/DOAJ',
   missing: 'No longer returned by OpenAlex (kept, flagged)',
+  review: 'Flagged by screening (or excluded with re-review suggested): a person decides',
+  excluded: 'Excluded after review: hidden from authors, never listed publicly',
+  kept: 'Reviewed and kept',
 }
 
 function pageButtons(current, pages) {
@@ -137,6 +144,7 @@ export default function VenueIndexPanel() {
       const result = await api('/api/admin/venue-index/run/', { method: 'POST', body: JSON.stringify({ mode }) })
       showToast(result.already_running ? 'An index run is already in progress.'
         : mode === 'enrich' ? 'Checking journals against Crossref and DOAJ in the background.'
+          : mode === 'screen' ? 'Screening started in the background. Flagged journals appear under "Needs review".'
           : 'Index refresh started in the background. You can keep working.', 'info')
       await load()
     } catch (err) {
@@ -157,6 +165,17 @@ export default function VenueIndexPanel() {
       showToast(err.message, 'error')
     } finally {
       setBusy('')
+    }
+  }
+
+  async function unblock(entry) {
+    if (!window.confirm(`Remove ${entry.name} from the blocklist? Its titles are re-screened.`)) return
+    try {
+      await api(`/api/admin/venue-index/blocked-publishers/${entry.id}/`, { method: 'DELETE' })
+      showToast(`${entry.name} removed from the blocklist.`, 'info')
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
     }
   }
 
@@ -191,6 +210,11 @@ export default function VenueIndexPanel() {
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" /></svg>
           Monthly refresh: {schedule.enabled ? 'On' : 'Off'}
           {schedule.enabled && <span className="h-2 w-2 rounded-full bg-green-500" aria-hidden="true"></span>}
+        </button>
+        <button type="button" onClick={() => startRun('screen')} disabled={Boolean(busy) || runActive}
+          title="Re-screen every journal, then read the official pages of journals with concerns for evidence"
+          className="inline-flex items-center gap-2 rounded-xl border border-line bg-white px-4 py-2.5 text-[13px] font-extrabold shadow-sm hover:shadow-card disabled:cursor-not-allowed disabled:opacity-60">
+          {busy === 'screen' ? 'Starting…' : 'Run screening'}
         </button>
         <button type="button" onClick={() => startRun('enrich')} disabled={Boolean(busy) || runActive}
           title="Check journals against Crossref and DOAJ that are due (never checked, or older than 30 days)"
@@ -229,9 +253,10 @@ export default function VenueIndexPanel() {
         <span className="text-[12px] font-extrabold uppercase tracking-[.07em] text-muted">Last run</span>
         <span className="text-[14px] font-bold">{run ? when(run.started_at || run.created_at) : 'Never'}</span>
       </div>
-      {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}</div>}
+      {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}</div>}
       {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b>{run.removed > 0 && <b> · {count(run.removed)} removed (no longer in scope)</b>} <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
-      {run && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
+      {run && run.screened > 0 && <div className="text-[14px]"><span className="text-muted">Screening</span> <b className="ml-1">{count(run.flagged)} need review</b>{run.pages_checked > 0 && <span className="text-muted"> · pages read for {count(run.pages_checked)}</span>}</div>}
+      {run && run.mode !== 'screen' && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
       {run?.errors?.length > 0 && <button type="button" onClick={() => setShowErrors(v => !v)} className="text-[14px] font-extrabold text-flexee-700 underline decoration-flexee-200 underline-offset-2">{run.errors.length} problem{run.errors.length === 1 ? '' : 's'} · {showErrors ? 'hide' : 'show'}</button>}
       {run?.status === 'failed' && run.summary && <div className="basis-full text-[13px] font-semibold text-red-700">{run.summary}</div>}
       {run?.size_cutoff != null && <div className="text-[14px]"><span className="text-muted">Size cutoff</span> <b className="ml-1" title="The index keeps the most-published journals in your fields, up to VENUE_INDEX_MAX_RECORDS">{count(run.size_cutoff)}+ works</b></div>}
@@ -242,6 +267,11 @@ export default function VenueIndexPanel() {
         </li>)}
       </ul>}
     </div>
+
+    {(data.filter_counts?.review || 0) > 0 && filter !== 'review' && <div className="mb-3 flex flex-col gap-2 rounded-[18px] border border-amber-200 bg-amber-50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="text-[14px] text-amber-900"><b>{count(data.filter_counts.review)} journal{data.filter_counts.review === 1 ? '' : 's'} need a decision.</b> Screening only flags concerns; you decide whether to exclude or keep each one.</div>
+      <button type="button" onClick={() => setFilter('review')} className="shrink-0 rounded-xl bg-amber-600 px-4 py-2 text-[13px] font-extrabold text-white shadow-sm hover:bg-amber-700">Review now</button>
+    </div>}
 
     <div className="mb-3 flex flex-wrap gap-2">
       {FILTERS.map(([key, label]) => <button key={key} type="button" onClick={() => setFilter(key)} title={FILTER_HELP[key]}
@@ -283,6 +313,7 @@ export default function VenueIndexPanel() {
                   <div className="text-[15px] font-extrabold leading-snug">{item.title}</div>
                   <div className="text-[12px] font-medium text-muted">{item.publisher || 'Publisher not stated'}{item.issn_l ? ` · ISSN ${item.issn_l}` : ''}{item.country_code ? ` · ${item.country_code}` : ''}</div>
                   {item.missing_since && <div className="mt-1"><Pill tone="warn" title="No longer returned by OpenAlex. Kept and flagged.">Missing since {when(item.missing_since)}</Pill></div>}
+                  {(item.excluded || ['flagged', 'kept'].includes(item.screening?.status)) && <div className="mt-1"><ScreeningPill screening={item.screening} excluded={item.excluded} /></div>}
                 </td>
                 <td className="px-4 py-2.5 align-middle text-[13px]">
                   <div className="font-bold">{item.primary_subfield || '—'}</div>
@@ -328,6 +359,18 @@ export default function VenueIndexPanel() {
       <div className="border-t border-line px-5 py-2.5 text-[13px] font-medium text-muted">Click a row for every source fact and link. "Refreshed" is when OpenAlex last returned the journal.</div>
     </div>
 
+    {(data.blocked_publishers || []).length > 0 && <div className="premium-card mt-4 rounded-[22px] px-5 py-4">
+      <div className="text-[12px] font-extrabold uppercase tracking-[.08em] text-flexee-600">Internal blocklist</div>
+      <h3 className="serif mt-0.5 text-[22px] leading-none">Blocked publishers ({data.blocked_publishers.length})</h3>
+      <p className="mt-1 text-[13px] text-muted">Their titles go to the review queue and Venue Discovery will not add them. Internal only, never published.</p>
+      <ul className="mt-2 divide-y divide-line">
+        {data.blocked_publishers.map(entry => <li key={entry.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-[14px]">
+          <span><b>{entry.name}</b> <span className="text-[12.5px] text-muted">· by {entry.added_by} on {when(entry.created_at)}</span></span>
+          <button type="button" onClick={() => unblock(entry)} className="rounded-xl border border-line bg-white px-3 py-1.5 text-[12px] font-extrabold shadow-sm hover:shadow-card">Remove from blocklist</button>
+        </li>)}
+      </ul>
+    </div>}
+
     <AdminModal open={Boolean(detail) || detailLoading} onClose={() => { setDetail(null); setDetailLoading(false) }} labelledBy="index-record-title" maxWidth="max-w-[1080px]">
       {!detail ? <div className="p-10 text-center text-[15px] font-semibold text-muted">Loading…</div> : <>
         <div className="sticky top-0 z-[5] border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">
@@ -336,8 +379,16 @@ export default function VenueIndexPanel() {
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <VenueTrustBadge venue={asVenue(detail)} />
             {detail.missing_since && <Pill tone="warn">Missing from OpenAlex since {when(detail.missing_since)}</Pill>}
+            <ScreeningPill screening={detail.screening} excluded={detail.excluded} />
           </div>
         </div>
+        <ScreeningSection item={detail} criteria={data.criteria || {}}
+          onError={message => showToast(message, 'error')}
+          onDecided={(updated, mode) => {
+            setDetail(updated)
+            showToast(mode === 'exclude' ? `Excluded. ${updated.title} is hidden from authors.` : mode === 'keep' ? 'Kept. It leaves the review queue.' : 'Restored to the index.')
+            load()
+          }} />
         <div className="grid gap-4 p-6 lg:grid-cols-2">
           <KvTable title="Catalogue (OpenAlex)" rows={[
             ['ISSNs', detail.issns?.length ? detail.issns.join(', ') : '—'],
