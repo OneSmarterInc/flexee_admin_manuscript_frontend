@@ -10,6 +10,7 @@ import {
   saveAuthorSession,
   pollAuthorJob,
 } from '../authorApi.js'
+import VenueTrustBadge from '../components/VenueTrust.jsx'
 
 function routeSlug() {
   const parts = window.location.pathname.split('/').filter(Boolean)
@@ -182,6 +183,7 @@ export default function AuthorVenueAssessment() {
               <p className="kicker">{assessed ? 'Venue assessment' : 'Venue review'}</p>
               <span className="author-venue-type">{venue.venue_type}</span>
               <h1 className="publication-title">{venue.name}</h1>
+              <VenueTrustBadge venue={venue} withSources className="mb-2" />
               <p className="publication-lede">{assessed ? (brief.editor_summary || match.fit_summary) : match.fit_summary}</p>
             </div>
             <div className="author-assessment-choice">
