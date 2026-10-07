@@ -9,6 +9,7 @@ import '../admin-professional.css'
 
 // Loaded on demand: only platform superusers open Venue Discovery.
 const VenueDiscoveryPanel = lazy(() => import('../components/admin/VenueDiscoveryPanel.jsx'))
+const VenueIndexPanel = lazy(() => import('../components/admin/VenueIndexPanel.jsx'))
 
 const decisions = {
   PASS_TO_HUMAN: 'Pass to human',
@@ -651,10 +652,11 @@ const ADMIN_VIEW_PATHS = {
   editor: '/admin',
   venues: '/admin/venue-agents',
   discovery: '/admin/venue-discovery',
+  index: '/admin/venue-index',
   audit: '/admin/audit-log',
   smtp: '/admin/email-settings',
 }
-const SUPERUSER_VIEWS = new Set(['discovery', 'smtp'])
+const SUPERUSER_VIEWS = new Set(['discovery', 'index', 'smtp'])
 
 export function adminViewFromPath(path, platformSuperuser = false) {
   const clean = String(path || '/admin').replace(/\/+$/, '') || '/admin'
@@ -782,6 +784,20 @@ function AdminDashboard({ path = '/admin', username, onLogout, platformSuperuser
             Venue Discovery
           </button>}
 
+          {platformSuperuser && <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'index' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('index'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round">
+                <path d="M4 5a2 2 0 0 1 2-2h12v18H6a2 2 0 0 1-2-2z"/>
+                <path d="M4 17a2 2 0 0 1 2-2h12M9 7h6M9 11h4"/>
+              </svg>
+            </span>
+            Venue Index
+          </button>}
+
           <button
             className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'audit' ? 'active' : ''}`}
             type="button"
@@ -847,6 +863,10 @@ function AdminDashboard({ path = '/admin', username, onLogout, platformSuperuser
     ) : currentView === 'discovery' && platformSuperuser ? (
       <Suspense fallback={<div className="premium-card rounded-[22px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Discovery…</div>}>
         <VenueDiscoveryPanel onOpenVenue={id => { setOpenVenueId(id); setCurrentView('venues') }} />
+      </Suspense>
+    ) : currentView === 'index' && platformSuperuser ? (
+      <Suspense fallback={<div className="premium-card rounded-[22px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Index…</div>}>
+        <VenueIndexPanel />
       </Suspense>
     ) : currentView === 'editor' ? (
       <EditorWorkspacePanel platformSuperuser={platformSuperuser} memberships={memberships} />
