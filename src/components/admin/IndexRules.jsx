@@ -10,6 +10,10 @@ export function RulesPill({ rules, published }) {
     return <span className="inline-flex whitespace-nowrap rounded-full border border-flexee-200 bg-flexee-50 px-2 py-0.5 text-[11.5px] font-extrabold text-flexee-700"
       title="Rules read from the official pages; waiting for approval">Rules ready</span>
   }
+  if (rules?.status === 'blocked') {
+    return <span className="inline-flex whitespace-nowrap rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11.5px] font-extrabold text-amber-800"
+      title={rules.error || ''}>Site blocks reading</span>
+  }
   if (rules?.status === 'incomplete' || rules?.status === 'failed') {
     return <span className="inline-flex whitespace-nowrap rounded-full border border-line bg-white px-2 py-0.5 text-[11.5px] font-extrabold text-muted"
       title={rules.error || ''}>Rules not found</span>
@@ -56,7 +60,8 @@ export default function RulesSection({ item, onPublished, onError }) {
       <div>
         <div className="text-[12px] font-extrabold uppercase tracking-[.07em] text-flexee-600">Rules from the official pages</div>
         <h4 id="rules-title" className="serif mt-0.5 text-[24px] leading-none">
-          {published ? 'Published for authors' : status === 'ready' ? 'Ready for your approval' : status === 'failed' ? 'Pages could not be read' : 'Rules not found'}
+          {published ? 'Published for authors' : status === 'ready' ? 'Ready for your approval' : status === 'failed' ? 'Pages could not be read'
+            : status === 'blocked' ? 'Site blocks automated reading' : 'Rules not found'}
         </h4>
         <p className="mt-1 max-w-[720px] text-[13px] text-muted">
           Read by the AI{item.rules?.read_at ? ` on ${when(item.rules.read_at)}` : ''}. Only rules backed by a quote on the journal's own page are kept.
@@ -65,6 +70,17 @@ export default function RulesSection({ item, onPublished, onError }) {
       </div>
       {read && <span className="inline-flex shrink-0 rounded-full border border-line bg-white px-2.5 py-1 text-[12px] font-extrabold" title="Computed from the sources, never chosen by the AI">Confidence {read.confidence}</span>}
     </div>
+
+    {status === 'blocked' && <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] text-amber-900">
+      {item.rules?.error && <p className="break-words">{item.rules.error}</p>}
+      <p className={item.rules?.error ? 'mt-1.5 font-bold' : 'font-bold'}>The publisher does not allow automated reading, and we respect that. Options:</p>
+      <ol className="mt-1 list-decimal pl-5">
+        <li>Enter the rules by hand in Venue Agents.</li>
+        <li>Wait for the editor to claim the venue.</li>
+        <li>Leave it as Listed only.</li>
+      </ol>
+      <p className="mt-1.5 text-amber-800">It is tried again after 90 days.</p>
+    </div>}
 
     {(status === 'incomplete' || status === 'failed') && item.rules?.error && <div className="mt-3 rounded-xl border border-line bg-[#fcfaf8] px-3 py-2 text-[13px] text-muted">
       {item.rules.error} It is tried again after 30 days.

@@ -35,7 +35,7 @@ const FILTER_HELP = {
   excluded: 'Excluded after review: hidden from authors, never listed publicly',
   kept: 'Reviewed and kept',
   rules_ready: 'Rules read from the official pages, waiting for you to publish',
-  rules_missing: 'The AI could not find quoted rules, or the pages could not be read',
+  rules_missing: 'The AI could not find quoted rules, the pages could not be read, or the site blocks automated reading',
 }
 
 function pageButtons(current, pages) {
@@ -265,7 +265,7 @@ export default function VenueIndexPanel() {
         <span className="text-[14px] font-bold">{run ? when(run.started_at || run.created_at) : 'Never'}</span>
       </div>
       {run && <div className="text-[14px]"><span className="text-muted">Status</span> <b className={`ml-1 ${run.status === 'failed' ? 'text-red-700' : runActive ? 'text-amber-700' : 'text-green-700'}`}>{run.status.charAt(0).toUpperCase() + run.status.slice(1)}</b>{run.mode === 'enrich' && <span className="ml-1 text-muted">(checks only)</span>}{run.mode === 'screen' && <span className="ml-1 text-muted">(screening)</span>}{run.mode === 'rules' && <span className="ml-1 text-muted">(reading rules)</span>}</div>}
-      {run && run.mode === 'rules' && <div className="text-[14px]"><span className="text-muted">Rules</span> <b className="ml-1">{count(run.rules_ready)} ready</b> <span className="text-muted">· {count(run.rules_failed)} not found or unreadable · {count(run.rules_attempted)} read</span></div>}
+      {run && run.mode === 'rules' && <div className="text-[14px]"><span className="text-muted">Rules</span> <b className="ml-1">{count(run.rules_ready)} ready</b> <span className="text-muted">· {count(run.rules_failed)} not found, unreadable or blocked · {count(run.rules_attempted)} read</span></div>}
       {run && run.mode === 'full' && <div className="text-[14px]"><span className="text-muted">Journals</span> <b className="ml-1">{run.created} new · {run.updated} refreshed</b>{run.removed > 0 && <b> · {count(run.removed)} removed (no longer in scope)</b>} <span className="text-muted">· {count(run.out_of_scope)} outside scope skipped</span></div>}
       {run && run.screened > 0 && <div className="text-[14px]"><span className="text-muted">Screening</span> <b className="ml-1">{count(run.flagged)} need review</b>{run.pages_checked > 0 && <span className="text-muted"> · pages read for {count(run.pages_checked)}</span>}</div>}
       {run && !['screen', 'rules'].includes(run.mode) && <div className="text-[14px]"><span className="text-muted">Checked</span> <b className="ml-1">{count(run.enriched)}</b>{run.pending_after > 0 && <span className="text-muted"> · {count(run.pending_after)} still to check</span>}</div>}
