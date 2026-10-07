@@ -450,7 +450,7 @@ export default function AuthorDashboard() {
       <div className="border-b border-line bg-gradient-to-r from-white via-white to-flexee-50 px-6 py-4 pr-16">
         <div className="text-[12px] font-extrabold uppercase tracking-[.1em] text-flexee-600">Venue matches</div>
         <h3 id="author-matches-title" className="serif mt-0.5 text-[28px] leading-none">{matchesFor?.title}</h3>
-        <div className="mt-1 text-[13px] text-muted">{String(matchesFor?.manuscript_type || '').replaceAll('_', ' ')} · {matchesFor?.manuscript_filename} · checked against every active venue, updated when new venues are added.</div>
+        <div className="mt-1 text-[13px] text-muted">{String(matchesFor?.manuscript_type || '').replaceAll('_', ' ')} · {matchesFor?.manuscript_filename} · compared with the venues closest to its topic, updated when new venues are added.</div>
       </div>
       <div className="max-h-[62vh] overflow-auto px-6 py-4">
         {matchesLoading && <div className="py-8 text-center text-[14px] text-muted">Loading venue matches…</div>}

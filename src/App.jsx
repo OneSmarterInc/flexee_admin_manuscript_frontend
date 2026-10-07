@@ -17,6 +17,8 @@ import AuthorTransfer from './pages/AuthorTransfer.jsx'
 import AuthorManuscriptDetails from './pages/AuthorManuscriptDetails.jsx'
 import JournalIndex from './pages/JournalIndex.jsx'
 import JournalPage from './pages/JournalPage.jsx'
+import JournalClaimVerify from './pages/JournalClaimVerify.jsx'
+import EditorSetPassword from './pages/EditorSetPassword.jsx'
 import { fetchAuthorSession } from './authorApi.js'
 import { AuthorAccountContext } from './components/AuthorAccountMenu.jsx'
 
@@ -73,6 +75,7 @@ export default function App() {
   // The journal index is public: anyone can search it (build plan step 8).
   if (path === '/journals') return <AuthorTheme><JournalIndex /></AuthorTheme>
   if (path.startsWith('/journals/v/') || path.startsWith('/journals/i/')) return <AuthorTheme><JournalPage path={path} /></AuthorTheme>
+  if (path === '/journals/claim/verify') return <AuthorTheme><JournalClaimVerify /></AuthorTheme>
   if (path === '/author/login') return <AuthorTheme><AuthorLogin /></AuthorTheme>
   if (path === '/author/signup') return <AuthorTheme><AuthorSignup /></AuthorTheme>
   if (path === '/author/forgot-password') return <AuthorTheme><AuthorForgotPassword /></AuthorTheme>
@@ -87,6 +90,7 @@ export default function App() {
   if (path === '/author/status') return <AuthorTheme><RequireAuthor><AuthorSubmissionStatus /></RequireAuthor></AuthorTheme>
   if (path === '/author/transfer') return <AuthorTheme><RequireAuthor><AuthorTransfer /></RequireAuthor></AuthorTheme>
 
+  if (path === '/admin/set-password') return <EditorSetPassword />
   if (path.startsWith('/admin')) return <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#746c66', fontFamily: 'Inter, system-ui, sans-serif' }}>Loading admin…</div>}><AdminPage path={path} /></Suspense>
   return <Home />
 }

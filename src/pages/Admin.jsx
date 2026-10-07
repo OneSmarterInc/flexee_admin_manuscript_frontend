@@ -10,6 +10,7 @@ import '../admin-professional.css'
 // Loaded on demand: only platform superusers open Venue Discovery.
 const VenueDiscoveryPanel = lazy(() => import('../components/admin/VenueDiscoveryPanel.jsx'))
 const VenueIndexPanel = lazy(() => import('../components/admin/VenueIndexPanel.jsx'))
+const VenueClaimsPanel = lazy(() => import('../components/admin/VenueClaimsPanel.jsx'))
 
 const decisions = {
   PASS_TO_HUMAN: 'Pass to human',
@@ -653,10 +654,11 @@ const ADMIN_VIEW_PATHS = {
   venues: '/admin/venue-agents',
   discovery: '/admin/venue-discovery',
   index: '/admin/venue-index',
+  claims: '/admin/venue-claims',
   audit: '/admin/audit-log',
   smtp: '/admin/email-settings',
 }
-const SUPERUSER_VIEWS = new Set(['discovery', 'index', 'smtp'])
+const SUPERUSER_VIEWS = new Set(['discovery', 'index', 'claims', 'smtp'])
 
 export function adminViewFromPath(path, platformSuperuser = false) {
   const clean = String(path || '/admin').replace(/\/+$/, '') || '/admin'
@@ -798,6 +800,20 @@ function AdminDashboard({ path = '/admin', username, onLogout, platformSuperuser
             Venue Index
           </button>}
 
+          {platformSuperuser && <button
+            className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'claims' ? 'active' : ''}`}
+            type="button"
+            onClick={() => { setCurrentView('claims'); setSidebarOpen(false) }}
+          >
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-white shadow-sm">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6z"/>
+                <path d="m9 12 2 2 4-4"/>
+              </svg>
+            </span>
+            Venue Claims
+          </button>}
+
           <button
             className={`nav-item flex w-full items-center gap-3 rounded-2xl px-4 py-3.5 text-left text-[15px] font-extrabold ${currentView === 'audit' ? 'active' : ''}`}
             type="button"
@@ -867,6 +883,10 @@ function AdminDashboard({ path = '/admin', username, onLogout, platformSuperuser
     ) : currentView === 'index' && platformSuperuser ? (
       <Suspense fallback={<div className="premium-card rounded-[22px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Index…</div>}>
         <VenueIndexPanel />
+      </Suspense>
+    ) : currentView === 'claims' && platformSuperuser ? (
+      <Suspense fallback={<div className="premium-card rounded-[22px] p-8 text-center text-[15px] font-semibold text-muted">Loading Venue Claims…</div>}>
+        <VenueClaimsPanel />
       </Suspense>
     ) : currentView === 'editor' ? (
       <EditorWorkspacePanel platformSuperuser={platformSuperuser} memberships={memberships} />

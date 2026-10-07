@@ -24,6 +24,54 @@ function List({ items }) {
     : <span className="text-muted">Not stated</span>
 }
 
+// Build plan step 9: an editor claims their journal. They confirm their email; Flexee reviews.
+function ClaimBox({ journal }) {
+  const [open, setOpen] = useState(false)
+  const [form, setForm] = useState({ name: '', email: '', role_title: '', evidence_url: '', message: '', confirm: false })
+  const [state, setState] = useState({ busy: false, error: '', done: '' })
+  const set = (key, value) => setForm(f => ({ ...f, [key]: value }))
+
+  async function submit(e) {
+    e.preventDefault()
+    setState({ busy: true, error: '', done: '' })
+    try {
+      const result = await api('/api/journals/claim/', { method: 'POST', body: JSON.stringify({ kind: journal.kind, key: journal.key, ...form }) })
+      setState({ busy: false, error: '', done: result.detail })
+    } catch (err) {
+      setState({ busy: false, error: err?.payload?.detail || err.message, done: '' })
+    }
+  }
+
+  if (journal.trust?.tier === 'claimed') return null
+  return <section className="author-panel mt-5 px-5 py-4">
+    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <p className="kicker">For editors</p>
+        <p className="mt-1 max-w-[720px] text-[14.5px]"><b>Do you edit {journal.name}?</b> Claim it to set its rules yourself and check incoming manuscripts against them.
+          Authors then see it as <b>Editor-confirmed</b>.</p>
+      </div>
+      {!open && !state.done && <button type="button" onClick={() => setOpen(true)} className="shrink-0 cursor-pointer rounded-xl border-0 bg-ink px-4 py-2 text-[13.5px] font-extrabold text-white hover:opacity-90">Claim this venue</button>}
+    </div>
+    {state.done ? <div className="mt-3 rounded-xl border border-green-200 bg-green-50 px-3 py-2 text-[14px] font-bold text-green-800">{state.done}</div>
+      : open && <form onSubmit={submit} className="mt-3 grid gap-3 sm:grid-cols-2">
+        <label className="text-[13px] font-extrabold">Your name<input className="field mt-1 w-full rounded-xl border border-line px-3 py-2 text-[14.5px]" value={form.name} onChange={e => set('name', e.target.value)} required maxLength={200} /></label>
+        <label className="text-[13px] font-extrabold">Your role at the journal<input className="field mt-1 w-full rounded-xl border border-line px-3 py-2 text-[14.5px]" value={form.role_title} onChange={e => set('role_title', e.target.value)} placeholder="e.g. Editor-in-chief, managing editor" required maxLength={200} /></label>
+        <label className="text-[13px] font-extrabold">Work email<input type="email" className="field mt-1 w-full rounded-xl border border-line px-3 py-2 text-[14.5px]" value={form.email} onChange={e => set('email', e.target.value)} required />
+          <span className="mt-1 block font-semibold text-muted">An address on the journal&rsquo;s own domain is checked fastest.</span></label>
+        <label className="text-[13px] font-extrabold">Page that lists you (optional)<input type="url" className="field mt-1 w-full rounded-xl border border-line px-3 py-2 text-[14.5px]" value={form.evidence_url} onChange={e => set('evidence_url', e.target.value)} placeholder="https://… editorial board page" />
+          <span className="mt-1 block font-semibold text-muted">On the journal&rsquo;s own site, if possible.</span></label>
+        <label className="text-[13px] font-extrabold sm:col-span-2">Anything we should know (optional)<textarea className="field mt-1 min-h-[70px] w-full rounded-xl border border-line px-3 py-2 text-[14.5px]" value={form.message} onChange={e => set('message', e.target.value)} maxLength={2000} /></label>
+        <label className="flex items-start gap-2 text-[13.5px] sm:col-span-2"><input type="checkbox" className="mt-1" checked={form.confirm} onChange={e => set('confirm', e.target.checked)} required />
+          I am an editor or staff member of this journal and may manage how it receives submissions.</label>
+        {state.error && <div className="admin-error venue-admin-message sm:col-span-2">{state.error}</div>}
+        <div className="flex gap-2 sm:col-span-2">
+          <button type="submit" disabled={state.busy} className="cursor-pointer rounded-xl border-0 bg-flexee-500 px-4 py-2 text-[13.5px] font-extrabold text-white hover:bg-flexee-600 disabled:opacity-60">{state.busy ? 'Sending…' : 'Send claim'}</button>
+          <button type="button" onClick={() => setOpen(false)} className="cursor-pointer rounded-xl border border-line bg-white px-4 py-2 text-[13.5px] font-extrabold">Cancel</button>
+        </div>
+      </form>}
+  </section>
+}
+
 export default function JournalPage({ path }) {
   const [journal, setJournal] = useState(null)
   const [error, setError] = useState('')
@@ -99,6 +147,8 @@ export default function JournalPage({ path }) {
             {c.homepage_url && <Row label="Website"><a className="break-all font-bold text-flexee-700 underline decoration-flexee-200 underline-offset-2" href={c.homepage_url} target="_blank" rel="noopener noreferrer">{c.homepage_url}</a></Row>}
           </div>
         </section>}
+
+        <ClaimBox journal={journal} />
 
         {journal.matchable && <div className="mt-5 rounded-[18px] border border-flexee-200 bg-flexee-50 px-4 py-3 text-[14px] text-flexee-900">
           <b>Check your manuscript against these rules.</b> Start a submission and Flexee compares it with this journal and others in your field.
