@@ -12,6 +12,7 @@ import {
   getAuthorSession,
 } from '../authorApi.js'
 import VenueTrustBadge from '../components/VenueTrust.jsx'
+import ManuscriptVersions from '../components/ManuscriptVersions.jsx'
 
 function pretty(value) {
   return String(value || '—').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase())
@@ -197,6 +198,7 @@ export default function AuthorManuscriptDetails() {
             <div className="md2-head-main">
               <div className="md2-tags">
                 <span className="md2-type">{pretty(manuscript.manuscript_type)}</span>
+                {manuscript.current_version && <span className="md2-type">Version {manuscript.current_version}</span>}
                 {submission?.status && <AuthorStatusPill tone={statusTone(submission.status)}>{pretty(submission.status)}</AuthorStatusPill>}
               </div>
               <h1 title={manuscript.title}>{manuscript.title}</h1>
@@ -245,6 +247,13 @@ export default function AuthorManuscriptDetails() {
                 </div>
               </div>
             </section>
+
+            {/* Versions (instruction 2.4): history and "upload a revised version" */}
+            <ManuscriptVersions manuscript={manuscript} onUploaded={payload => {
+              setManuscript(payload.manuscript)
+              setReadiness(null)
+              setMatches([])
+            }} />
 
             {/* 3. Readiness checks as one table, with a switch for the semantic review */}
             <section className="md2-card">
@@ -360,6 +369,7 @@ export default function AuthorManuscriptDetails() {
             <div className="md2-side-actions">
               <button className="md2-btn" type="button" onClick={() => go('/author/readiness')}>Open readiness</button>
               <button className="md2-btn" type="button" onClick={() => go('/author/venues')}>Open venue matches</button>
+              <button className="md2-btn" type="button" onClick={() => go('/author/plan')}>Open submission plan</button>
               {submission?.id && <button className="md2-btn primary" type="button" onClick={() => go('/author/status')}>Open submission status</button>}
             </div>
           </aside>

@@ -1411,3 +1411,44 @@
 .venue-trust-sources { font-size: 12px; color: #6f6760; }
 .venue-trust-sources a { color: #9c4f24; font-weight: 700; text-decoration: none; }
 .venue-trust-sources a:hover { text-decoration: underline; }
+
+
+/* Manuscript versions and submission plan (instructions 2.4, 2.5). Neutral styling by policy:
+   effort is words, never a colour scale or a percentage. */
+.author-admin-theme .mv-form, .author-admin-theme .pl-answer { display: grid; gap: 10px; margin: 0 0 14px; padding: 14px; border: 1px solid var(--line); border-radius: 14px; background: #fffaf6; }
+.author-admin-theme .mv-form label, .author-admin-theme .pl-answer label { display: grid; gap: 5px; font-size: 13px; font-weight: 700; }
+.author-admin-theme .mv-form input, .author-admin-theme .mv-form textarea, .author-admin-theme .mv-form select,
+.author-admin-theme .pl-answer input, .author-admin-theme .pl-answer textarea { padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font: 400 14px var(--sans); }
+.author-admin-theme .pl-answer .pl-check { display: flex; align-items: flex-start; gap: 8px; font-weight: 600; }
+.author-admin-theme .mv-help, .author-admin-theme .pl-help, .author-admin-theme .pl-meta { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.author-admin-theme .mv-done { margin-bottom: 12px; padding: 10px 12px; border-radius: 12px; background: #f3f7f2; font-size: 13px; }
+.author-admin-theme .mv-list, .author-admin-theme .pl-list { margin: 0; padding: 0; list-style: none; }
+.author-admin-theme .mv-list li, .author-admin-theme .pl-list li { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.author-admin-theme .mv-list li:first-child { border-top: 0; }
+.author-admin-theme .pl-list { padding: 0 18px 8px; }
+.author-admin-theme .mv-num, .author-admin-theme .pl-num { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 10px; background: #fff; font-size: 13px; font-weight: 800; }
+.author-admin-theme .mv-list li.current .mv-num, .author-admin-theme .pl-list li.now .pl-num { border-color: var(--ink); background: var(--ink); color: #fff; }
+.author-admin-theme .mv-body, .author-admin-theme .pl-body { flex: 1; min-width: 0; }
+.author-admin-theme .mv-line, .author-admin-theme .pl-line { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 14px; }
+.author-admin-theme .mv-line span, .author-admin-theme .mv-muted, .author-admin-theme .pl-state { color: var(--muted); font-size: 12.5px; }
+.author-admin-theme .mv-note, .author-admin-theme .pl-reason { margin: 4px 0 0; font-size: 13.5px; line-height: 1.5; }
+.author-admin-theme .mv-subs { margin: 4px 0 0; color: var(--muted); font-size: 12.5px; }
+.author-admin-theme .pl-kind, .author-admin-theme .pl-status { padding: 2px 9px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--ink); font-size: 11.5px; font-weight: 800; white-space: nowrap; }
+.author-admin-theme .pl-head-actions, .author-admin-theme .pl-actions, .author-admin-theme .pl-choices, .author-admin-theme .pl-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.author-admin-theme .pl-actions, .author-admin-theme .pl-block { margin-top: 14px; }
+.author-admin-theme .pl-block > b { display: block; margin-bottom: 6px; font-size: 13px; }
+.author-admin-theme .pl-changes { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13.5px; }
+.author-admin-theme .pl-changes li { display: flex; align-items: baseline; gap: 8px; }
+.author-admin-theme .pl-ready { margin: 0; font-size: 13.5px; }
+.author-admin-theme .pl-decline { margin-top: 14px; padding: 16px; border: 1px solid var(--ink); border-radius: 16px; background: #fff; }
+.author-admin-theme .pl-decline h3 { margin: 0 0 6px; font: 400 20px Georgia, serif; }
+.author-admin-theme .pl-decline p { margin: 0 0 12px; font-size: 13.5px; line-height: 1.5; }
+.author-admin-theme .pl-decline .pl-answer { margin-top: 12px; }
+.author-admin-theme .pl-page .md2-card + .md2-card, .author-admin-theme .pl-footer { margin-top: 16px; }
+.author-admin-theme .pl-list details summary { cursor: pointer; margin-top: 6px; color: var(--muted); font-size: 12.5px; }
+.author-admin-theme .pl-list details .pl-changes { margin-top: 6px; }
+.author-admin-theme .mv-card { margin-bottom: 0; }
+@media (max-width: 640px) {
+  .author-admin-theme .pl-line, .author-admin-theme .mv-line { align-items: flex-start; }
+  .author-admin-theme .pl-list { padding: 0 12px 8px; }
+}
