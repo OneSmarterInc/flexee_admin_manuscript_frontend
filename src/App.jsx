@@ -14,6 +14,7 @@ import AuthorVenueMatches from './pages/AuthorVenueMatches.jsx'
 import AuthorVenueAssessment from './pages/AuthorVenueAssessment.jsx'
 import AuthorSubmissionStatus from './pages/AuthorSubmissionStatus.jsx'
 import AuthorTransfer from './pages/AuthorTransfer.jsx'
+import AuthorPlan from './pages/AuthorPlan.jsx'
 import AuthorManuscriptDetails from './pages/AuthorManuscriptDetails.jsx'
 import JournalIndex from './pages/JournalIndex.jsx'
 import JournalPage from './pages/JournalPage.jsx'
@@ -89,6 +90,7 @@ export default function App() {
   if (path === '/author/venue-assessment' || path.startsWith('/author/venue-assessment/')) return <AuthorTheme><RequireAuthor><AuthorVenueAssessment /></RequireAuthor></AuthorTheme>
   if (path === '/author/status') return <AuthorTheme><RequireAuthor><AuthorSubmissionStatus /></RequireAuthor></AuthorTheme>
   if (path === '/author/transfer') return <AuthorTheme><RequireAuthor><AuthorTransfer /></RequireAuthor></AuthorTheme>
+  if (path === '/author/plan') return <AuthorTheme><RequireAuthor><AuthorPlan /></RequireAuthor></AuthorTheme>
 
   if (path === '/admin/set-password') return <EditorSetPassword />
   if (path.startsWith('/admin')) return <Suspense fallback={<div style={{ padding: 40, textAlign: 'center', color: '#746c66', fontFamily: 'Inter, system-ui, sans-serif' }}>Loading admin…</div>}><AdminPage path={path} /></Suspense>
